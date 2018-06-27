@@ -1,0 +1,4 @@
+Type: ae3.Package
+Name: ae3.sdk
+Info: AE3 SDK Package
+Requires: ae3.api

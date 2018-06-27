@@ -1,0 +1,6 @@
+{
+	type : "ae3.Package",
+	name : 'ae3.sdk',
+	description : 'AE3 SDK Package',
+	requires : 'ae3.api'
+}
