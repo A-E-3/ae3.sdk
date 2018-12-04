@@ -46,12 +46,35 @@ public class FormatSAPI {
 	
 	/** Formats bytes as base27, more compact and readable than base16/hex
 	 *
-	 * @param any
+	 * @param bytes
 	 * @return */
-	/** public static final CharSequence binaryAsBase27(final Object any) {
+	public static final CharSequence binaryAsBase27(final byte[] bytes) {
+		
+		if (bytes == null || bytes.length == 0) {
+			return "";
+		}
+		BigInteger integer = new BigInteger(1, bytes);
+		final BigInteger base = BigInteger.valueOf(27);
+		final StringBuilder result = new StringBuilder();
+		while (integer.bitLength() > 0) {
+			result.append(RandomSAPI.MIXED_27_EASY.charAt(integer.remainder(base).intValueExact()));
+			integer = integer.divide(base);
+		}
+		return result.toString();
+	}
+	
+	/** Formats bytes as base27, more compact and readable than base16/hex
 	 *
-	 * } */
-
+	 * @param copier
+	 * @return */
+	public static final CharSequence binaryAsBase27(final TransferCopier copier) {
+		
+		if (copier == null || copier.length() == 0) {
+			return "";
+		}
+		return FormatSAPI.binaryAsBase27(copier.nextDirectArray());
+	}
+	
 	/** Formats bytes as base36, more compact and less readable than base16/hex
 	 *
 	 * @param any
@@ -60,10 +83,10 @@ public class FormatSAPI {
 		
 		final BigInteger integer;
 		if (any instanceof byte[]) {
-			integer = new BigInteger((byte[]) any);
+			integer = new BigInteger(1, (byte[]) any);
 		} else//
 		if (any instanceof TransferCopier) {
-			integer = new BigInteger(((TransferCopier) any).nextDirectArray());
+			integer = new BigInteger(1, ((TransferCopier) any).nextDirectArray());
 		} else //
 		if (any == null) {
 			return "";
@@ -72,7 +95,7 @@ public class FormatSAPI {
 		}
 		return integer.toString(36);
 	}
-	
+
 	/** Formats bytes as base64, useful for formatting md5 checksums, etc.
 	 *
 	 * @param bytes
@@ -385,7 +408,38 @@ public class FormatSAPI {
 			: Html.enhanceHtml(o, hrefAttributes);
 	}
 	
-	/** Formats binary value as hex, useful for formatting md5 checksums, etc.
+	/** Converts Base16 representation intor Base27
+	 *
+	 * @param hex
+	 * @return */
+	public static final CharSequence hexAsBase27(final CharSequence hex) {
+		
+		if (hex == null) {
+			return "";
+		}
+		// System.err.println( ">>> >>>> hexAsBinary: hex=" + hex );
+		final int hexLength = hex.length();
+		final int binaryLength = hexLength / 2;
+		final byte[] bytes = new byte[binaryLength];
+		for (int i = binaryLength, j = hexLength; j > 0 && i > 0;) {
+			final char l = hex.charAt(--j);
+			final char h = hex.charAt(--j);
+			final int L = 0x0F & (l >= 'a'
+				? l - 'a' + 10
+				: l >= 'A'
+					? l - 'A' + 10
+					: l - '0');
+			final int H = 0x0F & (h >= 'a'
+				? h - 'a' + 10
+				: h >= 'A'
+					? h - 'A' + 10
+					: h - '0');
+			bytes[--i] = (byte) ((H << 4) + L);
+		}
+		return FormatSAPI.binaryAsBase27(bytes);
+	}
+	
+	/** Converts Base16 representation into Base36
 	 *
 	 * @param hex
 	 * @return */
@@ -413,7 +467,37 @@ public class FormatSAPI {
 					: h - '0');
 			bytes[--i] = (byte) ((H << 4) + L);
 		}
-		return new BigInteger(bytes).toString(36);
+		return new BigInteger(1, bytes).toString(36);
+	}
+	
+	/** Formats bytes as base64, useful for formatting md5 checksums, etc.
+	 *
+	 * @param hex
+	 * @return */
+	public static final CharSequence hexAsBase64(final CharSequence hex) {
+		
+		if (hex == null) {
+			return null;
+		}
+		final int hexLength = hex.length();
+		final int binaryLength = hexLength / 2;
+		final byte[] bytes = new byte[binaryLength];
+		for (int i = binaryLength, j = hexLength; j > 0 && i > 0;) {
+			final char l = hex.charAt(--j);
+			final char h = hex.charAt(--j);
+			final int L = 0x0F & (l >= 'a'
+				? l - 'a' + 10
+				: l >= 'A'
+					? l - 'A' + 10
+					: l - '0');
+			final int H = 0x0F & (h >= 'a'
+				? h - 'a' + 10
+				: h >= 'A'
+					? h - 'A' + 10
+					: h - '0');
+			bytes[--i] = (byte) ((H << 4) + L);
+		}
+		return new String(Base64.getEncoder().withoutPadding().encode(bytes), Engine.CHARSET_ASCII);
 	}
 	
 	/** Formats binary value as hex, useful for formatting md5 checksums, etc.
