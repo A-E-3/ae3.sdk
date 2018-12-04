@@ -5,6 +5,7 @@
 package ru.myx.sapi;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.Base64;
 import java.util.Date;
@@ -42,13 +43,42 @@ import ru.myx.plist.Plist;
  *
  *         Window - Preferences - Java - Code Style - Code Templates */
 public class FormatSAPI {
+	
+	/** Formats bytes as base27, more compact and readable than base16/hex
+	 *
+	 * @param any
+	 * @return */
+	/** public static final CharSequence binaryAsBase27(final Object any) {
+	 *
+	 * } */
 
+	/** Formats bytes as base36, more compact and less readable than base16/hex
+	 *
+	 * @param any
+	 * @return */
+	public static final CharSequence binaryAsBase36(final Object any) {
+		
+		final BigInteger integer;
+		if (any instanceof byte[]) {
+			integer = new BigInteger((byte[]) any);
+		} else//
+		if (any instanceof TransferCopier) {
+			integer = new BigInteger(((TransferCopier) any).nextDirectArray());
+		} else //
+		if (any == null) {
+			return "";
+		} else {
+			throw new IllegalArgumentException("class: " + any.getClass().getName());
+		}
+		return integer.toString(36);
+	}
+	
 	/** Formats bytes as base64, useful for formatting md5 checksums, etc.
 	 *
 	 * @param bytes
 	 * @return */
 	public static final CharSequence binaryAsBase64(final byte[] bytes) {
-
+		
 		return bytes == null
 			? ""
 			: new String(Base64.getEncoder().withoutPadding().encode(bytes), Engine.CHARSET_ASCII);
@@ -59,18 +89,18 @@ public class FormatSAPI {
 	 * @param binary
 	 * @return */
 	public static final CharSequence binaryAsBase64(final TransferCopier binary) {
-
+		
 		return binary == null
 			? ""
 			: binary.toStringBase64();
 	}
-
+	
 	/** Formats bytes as hex, useful for formatting md5 checksums, etc.
 	 *
 	 * @param bytes
 	 * @return */
 	public static final CharSequence binaryAsHex(final byte[] bytes) {
-
+		
 		if (bytes == null || bytes.length == 0) {
 			return "";
 		}
@@ -94,13 +124,13 @@ public class FormatSAPI {
 		}
 		return new String(result, 0, target);
 	}
-
+	
 	/** Formats binary value as hex, useful for formatting md5 checksums, etc.
 	 *
 	 * @param binary
 	 * @return */
 	public static final CharSequence binaryAsHex(final TransferCopier binary) {
-
+		
 		if (binary == null) {
 			return "";
 		}
@@ -132,33 +162,67 @@ public class FormatSAPI {
 		}
 		return new String(result, 0, target);
 	}
+	
+	/** @param bytes
+	 * @param offset
+	 * @return */
+	public static final CharSequence binaryAsInetAddress4(final byte[] bytes, final int offset) {
 
+		int o = offset;
+		return (bytes[o++] & 0xFF) + "." + (bytes[o++] & 0xFF) + "." + (bytes[o++] & 0xFF) + "." + (bytes[o++] & 0xFF);
+	}
+	
+	/** @param bytes
+	 * @param offset
+	 * @return */
+	public static final CharSequence binaryAsInetAddress6(final byte[] bytes, final int offset) {
+		
+		int o = offset;
+		return "[" + //
+				Integer.toHexString(((bytes[o++] & 0xFF) << 8) + ((bytes[o++] & 0xFF) << 0)) //
+				+ ":" + //
+				Integer.toHexString(((bytes[o++] & 0xFF) << 8) + ((bytes[o++] & 0xFF) << 0)) //
+				+ ":" + //
+				Integer.toHexString(((bytes[o++] & 0xFF) << 8) + ((bytes[o++] & 0xFF) << 0)) //
+				+ ":" + //
+				Integer.toHexString(((bytes[o++] & 0xFF) << 8) + ((bytes[o++] & 0xFF) << 0)) //
+				+ ":" + //
+				Integer.toHexString(((bytes[o++] & 0xFF) << 8) + ((bytes[o++] & 0xFF) << 0)) //
+				+ ":" + //
+				Integer.toHexString(((bytes[o++] & 0xFF) << 8) + ((bytes[o++] & 0xFF) << 0)) //
+				+ ":" + //
+				Integer.toHexString(((bytes[o++] & 0xFF) << 8) + ((bytes[o++] & 0xFF) << 0)) //
+				+ ":" + //
+				Integer.toHexString(((bytes[o++] & 0xFF) << 8) + ((bytes[o++] & 0xFF) << 0)) //
+				+ "]";
+	}
+	
 	/** @param size
 	 * @return */
 	public static final String bytesCompact(final double size) {
-
+		
 		return Format.Compact.toBytes(size);
 	}
-
+	
 	/** @param size
 	 * @return */
 	public static final String bytesExact(final long size) {
-
+		
 		return Format.Exact.toBytes(size);
 	}
-
+	
 	/** @param size
 	 * @return */
 	public static final String bytesRound(final long size) {
-
+		
 		return Format.Round.toBytes(size);
 	}
-
+	
 	/** @param items
 	 * @param relaxed
 	 * @return */
 	public static final String csvFragment(final BaseList<?> items, final boolean relaxed) {
-
+		
 		if (items == null || items.isEmpty()) {
 			return "";
 		}
@@ -193,11 +257,11 @@ public class FormatSAPI {
 		}
 		return builder.toString();
 	}
-
+	
 	/** @param string
 	 * @return string */
 	public static final String csvString(final String string) {
-
+		
 		return string == null
 			? "\"\""
 			: FormatSAPI.csvStringFragmentImpl(
@@ -208,11 +272,11 @@ public class FormatSAPI {
 					.append('\"')//
 					.toString();
 	}
-
+	
 	/** @param string
 	 * @return string */
 	public static final String csvStringFragment(final String string) {
-
+		
 		return string == null
 			? ""
 			: FormatSAPI.csvStringFragmentImpl(
@@ -220,9 +284,9 @@ public class FormatSAPI {
 					new StringBuilder((int) (string.length() * 1.1)))//
 					.toString();
 	}
-
+	
 	private static final StringBuilder csvStringFragmentImpl(final String string, final StringBuilder builder) {
-
+		
 		if (string == null) {
 			return builder;
 		}
@@ -237,19 +301,19 @@ public class FormatSAPI {
 		}
 		return builder;
 	}
-
+	
 	/** @param object
 	 * @return string */
 	public static final String date(final Object object) {
-
+		
 		return FormatSAPI.date(object, null);
 	}
-
+	
 	/** @param object
 	 * @param format
 	 * @return string */
 	public static final String date(final Object object, final String format) {
-
+		
 		final SimpleDateFormat formatter = new SimpleDateFormat(
 				format == null
 					? "yyyy-MM-dd HH:mm:ss"
@@ -259,24 +323,24 @@ public class FormatSAPI {
 		}
 		return formatter.format(new Date(Convert.Any.toLong(object, 0L)));
 	}
-
+	
 	/** like: 2012-09-19T05:50:38.161Z
 	 *
 	 * @param object
 	 * @return string */
 	public static final String dateISO(final Object object) {
-
+		
 		if (object instanceof Date) {
 			return Format.Ecma.date((Date) object);
 		}
 		return Format.Ecma.date(Convert.Any.toLong(object, 0L));
 	}
-
+	
 	/** @param object
 	 * @param format
 	 * @return string */
 	public static final String dateUTC(final Object object, final String format) {
-
+		
 		final SimpleDateFormat formatter = new SimpleDateFormat(
 				format == null
 					? "yyyy-MM-dd HH:mm:ss"
@@ -287,46 +351,77 @@ public class FormatSAPI {
 		}
 		return formatter.format(new Date(Convert.Any.toLong(object, 0L)));
 	}
-
+	
 	/** @param number
 	 * @return */
 	public static final String decimalCompact(final double number) {
-
+		
 		return Format.Compact.toDecimal(number);
 	}
-
+	
 	/** @param number
 	 * @return */
 	public static final String decimalRounded(final double number) {
-
+		
 		return Format.Round.toDecimal(number);
 	}
-
+	
 	/** @param o
 	 * @return string */
 	public static final String enhanceHtml(final String o) {
-
+		
 		return o == null
 			? null
 			: Html.enhanceHtml(o, null);
 	}
-
+	
 	/** @param o
 	 * @param hrefAttributes
 	 * @return string */
 	public static final String enhanceHtml(final String o, final String hrefAttributes) {
-
+		
 		return o == null
 			? null
 			: Html.enhanceHtml(o, hrefAttributes);
 	}
-
+	
+	/** Formats binary value as hex, useful for formatting md5 checksums, etc.
+	 *
+	 * @param hex
+	 * @return */
+	public static final String hexAsBase36(final CharSequence hex) {
+		
+		if (hex == null) {
+			return "";
+		}
+		// System.err.println( ">>> >>>> hexAsBinary: hex=" + hex );
+		final int hexLength = hex.length();
+		final int binaryLength = hexLength / 2;
+		final byte[] bytes = new byte[binaryLength];
+		for (int i = binaryLength, j = hexLength; j > 0 && i > 0;) {
+			final char l = hex.charAt(--j);
+			final char h = hex.charAt(--j);
+			final int L = 0x0F & (l >= 'a'
+				? l - 'a' + 10
+				: l >= 'A'
+					? l - 'A' + 10
+					: l - '0');
+			final int H = 0x0F & (h >= 'a'
+				? h - 'a' + 10
+				: h >= 'A'
+					? h - 'A' + 10
+					: h - '0');
+			bytes[--i] = (byte) ((H << 4) + L);
+		}
+		return new BigInteger(bytes).toString(36);
+	}
+	
 	/** Formats binary value as hex, useful for formatting md5 checksums, etc.
 	 *
 	 * @param hex
 	 * @return */
 	public static final TransferCopier hexAsBinary(final CharSequence hex) {
-
+		
 		if (hex == null) {
 			return null;
 		}
@@ -351,20 +446,20 @@ public class FormatSAPI {
 		}
 		return Transfer.wrapCopier(bytes);
 	}
-
+	
 	/** @param o
 	 * @return string */
 	public static final String htmlAsPlainText(final String o) {
-
+		
 		return o == null
 			? null
 			: Html.cleanHtml(o);
 	}
-
+	
 	/** @param s
 	 * @return */
 	public static final boolean isValidDnsHostName(final CharSequence s) {
-
+		
 		final int l = s.length();
 		if (l < 1) {
 			return false;
@@ -394,11 +489,11 @@ public class FormatSAPI {
 		}
 		return true;
 	}
-
+	
 	/** @param s
 	 * @return */
 	public static final boolean isValidDnsLabel(final CharSequence s) {
-
+		
 		final int l = s.length();
 		if (l < 1) {
 			return false;
@@ -419,11 +514,11 @@ public class FormatSAPI {
 		}
 		return true;
 	}
-
+	
 	/** @param c
 	 * @return */
 	public static final boolean isValidDnsLabelPart(final char c) {
-
+		
 		if (c == '.') {
 			return false;
 		}
@@ -435,11 +530,11 @@ public class FormatSAPI {
 		}
 		return true;
 	}
-
+	
 	/** @param c
 	 * @return */
 	public static final boolean isValidDnsLabelStart(final char c) {
-
+		
 		if (c == '.') {
 			return false;
 		}
@@ -451,35 +546,35 @@ public class FormatSAPI {
 		}
 		return true;
 	}
-
+	
 	/** @param s
 	 * @return */
 	public static final boolean isValidXmlCharacterData(final CharSequence s) {
-
+		
 		return Format.Xml.isValidCharacterData(s);
 	}
-
+	
 	/** @param s
 	 * @return */
 	public static final boolean isValidXmlName(final CharSequence s) {
-
+		
 		return Format.Xml.isValidName(s);
 	}
-
+	
 	/** @param s
 	 * @return */
 	public static final boolean isValidXmlValue(final CharSequence s) {
-
+		
 		return Format.Xml.isValidAttributeValue(s);
 	}
-
+	
 	/** @param object
 	 * @return */
 	public static final String jsDescribe(final BaseObject object) {
-
+		
 		return Format.Describe.toEcmaSource(object, "");
 	}
-
+	
 	/** Creates special object that acts like a string object, but when serialized to JS (using
 	 * Format.jsObject, for example) is not escaped like string should but in-lined as an
 	 * expression.
@@ -487,35 +582,35 @@ public class FormatSAPI {
 	 * @param string
 	 * @return */
 	public static final BaseString<?> jsInlineExpressionString(final CharSequence string) {
-
+		
 		return new InlineEvalExpressionImpl(string);
 	}
-
+	
 	/** @param object
 	 * @return */
 	public static final String jsObject(final BaseObject object) {
-
+		
 		return Ecma.toEcmaSourceCompact(object);
 	}
-
+	
 	/** @param object
 	 * @return */
 	public static final String jsObjectReadable(final BaseObject object) {
-
+		
 		return Ecma.toEcmaSource(object, true, 0);
 	}
-
+	
 	/** @param string
 	 * @return string */
 	public static final String jsString(final CharSequence string) {
-
+		
 		return Format.Ecma.string(string);
 	}
-
+	
 	/** @param string
 	 * @return string */
 	public static final String jsStringFragment(final CharSequence string) {
-
+		
 		if (string == null) {
 			return "";
 		}
@@ -626,37 +721,37 @@ public class FormatSAPI {
 		}
 		return builder.toString();
 	}
-
+	
 	/** @param number
 	 * @return */
 	public static final String periodCompact(final double number) {
-
+		
 		return Format.Compact.toPeriod(number);
 	}
-
+	
 	/** @param o
 	 * @return string */
 	public static final String plainTextAsHtml(final String o) {
-
+		
 		return o == null
 			? null
 			: Html.fromPlainText(o, null);
 	}
-
+	
 	/** @param o
 	 * @param hrefAttributes
 	 * @return string */
 	public static final String plainTextAsHtml(final String o, final String hrefAttributes) {
-
+		
 		return o == null
 			? null
 			: Html.fromPlainText(o, hrefAttributes);
 	}
-
+	
 	/** @param object
 	 * @return */
 	public static final String plainTextDescribe(final BaseObject object) {
-
+		
 		try {
 			if (object instanceof Throwable) {
 				return FormatSAPI.plainTextDescribe((Throwable) object);
@@ -666,11 +761,11 @@ public class FormatSAPI {
 			return "[ERROR: " + e.getClass().getName() + " " + e.getMessage() + "]";
 		}
 	}
-
+	
 	/** @param object
 	 * @return */
 	public static final String plainTextDescribe(final Object object) {
-
+		
 		try {
 			if (object instanceof Throwable) {
 				return FormatSAPI.plainTextDescribe((Throwable) object);
@@ -680,37 +775,37 @@ public class FormatSAPI {
 			return "[ERROR: " + e.getClass().getName() + " " + e.getMessage() + "]";
 		}
 	}
-
+	
 	/** @param t
 	 * @return */
 	public static final String plainTextDescribe(final Throwable t) {
-
+		
 		try {
 			return "[" + t.getClass().getName() + " " + FormatSAPI.jsString(t.getMessage()) + "]";
 		} catch (final Throwable e) {
 			return "[ERROR: " + e.getClass().getName() + " " + e.getMessage() + "]";
 		}
 	}
-
+	
 	/** @param object
 	 * @return */
 	public static final String plistObject(final BaseObject object) {
-
+		
 		return Plist.toPlistSource(object);
 	}
-
+	
 	/** @param object
 	 * @return */
 	public static final String queryStringParameters(final BaseObject object) {
-
+		
 		return QueryString.toQueryString(object, Engine.CHARSET_UTF8);
 	}
-
+	
 	/** @param base
 	 * @param change
 	 * @return */
 	public static final String queryStringParameters(final BaseObject base, final BaseObject change) {
-
+		
 		if (change == null || change == BaseObject.UNDEFINED) {
 			return QueryString.toQueryString(base, Engine.CHARSET_UTF8);
 		}
@@ -718,21 +813,21 @@ public class FormatSAPI {
 		result.baseDefineImportAllEnumerable(change);
 		return QueryString.toQueryString(result, Engine.CHARSET_UTF8);
 	}
-
+	
 	/** @param csvLine
 	 * @return list */
 	public static final BaseList<?> splitCsvLine(final String csvLine) {
-
+		
 		return csvLine == null
 			? null
 			: FormatSAPI.splitCsvLine(csvLine, ',');
 	}
-
+	
 	/** @param csvLine
 	 * @param splitter
 	 * @return list */
 	public static final BaseList<?> splitCsvLine(final String csvLine, final char splitter) {
-
+		
 		if (csvLine == null) {
 			return null;
 		}
@@ -766,20 +861,20 @@ public class FormatSAPI {
 		result.baseDefaultPush(Base.forString(buffer.toString().trim()));
 		return result;
 	}
-
+	
 	/** @param csvLine
 	 * @param splitter
 	 * @return list */
 	@ReflectionHidden
 	public static final BaseList<?> splitCsvLine(final String csvLine, final String splitter) {
-
+		
 		return FormatSAPI.splitCsvLine(csvLine, splitter.charAt(0));
 	}
-
+	
 	/** @param o
 	 * @return list */
 	public static final BaseList<?> splitLines(final Object o) {
-
+		
 		if (o == null) {
 			return null;
 		}
@@ -810,11 +905,11 @@ public class FormatSAPI {
 		}
 		return result;
 	}
-
+	
 	/** @param o
 	 * @return list */
 	public static final BaseList<?> splitLinesIgnoreQuotes(final Object o) {
-
+		
 		if (o == null) {
 			return null;
 		}
@@ -841,19 +936,19 @@ public class FormatSAPI {
 		}
 		return result;
 	}
-
+	
 	/** @param format
 	 * @param args
 	 * @return */
 	public static final String sprintf(final String format, final Object... args) {
-
+		
 		return String.format(format, args);
 	}
-
+	
 	/** @param string
 	 * @return string */
 	public static final String sqlString(final String string) {
-
+		
 		return string == null
 			? "''"
 			: FormatSAPI.sqlStringFragmentImpl(
@@ -864,11 +959,11 @@ public class FormatSAPI {
 					.append('\'')//
 					.toString();
 	}
-
+	
 	/** @param string
 	 * @return string */
 	public static final String sqlStringFragment(final String string) {
-
+		
 		return string == null
 			? ""
 			: FormatSAPI.sqlStringFragmentImpl(
@@ -876,9 +971,9 @@ public class FormatSAPI {
 					new StringBuilder((int) (string.length() * 1.1)))//
 					.toString();
 	}
-
+	
 	private static final StringBuilder sqlStringFragmentImpl(final String string, final StringBuilder builder) {
-
+		
 		if (string == null) {
 			return builder;
 		}
@@ -893,63 +988,63 @@ public class FormatSAPI {
 		}
 		return builder;
 	}
-
+	
 	/** @param text
 	 * @return */
 	public static final byte[] stringAsAsciiBytes(final String text) {
-
+		
 		return text == null
 			? new byte[0]
 			: text.getBytes(Engine.CHARSET_ASCII);
 	}
-
+	
 	/** Formats bytes as base64, useful for formatting md5 checksums, etc.
 	 *
 	 * @param text
 	 * @return */
 	public static final CharSequence stringAsUtf8Base64(final String text) {
-
+		
 		return text == null
 			? ""
 			: new String(Base64.getEncoder().withoutPadding().encode(text.getBytes(Engine.CHARSET_UTF8)), Engine.CHARSET_ASCII);
 	}
-
+	
 	/** @param text
 	 * @return */
 	public static final byte[] stringAsUtf8Bytes(final String text) {
-
+		
 		return text == null
 			? new byte[0]
 			: text.getBytes(Engine.CHARSET_UTF8);
 	}
-
+	
 	/** Formats bytes as base64, useful for formatting md5 checksums, etc.
 	 *
 	 * @param base64
 	 * @return */
 	public static final CharSequence stringFromUtf8Base64(final String base64) {
-
+		
 		return base64 == null
 			? ""
 			: new String(Base64.getDecoder().decode(base64.getBytes(Engine.CHARSET_ASCII)), Engine.CHARSET_UTF8);
 	}
-
+	
 	/** @param o
 	 * @return string */
 	public static final String throwableAsPlainText(final Throwable o) {
-
+		
 		if (o instanceof ExecThrown) {
 			return Base.forUnknown(((ExecThrown) o).getThrownValue()).baseToJavaString();
 		}
 		return Format.Throwable.toText(o).replaceAll("ru\\.myx\\.ae3", "ae3");
 	}
-
+	
 	/** Parses some text forms of dates into date object or returns undefined.
 	 *
 	 * @param anyDate
 	 * @return */
 	public static final BaseDate toDate(final BaseObject anyDate) {
-
+		
 		if (anyDate instanceof BaseDate) {
 			return (BaseDate) anyDate;
 		}
@@ -965,19 +1060,19 @@ public class FormatSAPI {
 		}
 		return new BaseDate(date);
 	}
-
+	
 	/** @param text
 	 * @return */
 	public static final long toPeriod(final String text) {
-
+		
 		return Convert.Any.toPeriod(text, -1);
 	}
-
+	
 	/** @param source
 	 * @param delimiter
 	 * @return string */
 	public static final String uniqueWords(final String source, final String delimiter) {
-
+		
 		if (source == null) {
 			return "";
 		}
@@ -985,19 +1080,19 @@ public class FormatSAPI {
 		ExtractorPlainVariant.extractContent(words, source);
 		return Text.join(words, delimiter);
 	}
-
+	
 	/** @param object
 	 * @return string */
 	public static final String utcDate(final Object object) {
-
+		
 		return FormatSAPI.utcDate(object, null);
 	}
-
+	
 	/** @param object
 	 * @param format
 	 * @return string */
 	public static final String utcDate(final Object object, final String format) {
-
+		
 		final SimpleDateFormat formatter = new SimpleDateFormat(
 				format == null
 					? "yyyy-MM-dd HH:mm:ss"
@@ -1008,7 +1103,7 @@ public class FormatSAPI {
 		}
 		return formatter.format(new Date(Convert.Any.toLong(object, 0L)));
 	}
-
+	
 	/** Will ignore names which are not valid XML attribute names, will escape values properly (you
 	 * don't need to replace '&amp;' to '&amp;amp;' and such when passing your strings to this
 	 * method...).
@@ -1017,7 +1112,7 @@ public class FormatSAPI {
 	 * @param value
 	 * @return empty string or a space character with valid XML attribute notation concatenated */
 	public static final String xmlAttribute(final String name, final String value) {
-
+		
 		if (name == null || value == null) {
 			return "";
 		}
@@ -1027,7 +1122,7 @@ public class FormatSAPI {
 			throw new RuntimeException(e);
 		}
 	}
-
+	
 	/** The part of XML attribute text.
 	 *
 	 * Example: <code>
@@ -1043,7 +1138,7 @@ public class FormatSAPI {
 	 * @param string
 	 * @return */
 	public static final String xmlAttributeFragment(final String string) {
-
+		
 		if (string == null) {
 			return "";
 		}
@@ -1056,7 +1151,7 @@ public class FormatSAPI {
 			throw new RuntimeException(e);
 		}
 	}
-
+	
 	/** Makes a string with ' name="value"' parts for every non-Object.prototype's mapping.
 	 *
 	 * Values are escaped according to XML specification rules. Illegal attribute names are silently
@@ -1065,23 +1160,23 @@ public class FormatSAPI {
 	 * @param object
 	 * @return */
 	public static final String xmlAttributes(final BaseObject object) {
-
+		
 		try {
 			return FormatSAPI.xmlAttributesImpl(object, new StringBuilder(64)).toString();
 		} catch (final IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
-
+	
 	private static final StringBuilder xmlAttributesImpl(final BaseObject object, final StringBuilder builder) throws IOException {
-
+		
 		for (final Iterator<String> iterator = Base.keys(object, BaseObject.PROTOTYPE); iterator.hasNext();) {
 			final String key = iterator.next();
 			Format.Xml.xmlAttributeImpl(key, object.baseGet(key, null), builder);
 		}
 		return builder;
 	}
-
+	
 	/** The while XML attribute including quotes and text.
 	 *
 	 * The Date instances are formatted as Format.Ecma.date( x )
@@ -1101,7 +1196,7 @@ public class FormatSAPI {
 	 * @param string
 	 * @return */
 	public static final String xmlAttributeValue(final Object string) {
-
+		
 		if (string == null) {
 			return "\"\"";
 		}
@@ -1126,7 +1221,7 @@ public class FormatSAPI {
 		target.append('"');
 		return target.toString();
 	}
-
+	
 	/** Makes an xml element with given name, attributes and child elements. This version support
 	 * child elements as well as attributes:
 	 * <ul>
@@ -1145,7 +1240,7 @@ public class FormatSAPI {
 	 * @param attributes
 	 * @return */
 	public static final String xmlElement(final String name, final BaseObject attributes) {
-
+		
 		assert Format.Xml.isValidName(name) : "invalid element name: " + name;
 		try {
 			return FormatSAPI.xmlElementImpl(name, attributes, new StringBuilder(64)).toString();
@@ -1153,7 +1248,7 @@ public class FormatSAPI {
 			throw new RuntimeException(e);
 		}
 	}
-
+	
 	/** Makes an xml element with given name and attributes.
 	 *
 	 * @param name
@@ -1161,7 +1256,7 @@ public class FormatSAPI {
 	 * @param nodeValue
 	 * @return */
 	public static final String xmlElement(final String name, final BaseObject attributes, final BaseObject nodeValue) {
-
+		
 		final StringBuilder builder = new StringBuilder(64);
 		assert Format.Xml.isValidName(name) : "invalid element name: " + name;
 		try {
@@ -1178,7 +1273,7 @@ public class FormatSAPI {
 			throw new RuntimeException(e);
 		}
 	}
-
+	
 	/** Makes an xml element with given name, attribute and body. For methods like
 	 * String.prototype.anchor...
 	 *
@@ -1188,7 +1283,7 @@ public class FormatSAPI {
 	 * @param nodeValue
 	 * @return */
 	public static final String xmlElement(final String name, final String attributeName, final BaseObject attributeValue, final BaseObject nodeValue) {
-
+		
 		final StringBuilder builder = new StringBuilder(128);
 		assert Format.Xml.isValidName(name) : "invalid element name: " + name;
 		try {
@@ -1205,20 +1300,20 @@ public class FormatSAPI {
 			throw new RuntimeException(e);
 		}
 	}
-
+	
 	@SuppressWarnings("javadoc")
 	@Deprecated
 	public static final String xmlElementAttributes(final BaseObject object) {
-
+		
 		try {
 			return FormatSAPI.xmlAttributesImpl(object, new StringBuilder()).toString();
 		} catch (final IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
-
+	
 	private static final <T extends Appendable> T xmlElementImpl(final String name, final BaseObject attributes, final T result) throws IOException {
-
+		
 		if (!Format.Xml.isValidName(name)) {
 			return result;
 		}
@@ -1311,12 +1406,12 @@ public class FormatSAPI {
 				if (layout != null) {
 					if ("xml".equals(layout) || "xml-fragment".equals(layout) || "final".equals(layout) && "text/xml".equals(Base.getString(value, "type", null))) {
 						body.append('<').append(key).append('>');
-
+						
 						{
 							/** NOTE: unchecked XML fragment */
 							body.append(value.baseGet("content", BaseString.EMPTY));
 						}
-
+						
 						body.append("</").append(key).append('>');
 						continue mapProperties;
 					}
@@ -1333,7 +1428,7 @@ public class FormatSAPI {
 		result.append('>').append(body).append("</").append(name).append('>');
 		return result;
 	}
-
+	
 	/** Executes xmlElement zero or more times to build an XML fragment string. No element is
 	 * produced if attributes equal to 'undefined'. When attributes is an array, xmlElement will be
 	 * called for each item, unless that item is 'undefined' or primitive. For primitive values of
@@ -1343,7 +1438,7 @@ public class FormatSAPI {
 	 * @param attributes
 	 * @return */
 	public static final String xmlElements(final String name, final BaseObject attributes) {
-
+		
 		assert Format.Xml.isValidName(name) : "invalid element name: " + name;
 		if (attributes == null || attributes == BaseObject.UNDEFINED) {
 			return "";
@@ -1389,7 +1484,7 @@ public class FormatSAPI {
 		}
 		return FormatSAPI.xmlElement(name, attributes);
 	}
-
+	
 	/** nodeValue - element's body.
 	 *
 	 * Example: <code>
@@ -1402,7 +1497,7 @@ public class FormatSAPI {
 	 * @param o
 	 * @return string */
 	public static final String xmlNodeValue(final Object o) {
-
+		
 		if (o == null) {
 			return "";
 		}
@@ -1415,21 +1510,21 @@ public class FormatSAPI {
 			throw new RuntimeException(e);
 		}
 	}
-
+	
 	/** @param o
 	 * @return string */
 	public static final String xmlTextAsHtml(final String o) {
-
+		
 		return o == null
 			? null
 			: Html.fromXmlText(o, null);
 	}
-
+	
 	/** @param o
 	 * @param hrefAttributes
 	 * @return string */
 	public static final String xmlTextAsHtml(final String o, final String hrefAttributes) {
-
+		
 		return o == null
 			? null
 			: Html.fromXmlText(o, hrefAttributes);
