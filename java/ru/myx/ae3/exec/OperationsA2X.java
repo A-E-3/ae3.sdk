@@ -564,6 +564,7 @@ public enum OperationsA2X implements OperationA2X {
 					 * </code> */
 				}
 				if (argumentA instanceof ExecValueStack) {
+					// TODO: check is it really needed? .baseValue()?!
 					argumentA.baseValue();
 					final BaseObject replacement = ((ExecValueStack<?>) argumentA).toNative();
 					if (replacement != argumentA) {
@@ -572,6 +573,7 @@ public enum OperationsA2X implements OperationA2X {
 					}
 				}
 				if (argumentB instanceof ExecValueStack) {
+					// TODO: check is it really needed? .baseValue()?!
 					argumentB.baseValue();
 					final BaseObject replacement = ((ExecValueStack<?>) argumentB).toNative();
 					if (replacement != argumentB) {
@@ -659,6 +661,7 @@ public enum OperationsA2X implements OperationA2X {
 					 * </code> */
 				}
 				if (argumentA instanceof ExecValueStack) {
+					// TODO: check is it really needed? .baseValue()?!
 					argumentA.baseValue();
 					final BaseObject replacement = ((ExecValueStack<?>) argumentA).toNative();
 					if (replacement != argumentA) {
@@ -667,6 +670,7 @@ public enum OperationsA2X implements OperationA2X {
 					}
 				}
 				if (argumentB instanceof ExecValueStack) {
+					// TODO: check is it really needed? .baseValue()?!
 					argumentB.baseValue();
 					final BaseObject replacement = ((ExecValueStack<?>) argumentB).toNative();
 					if (replacement != argumentB) {

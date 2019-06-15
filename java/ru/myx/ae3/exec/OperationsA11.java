@@ -130,7 +130,8 @@ public enum OperationsA11 implements OperationA11 {
 		@Override
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final int constant, final ResultHandler store) {
 
-			if (!BaseObject.equalsNative(ctx.ra0RB, argumentA)) {
+			// if (!BaseObject.equalsNative(ctx.ra0RB, argumentA)) {
+			if (!BaseObject.equalsStrict(ctx.ra0RB, argumentA)) {
 				ctx.ri08IP += constant;
 				/** return NEXT - skip other VLIW command parts */
 				return NEXT;
@@ -158,7 +159,8 @@ public enum OperationsA11 implements OperationA11 {
 		@Override
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final int constant, final ResultHandler store) {
 
-			if (BaseObject.equalsNative(ctx.ra0RB, argumentA)) {
+			// if (BaseObject.equalsNative(ctx.ra0RB, argumentA)) {
+			if (BaseObject.equalsStrict(ctx.ra0RB, argumentA)) {
 				ctx.ri08IP += constant;
 				/** return NEXT - skip other VLIW command parts */
 				return NEXT;
@@ -188,13 +190,15 @@ public enum OperationsA11 implements OperationA11 {
 
 		if (store == ResultHandler.FA_BNN_NXT) {
 			// that way is required, so re-implemented method will be called
-			return InstructionA11.instructionCached(argumentA == AA0RB
-				? new IA11_AXXX_R_C_NN_NXT(this, constant)
-				: new IA11_AXXX_A_C_NN_NXT(this, argumentA, constant));
+			return InstructionA11.instructionCached(
+					argumentA == AA0RB
+						? new IA11_AXXX_R_C_NN_NXT(this, constant)
+						: new IA11_AXXX_A_C_NN_NXT(this, argumentA, constant));
 		}
 
-		return InstructionA11.instructionCached(argumentA == AA0RB
-			? new IA11_AXXX_R_C_XX_XXX(this, constant, store)
-			: new IA11_AXXX_A_C_XX_XXX(this, argumentA, constant, store));
+		return InstructionA11.instructionCached(
+				argumentA == AA0RB
+					? new IA11_AXXX_R_C_XX_XXX(this, constant, store)
+					: new IA11_AXXX_A_C_XX_XXX(this, argumentA, constant, store));
 	}
 }

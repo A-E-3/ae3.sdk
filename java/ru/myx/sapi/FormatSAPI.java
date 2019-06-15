@@ -7,6 +7,7 @@ package ru.myx.sapi;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Date;
 import java.util.Iterator;
@@ -43,6 +44,8 @@ import ru.myx.plist.Plist;
  *
  *         Window - Preferences - Java - Code Style - Code Templates */
 public class FormatSAPI {
+	
+	static final char[] CHARS_BASE58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz".toCharArray();
 	
 	/** Formats bytes as base27, more compact and readable than base16/hex
 	 *
@@ -95,7 +98,63 @@ public class FormatSAPI {
 		}
 		return integer.toString(36);
 	}
-
+	
+	/** Formats bytes as base58, more compact and less readable than base16/hex
+	 *
+	 * @param any
+	 * @return */
+	public static final CharSequence binaryAsBase58(final Object any) {
+		
+		byte[] bytes;
+		if (any instanceof byte[]) {
+			bytes = (byte[]) any;
+		} else//
+		if (any instanceof TransferCopier) {
+			bytes = ((TransferCopier) any).nextDirectArray();
+		} else //
+		if (any == null) {
+			return "";
+		} else {
+			throw new IllegalArgumentException("class: " + any.getClass().getName());
+		}
+		if (bytes.length == 0) {
+			return "";
+		}
+		
+		final char[] buffer = new char[bytes.length * 2];
+		
+		// Count leading zeros.
+		int zeros = 0;
+		while (zeros < bytes.length && bytes[zeros] == 0) {
+			++zeros;
+		}
+		bytes = Arrays.copyOf(bytes, bytes.length); // since we modify it in-place
+		int outputStart = buffer.length;
+		
+		for (int inputStart = zeros; inputStart < bytes.length;) {
+			int remainder = 0;
+			for (int i = inputStart; i < bytes.length; i++) {
+				final int digit = bytes[i] & 0xFF;
+				final int temp = remainder * 256 + digit;
+				bytes[i] = (byte) (temp / 58);
+				remainder = temp % 58;
+			}
+			buffer[--outputStart] = FormatSAPI.CHARS_BASE58[(byte) remainder];
+			if (bytes[inputStart] == 0) {
+				++inputStart; // optimization - skip leading zeros
+			}
+		}
+		// Preserve exactly as many leading encoded zeros in output as there were leading zeros in
+		// input.
+		while (outputStart < buffer.length && buffer[outputStart] == '1') {
+			++outputStart;
+		}
+		while (--zeros >= 0) {
+			buffer[--outputStart] = '1';
+		}
+		return new String(buffer, outputStart, buffer.length - outputStart);
+	}
+	
 	/** Formats bytes as base64, useful for formatting md5 checksums, etc.
 	 *
 	 * @param bytes
@@ -106,7 +165,7 @@ public class FormatSAPI {
 			? ""
 			: new String(Base64.getEncoder().withoutPadding().encode(bytes), Engine.CHARSET_ASCII);
 	}
-
+	
 	/** Formats bytes as base64, useful for formatting md5 checksums, etc.
 	 *
 	 * @param binary
@@ -190,7 +249,7 @@ public class FormatSAPI {
 	 * @param offset
 	 * @return */
 	public static final CharSequence binaryAsInetAddress4(final byte[] bytes, final int offset) {
-
+		
 		int o = offset;
 		return (bytes[o++] & 0xFF) + "." + (bytes[o++] & 0xFF) + "." + (bytes[o++] & 0xFF) + "." + (bytes[o++] & 0xFF);
 	}
