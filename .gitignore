@@ -1,4 +1,1 @@
-bin/
-*/CVS/*
-*.class
-*.log
+/bin/
