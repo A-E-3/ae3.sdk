@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /bin/
 bin/
 /bin/*
@@ -6,3 +7,9 @@ bin/
 */CVS/*
 *.class
 *.log
+=======
+bin/
+*/CVS/*
+*.class
+*.log
+>>>>>>> 6c6cb397051385b246a2ecd0e6cd9cef17f14060
