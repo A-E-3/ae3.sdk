@@ -1,5 +1,8 @@
 /bin/
 bin/
+/bin/*
+bin/*
+bin/
 */CVS/*
 *.class
 *.log
