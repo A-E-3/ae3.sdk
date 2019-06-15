@@ -17,34 +17,39 @@ import ru.myx.ae3.base.BaseNativeObject;
 import ru.myx.ae3.base.BaseObject;
 import ru.myx.ae3.binary.Transfer;
 import ru.myx.ae3.binary.TransferCopier;
+import ru.myx.ae3.know.Guid;
 import ru.myx.ae3.reflect.ReflectionHidden;
 
 /** @author myx
  *
  *         Window - Preferences - Java - Code Style - Code Templates */
 public class RandomSAPI {
-	
+
 	/** base62 digits: case-sensitive, all basic letters and digits */
 	@ReflectionHidden
 	public static final String MIXED_62 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-	
+
 	/** base78 digits: case-sensitive, all basic letters and digits plus some basic keyboard
 	 * symbols */
 	@ReflectionHidden
 	public static final String MIXED_78 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789~`!@$^*-_[]{}|.,";
-	
+
 	/** base55 digits: case-sensitive easily readable and easily distinguishable */
 	@ReflectionHidden
 	public static final String MIXED_55_EASY = "BCDFGHKLMNPRSTVZbcdfhkmnprstvzJQWXjwxAEUYaeiouy23456789";
 	
+	/** base55 digits: case-sensitive easily readable and easily distinguishable */
+	@ReflectionHidden
+	public static final String MIXED_58_EASY = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+
 	/** base27 digits: case-insensitive easily readable and easily distinguishable */
 	@ReflectionHidden
 	public static final String MIXED_27_EASY = "bcdfhkmnprtvzjwxaeuy2346789";
-	
+
 	/** @param length
 	 * @return */
 	public static TransferCopier binary(final int length) {
-
+		
 		final byte[] b = new byte[length];
 		for (int i = length;;) {
 			final int random = Engine.createRandom();
@@ -67,7 +72,7 @@ public class RandomSAPI {
 		}
 		return Transfer.wrapCopier(b);
 	}
-	
+
 	/** @param format
 	 *            D - decimal digit<br>
 	 *            H - hexadecimal digit - upper case<br>
@@ -82,7 +87,7 @@ public class RandomSAPI {
 	 *
 	 * @return */
 	public static String formattedString(final String format) {
-
+		
 		if (format == null) {
 			return null;
 		}
@@ -158,6 +163,15 @@ public class RandomSAPI {
 					value /= 55;
 					left /= 55;
 					continue;
+				case 'B' :
+					if (left < 58) {
+						value = Engine.createRandom();
+						left = Integer.MAX_VALUE;
+					}
+					result.append(RandomSAPI.MIXED_58_EASY.charAt((value & 0x7FFFFFFF) % 58));
+					value /= 58;
+					left /= 58;
+					continue;
 				case 'e' :
 					if (left < 27) {
 						value = Engine.createRandom();
@@ -176,41 +190,53 @@ public class RandomSAPI {
 		}
 		return result.toString();
 	}
-	
+
 	/** @param list
 	 * @return object */
 	public static Object fromList(final List<Object> list) {
-
+		
 		if (list == null || list.isEmpty()) {
 			return null;
 		}
 		return list.get(Engine.createRandom(list.size()));
 	}
-	
+
 	/** @param list
 	 * @return object */
 	public static Object fromList(final Object[] list) {
-
+		
 		if (list == null || list.length == 0) {
 			return null;
 		}
 		return list[Engine.createRandom(list.length)];
 	}
-	
+
+	/** @return */
+	public static Guid guid184() {
+
+		return Guid.createGuid184();
+	}
+
+	/** @return */
+	public static Guid guid384() {
+
+		return Guid.createGuid384();
+	}
+
 	/** @param limit
 	 * @return int */
 	public static int integer(final int limit) {
-
+		
 		if (limit < 1) {
 			throw new IllegalArgumentException("Limit should be greater than zero, but equals to " + limit + "!");
 		}
 		return Engine.createRandom(limit);
 	}
-	
+
 	/** @param random
 	 * @return */
 	public static String reformat55to27(final String random) {
-
+		
 		final StringBuilder result = new StringBuilder();
 		final int length = random.length();
 		for (int i = 0, left = 0, value = 0; i < length; i++) {
@@ -222,12 +248,12 @@ public class RandomSAPI {
 		}
 		return result.toString();
 	}
-	
+
 	/** @param list
 	 * @param limit
 	 * @return list */
 	public static List<?> subList(final List<Object> list, final int limit) {
-
+		
 		if (list == null) {
 			return null;
 		}
@@ -245,12 +271,12 @@ public class RandomSAPI {
 		Collections.shuffle(result);
 		return result.subList(0, limit);
 	}
-	
+
 	/** @param map
 	 * @param limit
 	 * @return map */
 	public static BaseObject subMap(final BaseObject map, final int limit) {
-
+		
 		if (map == null) {
 			return null;
 		}
@@ -276,7 +302,7 @@ public class RandomSAPI {
 	 * @param limit
 	 * @return map */
 	public static Map<String, Object> subMap(final Map<String, Object> map, final int limit) {
-
+		
 		if (map == null) {
 			return null;
 		}
