@@ -6,13 +6,9 @@ import ru.myx.ae3.base.BaseObject;
 import ru.myx.ae3.eval.Evaluate;
 import ru.myx.renderer.ecma.AcmEcmaLanguageImpl;
 
-/**
- * @author myx
- *
- */
+/** @author myx */
 public final class ExecFunctionImpl extends BaseFunctionAbstract implements ExecCallableStepper {
-	
-	
+
 	private final BaseObject scope;
 
 	private final String[] arguments;
@@ -23,23 +19,13 @@ public final class ExecFunctionImpl extends BaseFunctionAbstract implements Exec
 
 	private final int stop;
 
-	ExecFunctionImpl(final BaseObject scope, final String[] arguments, final Instruction[] code, final int start, final int stop) {
-		this.scope = scope;
-		this.arguments = arguments;
-		this.code = code;
-		this.start = start;
-		this.stop = stop;
-	}
-
-	/**
-	 * @param scope
+	/** @param scope
 	 * @param context
 	 * @param arguments
 	 * @param ecmaSourceCode
-	 * @throws Exception
-	 */
+	 * @throws Exception */
 	public ExecFunctionImpl(final BaseObject scope, final String context, final String[] arguments, final String ecmaSourceCode) throws Exception {
-		
+
 		final ProgramAssembly assembly = new ProgramAssembly();
 		if (arguments != null && arguments.length > 0) {
 			assembly.addInstruction(new IAVV_ARGS_SETUP(null, arguments));
@@ -48,9 +34,7 @@ public final class ExecFunctionImpl extends BaseFunctionAbstract implements Exec
 			Evaluate.compileProgramBlock(AcmEcmaLanguageImpl.INSTANCE, context, ecmaSourceCode, assembly);
 		}
 
-		/**
-		 * TODO: need Exec.getGlobalProcess() - for acm domains
-		 */
+		/** TODO: need Exec.getGlobalProcess() - for acm domains */
 		this.scope = BaseMap.create(scope);
 
 		this.arguments = arguments;
@@ -62,17 +46,24 @@ public final class ExecFunctionImpl extends BaseFunctionAbstract implements Exec
 		this.stop = this.code.length;
 	}
 
+	ExecFunctionImpl(final BaseObject scope, final String[] arguments, final Instruction[] code, final int start, final int stop) {
+
+		this.scope = scope;
+		this.arguments = arguments;
+		this.code = code;
+		this.start = start;
+		this.stop = stop;
+	}
+
 	@Override
 	public final int execArgumentsAcceptable() {
-		
-		
+
 		return Integer.MAX_VALUE;
 	}
 
 	@Override
 	public final int execArgumentsDeclared() {
-		
-		
+
 		return this.arguments == null
 			? 0
 			: this.arguments.length;
@@ -80,59 +71,51 @@ public final class ExecFunctionImpl extends BaseFunctionAbstract implements Exec
 
 	@Override
 	public final int execArgumentsMinimal() {
-		
-		
+
 		return 0;
 	}
 
 	@Override
+	public String[] execFormalParameters() {
+
+		return this.arguments;
+	}
+
+	@Override
+	public Instruction[] execGetCode() {
+
+		return this.code;
+	}
+
+	@Override
 	public int execGetCodeStart() {
-		
-		
+
 		return this.start;
 	}
 
 	@Override
 	public int execGetCodeStop() {
-		
-		
+
 		return this.stop;
 	}
 
 	@Override
-	public Instruction[] execGetCode() {
-		
-		
-		return this.code;
+	public BaseObject execScope() {
+
+		return this.scope;
 	}
 
 	@Override
 	public void execSetupContext(final ExecProcess ctx) {
-		
-		
+
 		ctx.fldCode = this.code;
 		ctx.ri0FI0 = ctx.ri08IP = this.start;
 		ctx.ri09IL = this.stop;
 	}
 
 	@Override
-	public BaseObject execScope() {
-		
-		
-		return this.scope;
-	}
-
-	@Override
-	public String[] execFormalParameters() {
-		
-		
-		return this.arguments;
-	}
-
-	@Override
 	public final String toString() {
-		
-		
+
 		final String[] arguments = this.arguments;
 		if (arguments == null || arguments.length == 0) {
 			return "function()";

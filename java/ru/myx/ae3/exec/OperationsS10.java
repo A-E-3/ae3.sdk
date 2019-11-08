@@ -8,6 +8,7 @@ import ru.myx.ae3.base.BaseObject;
 import ru.myx.ae3.base.BasePrimitive;
 import ru.myx.ae3.base.BaseString;
 import ru.myx.ae3.base.ToPrimitiveHint;
+import ru.myx.vm_vliw32_2010.OperationA10;
 
 /** @author myx */
 public enum OperationsS10 implements OperationA10 {
@@ -27,7 +28,7 @@ public enum OperationsS10 implements OperationA10 {
 				return store.execReturn(ctx, argumentA);
 			}
 			{
-				
+
 				final BasePrimitive<?> primitive = argumentA.baseToPrimitive(ToPrimitiveHint.NUMBER);
 
 				return primitive instanceof BaseNumber
@@ -85,7 +86,7 @@ public enum OperationsS10 implements OperationA10 {
 				return store.execReturn(ctx, argumentA);
 			}
 			{
-				
+
 				final BasePrimitive<?> primitive = argumentA.baseToPrimitive(ToPrimitiveHint.STRING);
 				return primitive instanceof BaseString
 					? store.execReturn(ctx, primitive)
@@ -138,7 +139,7 @@ public enum OperationsS10 implements OperationA10 {
 		}
 
 		@Override
-		
+
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final int constant, final ResultHandler store) {
 
 			return store.execReturn(ctx, ExecProcess.vmEnsureDetached(ctx, argumentA));
@@ -162,7 +163,7 @@ public enum OperationsS10 implements OperationA10 {
 	VFLOAD_N {
 
 		@Override
-		
+
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final int constant, final ResultHandler store) {
 
 			return store.execReturn(ctx, ExecProcess.vmEnsureNative(argumentA));
@@ -403,7 +404,10 @@ public enum OperationsS10 implements OperationA10 {
 	 * @return */
 	public abstract InstructionResult getResultType();
 
-	Instruction instructionCached(final ModifierArgument argumentA, final int constant, final ResultHandler store) {
+	Instruction instructionCached(//
+			final ModifierArgument argumentA,
+			final int constant,
+			final ResultHandler store) {
 
 		return InstructionA10.instructionCached(this.instruction(argumentA, constant, store));
 	}

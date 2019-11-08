@@ -4,9 +4,10 @@
 package ru.myx.ae3.exec;
 
 import static ru.myx.ae3.exec.ExecStateCode.NEXT;
-import static ru.myx.ae3.exec.ModifierArguments.AA0RB;
 
 import ru.myx.ae3.base.BaseObject;
+import ru.myx.vm_vliw32_2010.InstructionIA;
+import ru.myx.vm_vliw32_2010.OperationA11;
 
 /** @author myx */
 public enum OperationsA11 implements OperationA11 {
@@ -71,7 +72,7 @@ public enum OperationsA11 implements OperationA11 {
 		}
 
 		@Override
-		public final Instruction instruction(final ModifierArgument argumentA, final int constant, final ResultHandler store) {
+		public final InstructionIA instruction(final ModifierArgument argumentA, final int constant, final ResultHandler store) {
 
 			if (store == ResultHandler.FA_BNN_NXT) {
 				return new IA11_XESKIP0A_A_C_NN_NXT(argumentA, constant);
@@ -108,7 +109,7 @@ public enum OperationsA11 implements OperationA11 {
 		}
 
 		@Override
-		public final Instruction instruction(final ModifierArgument argumentA, final int constant, final ResultHandler store) {
+		public final InstructionIA instruction(final ModifierArgument argumentA, final int constant, final ResultHandler store) {
 
 			if (store == ResultHandler.FA_BNN_NXT) {
 				return new IA11_XESKIP1A_A_C_NN_NXT(argumentA, constant);
@@ -186,19 +187,11 @@ public enum OperationsA11 implements OperationA11 {
 	 * @return */
 	public abstract InstructionResult getResultType();
 
-	InstructionA11 instructionCached(final ModifierArgument argumentA, final int constant, final ResultHandler store) {
+	Instruction instructionCached(//
+			final ModifierArgument argumentA,
+			final int constant,
+			final ResultHandler store) {
 
-		if (store == ResultHandler.FA_BNN_NXT) {
-			// that way is required, so re-implemented method will be called
-			return InstructionA11.instructionCached(
-					argumentA == AA0RB
-						? new IA11_AXXX_R_C_NN_NXT(this, constant)
-						: new IA11_AXXX_A_C_NN_NXT(this, argumentA, constant));
-		}
-
-		return InstructionA11.instructionCached(
-				argumentA == AA0RB
-					? new IA11_AXXX_R_C_XX_XXX(this, constant, store)
-					: new IA11_AXXX_A_C_XX_XXX(this, argumentA, constant, store));
+		return InstructionA11.instructionCached(this.instruction(argumentA, constant, store));
 	}
 }

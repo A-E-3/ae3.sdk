@@ -6,11 +6,11 @@ import ru.myx.ae3.base.BaseObject;
 
 /** @author myx */
 public abstract class ExecArgumentsAbstract extends BaseHostSealed implements ExecArguments {
-	
+
 	/** @param arguments
 	 * @return arguments impl */
 	static ExecArguments createArgumentsNamedClone(final NamedToIndexMapper desc, final BaseArray arguments) {
-		
+
 		if (arguments == null || arguments == ExecArgumentsEmpty.INSTANCE) {
 			return ExecArgumentsEmpty.INSTANCE;
 		}
@@ -45,7 +45,7 @@ public abstract class ExecArgumentsAbstract extends BaseHostSealed implements Ex
 
 	@Override
 	public String toString() {
-		
+
 		return "[object " + this.baseClass() + "(length=" + this.length() + ")]";
 	}
 

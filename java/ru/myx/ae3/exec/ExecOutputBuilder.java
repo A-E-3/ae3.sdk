@@ -10,26 +10,20 @@ import ru.myx.ae3.base.BasePrimitiveString;
 import ru.myx.ae3.common.Describable;
 import ru.myx.ae3.help.Format;
 
-/**
- * @author myx
- *
- */
+/** @author myx */
 public final class ExecOutputBuilder extends BaseFunctionAbstract implements ExecOutputFunction, Describable {
-	
-	
+
 	private final StringBuilder builder;
 
-	/**
-	 * @param builder
-	 */
+	/** @param builder */
 	public ExecOutputBuilder(final StringBuilder builder) {
+
 		this.builder = builder;
 	}
 
 	@Override
 	public boolean absorb(final BaseObject object) {
-		
-		
+
 		if (object != null) {
 			this.builder.append(object);
 		}
@@ -37,24 +31,21 @@ public final class ExecOutputBuilder extends BaseFunctionAbstract implements Exe
 	}
 
 	@Override
+	public final String baseDescribe() {
+
+		return this.getClass().getSimpleName() //
+				+ ": len: " + this.builder.length() + ", buffer: " + Format.Describe.toEcmaSource(this.builder.toString(), "");
+	}
+
+	@Override
 	public BasePrimitiveString baseToString() {
-		
-		
+
 		return Base.forString(this.builder.toString());
 	}
 
 	@Override
 	public final String toString() {
-		
-		
-		return this.builder.toString();
-	}
 
-	@Override
-	public final String baseDescribe() {
-		
-		
-		return this.getClass().getSimpleName() //
-				+ ": len: " + this.builder.length() + ", buffer: " + Format.Describe.toEcmaSource(this.builder.toString(), "");
+		return this.builder.toString();
 	}
 }

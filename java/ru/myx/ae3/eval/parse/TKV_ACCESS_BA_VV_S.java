@@ -7,7 +7,6 @@ package ru.myx.ae3.eval.parse;
 import ru.myx.ae3.exec.InstructionResult;
 import ru.myx.ae3.exec.ModifierArgument;
 import ru.myx.ae3.exec.ModifierArguments;
-import ru.myx.ae3.exec.OperationA3X;
 import ru.myx.ae3.exec.OperationsA2X;
 import ru.myx.ae3.exec.OperationsA3X;
 import ru.myx.ae3.exec.OperationsS2X;
@@ -17,13 +16,12 @@ import ru.myx.ae3.exec.ResultHandler;
 import ru.myx.ae3.exec.ResultHandlerBasic;
 import ru.myx.ae3.exec.parse.expression.TokenInstruction;
 import ru.myx.ae3.exec.parse.expression.TokenValue;
+import ru.myx.vm_vliw32_2010.OperationA3X;
 
-/**
- * @author myx
+/** @author myx
  *
  *         To change the template for this generated type comment go to
- *         Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
- */
+ *         Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments */
 public final class TKV_ACCESS_BA_VV_S extends TokenValue {
 
 	private final TokenInstruction argumentA;
@@ -32,11 +30,10 @@ public final class TKV_ACCESS_BA_VV_S extends TokenValue {
 	
 	private int visibility = 0;
 	
-	/**
-	 * @param argumentA
-	 * @param argumentB
-	 */
+	/** @param argumentA
+	 * @param argumentB */
 	public TKV_ACCESS_BA_VV_S(final TokenInstruction argumentA, final TokenInstruction argumentB) {
+
 		assert argumentA.isStackValue();
 		assert argumentB.isStackValue();
 		this.argumentA = argumentA;
@@ -70,15 +67,11 @@ public final class TKV_ACCESS_BA_VV_S extends TokenValue {
 	@Override
 	public void toAssembly(final ProgramAssembly assembly, final ModifierArgument argumentA, final ModifierArgument argumentB, final ResultHandlerBasic store) {
 
-		/**
-		 * zero operands
-		 */
+		/** zero operands */
 		assert argumentA == null;
 		assert argumentB == null;
 		
-		/**
-		 * valid store
-		 */
+		/** valid store */
 		assert store != null;
 		
 		final ModifierArgument modifierA = this.argumentA.toDirectModifier();
@@ -86,32 +79,37 @@ public final class TKV_ACCESS_BA_VV_S extends TokenValue {
 		final boolean directA = modifierA == ModifierArguments.AA0RB;
 		final boolean directB = modifierB == ModifierArguments.AA0RB;
 		if (directA) {
-			this.argumentA.toAssembly(assembly, null, null, directB
-				? ResultHandler.FB_BSN_NXT
-				: ResultHandler.FA_BNN_NXT);
+			this.argumentA.toAssembly(
+					assembly,
+					null,
+					null,
+					directB
+						? ResultHandler.FB_BSN_NXT
+						: ResultHandler.FA_BNN_NXT);
 		}
 		if (directB) {
 			this.argumentB.toAssembly(assembly, null, null, ResultHandler.FA_BNN_NXT);
 		}
 		final InstructionResult argumentType = this.argumentB.getResultType();
-		assembly.addInstruction((argumentType == InstructionResult.INTEGER
-			? this.visibility == 0
-				? OperationsS2X.VACCESS_TI
-				: OperationsS2X.VACCESS_DI
-			: argumentType == InstructionResult.STRING
-				? this.visibility == 2
-					? OperationsS2X.VACCESS_NS
-					: OperationsS2X.VACCESS_DS
-				: this.visibility == 2
-					? OperationsS2X.VACCESS_NA
-					: OperationsA2X.XACCESS_D)//
-							.instruction(
-									directA && directB
-										? ModifierArguments.AE21POP
-										: modifierA, //
-									modifierB,
-									0,
-									store));
+		assembly.addInstruction(
+				(argumentType == InstructionResult.INTEGER
+					? this.visibility == 0
+						? OperationsS2X.VACCESS_TI
+						: OperationsS2X.VACCESS_DI
+					: argumentType == InstructionResult.STRING
+						? this.visibility == 2
+							? OperationsS2X.VACCESS_NS
+							: OperationsS2X.VACCESS_DS
+						: this.visibility == 2
+							? OperationsS2X.VACCESS_NA
+							: OperationsA2X.XACCESS_D)//
+									.instruction(
+											directA && directB
+												? ModifierArguments.AE21POP
+												: modifierA, //
+											modifierB,
+											0,
+											store));
 	}
 	
 	@Override
@@ -173,30 +171,31 @@ public final class TKV_ACCESS_BA_VV_S extends TokenValue {
 		}
 		if (needRead) {
 			final InstructionResult argumentType = this.argumentB.getResultType();
-			assembly.addInstruction((argumentType == InstructionResult.INTEGER
-				? this.visibility == 0
-					? OperationsS2X.VACCESS_TI
-					: OperationsS2X.VACCESS_DI
-				: argumentType == InstructionResult.STRING
-					? this.visibility == 2
-						? OperationsS2X.VACCESS_NS
-						: OperationsS2X.VACCESS_DS
-					: this.visibility == 2
-						? OperationsS2X.VACCESS_NA
-						: OperationsA2X.XACCESS_D)//
-								.instruction(
-										directA
-											? directB
-												? ModifierArguments.AE23PEEK2
-												: ModifierArguments.AE22PEEK
-											: modifierA, //
-										directB
-											? ModifierArguments.AE22PEEK
-											: modifierB,
-										0,
-										directAllowed
-											? ResultHandler.FA_BNN_NXT
-											: ResultHandler.FB_BSN_NXT));
+			assembly.addInstruction(
+					(argumentType == InstructionResult.INTEGER
+						? this.visibility == 0
+							? OperationsS2X.VACCESS_TI
+							: OperationsS2X.VACCESS_DI
+						: argumentType == InstructionResult.STRING
+							? this.visibility == 2
+								? OperationsS2X.VACCESS_NS
+								: OperationsS2X.VACCESS_DS
+							: this.visibility == 2
+								? OperationsS2X.VACCESS_NA
+								: OperationsA2X.XACCESS_D)//
+										.instruction(
+												directA
+													? directB
+														? ModifierArguments.AE23PEEK2
+														: ModifierArguments.AE22PEEK
+													: modifierA, //
+												directB
+													? ModifierArguments.AE22PEEK
+													: modifierB,
+												0,
+												directAllowed
+													? ResultHandler.FA_BNN_NXT
+													: ResultHandler.FB_BSN_NXT));
 			return directAllowed
 				? ModifierArguments.AA0RB
 				: ModifierArguments.AE21POP;
@@ -229,16 +228,17 @@ public final class TKV_ACCESS_BA_VV_S extends TokenValue {
 			default :
 				operation = OperationsA3X.XASTORE_N;
 		}
-		assembly.addInstruction(operation//
-				.instruction(
-						directA
-							? ModifierArguments.AE21POP
-							: modifierA, //
-						directB
-							? ModifierArguments.AE21POP
-							: modifierB,
-						modifierValue,
-						0,
-						store));
+		assembly.addInstruction(
+				operation//
+						.instruction(
+								directA
+									? ModifierArguments.AE21POP
+									: modifierA, //
+								directB
+									? ModifierArguments.AE21POP
+									: modifierB,
+								modifierValue,
+								0,
+								store));
 	}
 }

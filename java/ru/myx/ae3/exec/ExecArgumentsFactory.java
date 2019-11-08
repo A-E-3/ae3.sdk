@@ -1,23 +1,16 @@
 /**
- * 
+ *
  */
 package ru.myx.ae3.exec;
 
 import ru.myx.ae3.status.StatusInfo;
 
-/**
- * @author myx
- * 
- */
+/** @author myx */
 public class ExecArgumentsFactory {
 	
-	
-	/**
-	 * @param data
-	 */
+	/** @param data */
 	public static final void statusFill(final StatusInfo data) {
-		
-		
+
 		ExecArgumentsEmpty.statusFill(data);
 		ExecArgumentsList1.statusFill(data);
 		ExecArgumentsList2.statusFill(data);

@@ -6,7 +6,6 @@
  */
 package ru.myx.ae3.eval.parse;
 
-import ru.myx.ae3.exec.InstructionA2X;
 import ru.myx.ae3.exec.InstructionResult;
 import ru.myx.ae3.exec.ModifierArgument;
 import ru.myx.ae3.exec.ModifierArguments;
@@ -20,6 +19,7 @@ import ru.myx.ae3.exec.ResultHandler;
 import ru.myx.ae3.exec.ResultHandlerBasic;
 import ru.myx.ae3.exec.parse.expression.TokenInstruction;
 import ru.myx.ae3.exec.parse.expression.TokenOperator;
+import ru.myx.vm_vliw32_2010.VIFmtA21;
 
 final class TKO_ACALLS_CBA_AVS_S extends TokenOperator {
 
@@ -111,7 +111,7 @@ final class TKO_ACALLS_CBA_AVS_S extends TokenOperator {
 			return;
 		}
 
-		if (this.constant > InstructionA2X.CNST_MAX) {
+		if (this.constant > VIFmtA21.CNST_MAX) {
 			if (accessPropertyDirect) {
 				this.accessProperty.toAssembly(assembly, null, null, ResultHandler.FB_BSN_NXT);
 			}

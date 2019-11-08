@@ -14,27 +14,27 @@ import ru.myx.ae3.status.StatusInfo;
 public final class ExecArgumentsList4 extends ExecArgumentsAbstractList {
 
 	private static int COUNT = 0;
-	
+
 	static final void statusFill(final StatusInfo data) {
 
 		data.put("ARGS: 'List4' count", Format.Compact.toDecimal(ExecArgumentsList4.COUNT));
 	}
-	
+
 	private final BaseObject object1;
-	
+
 	private final BaseObject object2;
-	
+
 	private final BaseObject object3;
-	
+
 	private final BaseObject object4;
-	
+
 	/** @param object1
 	 * @param object2
 	 * @param object3
 	 * @param object4 */
 	@ReflectionHidden
 	public ExecArgumentsList4(final BaseObject object1, final BaseObject object2, final BaseObject object3, final BaseObject object4) {
-		
+
 		assert object1 != null : "NULL java object!";
 		assert object2 != null : "NULL java object!";
 		assert object3 != null : "NULL java object!";
@@ -45,7 +45,7 @@ public final class ExecArgumentsList4 extends ExecArgumentsAbstractList {
 		this.object3 = object3;
 		this.object4 = object4;
 	}
-	
+
 	@Override
 	@ReflectionHidden
 	public final BaseObject baseGet(final int i, final BaseObject defaultValue) {
@@ -63,21 +63,21 @@ public final class ExecArgumentsList4 extends ExecArgumentsAbstractList {
 				return defaultValue;
 		}
 	}
-	
+
 	@Override
 	@ReflectionHidden
 	public BaseObject baseGetFirst(final BaseObject defaultValue) {
 
 		return this.object1;
 	}
-	
+
 	@Override
 	@ReflectionHidden
 	public BaseObject baseGetLast(final BaseObject defaultValue) {
 
 		return this.object4;
 	}
-	
+
 	@Override
 	@ReflectionHidden
 	public final Object get(final int i) {
@@ -95,21 +95,21 @@ public final class ExecArgumentsList4 extends ExecArgumentsAbstractList {
 				return null;
 		}
 	}
-	
+
 	@Override
 	@ReflectionHidden
 	public final boolean isEmpty() {
 
 		return false;
 	}
-	
+
 	@Override
 	@ReflectionHidden
 	public final int length() {
 
 		return 4;
 	}
-	
+
 	@Override
 	public BaseObject[] toArrayBase() {
 
@@ -117,7 +117,7 @@ public final class ExecArgumentsList4 extends ExecArgumentsAbstractList {
 				this.object1, this.object2, this.object3, this.object4
 		};
 	}
-	
+
 	@Override
 	@ReflectionHidden
 	public ExecStateCode vmPropertyRead(final ExecProcess ctx, final int index, final BaseObject originalIfKnown, final BaseObject defaultValue, final ResultHandler store) {

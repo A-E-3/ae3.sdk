@@ -7,6 +7,8 @@ import ru.myx.ae3.base.BaseArray;
 import ru.myx.ae3.base.BaseFunction;
 import ru.myx.ae3.base.BaseObject;
 import ru.myx.ae3.help.Format;
+import ru.myx.vm_vliw32_2010.InstructionIA;
+import ru.myx.vm_vliw32_2010.OperationA3X;
 
 /** @author myx */
 public enum OperationsA3X implements OperationA3X {
@@ -15,12 +17,8 @@ public enum OperationsA3X implements OperationA3X {
 
 		@Override
 
-		public final ExecStateCode execute(final ExecProcess ctx,
-				final BaseObject argumentA,
-				final BaseObject argumentB,
-				final BaseObject argumentC,
-				final int constant,
-				final ResultHandler store) {
+		public final ExecStateCode
+				execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final BaseObject argumentC, final int constant, final ResultHandler store) {
 
 			/** CANNOT BE USED WITH GETTERS, execution order is invalid, make RCALL <code>
 			final ExecStateCode access = argumentA.vmPropertyRead(ctx, argumentB, BaseObject.UNDEFINED, ResultHandler.FA_BNN_NXT);
@@ -36,10 +34,11 @@ public enum OperationsA3X implements OperationA3X {
 			final BaseFunction callee = candidate.baseCall();
 			if (callee == null) {
 				if (candidate == BaseObject.UNDEFINED) {
-					return ctx.vmRaise((argumentA == ctx
-						? "Context has no property called "
-						: Format.Compact.baseObject(argumentA) + " has no property called ") //
-							+ Format.Compact.baseObject(argumentB));
+					return ctx.vmRaise(
+							(argumentA == ctx
+								? "Context has no property called "
+								: Format.Compact.baseObject(argumentA) + " has no property called ") //
+									+ Format.Compact.baseObject(argumentB));
 				}
 				return ctx.vmRaise("Not a function: key=" + argumentB.baseToString() + ", class=" + candidate.getClass().getName());
 			}
@@ -71,12 +70,8 @@ public enum OperationsA3X implements OperationA3X {
 
 		@Override
 
-		public final ExecStateCode execute(final ExecProcess ctx,
-				final BaseObject argumentA,
-				final BaseObject argumentB,
-				final BaseObject argumentC,
-				final int constant,
-				final ResultHandler store) {
+		public final ExecStateCode
+				execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final BaseObject argumentC, final int constant, final ResultHandler store) {
 
 			/** CANNOT BE USED WITH GETTERS, execution order is invalid, make RCALL <code>
 			final ExecStateCode access = argumentA.vmPropertyRead(ctx, argumentB, BaseObject.UNDEFINED, ResultHandler.FA_BNN_NXT);
@@ -92,10 +87,11 @@ public enum OperationsA3X implements OperationA3X {
 			final BaseFunction callee = candidate.baseCall();
 			if (callee == null) {
 				if (candidate == BaseObject.UNDEFINED) {
-					return ctx.vmRaise((argumentA == ctx
-						? "Context has no property called "
-						: Format.Compact.baseObject(argumentA) + " has no property called ") //
-							+ Format.Compact.baseObject(argumentB));
+					return ctx.vmRaise(
+							(argumentA == ctx
+								? "Context has no property called "
+								: Format.Compact.baseObject(argumentA) + " has no property called ") //
+									+ Format.Compact.baseObject(argumentB));
 				}
 				return ctx.vmRaise("Not a function: key=" + argumentB.baseToString() + ", class=" + candidate.getClass().getName());
 			}
@@ -116,12 +112,8 @@ public enum OperationsA3X implements OperationA3X {
 
 		@Override
 
-		public final ExecStateCode execute(final ExecProcess ctx,
-				final BaseObject argumentA,
-				final BaseObject argumentB,
-				final BaseObject argumentC,
-				final int constant,
-				final ResultHandler store) {
+		public final ExecStateCode
+				execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final BaseObject argumentC, final int constant, final ResultHandler store) {
 
 			final BaseObject value = ExecProcess.vmEnsureNative(argumentC);
 			return argumentA.vmPropertyDefine(ctx, argumentB, value, store);
@@ -139,12 +131,8 @@ public enum OperationsA3X implements OperationA3X {
 
 		@Override
 
-		public final ExecStateCode execute(final ExecProcess ctx,
-				final BaseObject argumentA,
-				final BaseObject argumentB,
-				final BaseObject argumentC,
-				final int constant,
-				final ResultHandler store) {
+		public final ExecStateCode
+				execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final BaseObject argumentC, final int constant, final ResultHandler store) {
 
 			final BaseFunction callee = argumentA.baseCall();
 			if (callee == null) {
@@ -187,14 +175,13 @@ public enum OperationsA3X implements OperationA3X {
 	 * @return */
 	public abstract InstructionResult getResultType();
 
-	InstructionA3X instructionCached(final ModifierArgument modifierFilterA,
+	InstructionIA instructionCached(//
+			final ModifierArgument modifierFilterA,
 			final ModifierArgument modifierFilterB,
 			final ModifierArgument modifierFilterC,
 			final int constant,
 			final ResultHandler store) {
 
-		return InstructionA3X.instructionCached(store == ResultHandler.FA_BNN_NXT
-			? new IA3X_AXXX_ABC_C_NN_NXT(this, modifierFilterA, modifierFilterB, modifierFilterC, constant)
-			: new IA3X_AXXX_ABC_C_XX_XXX(this, modifierFilterA, modifierFilterB, modifierFilterC, constant, store));
+		return InstructionA3X.instructionCached(this.instruction(modifierFilterA, modifierFilterB, modifierFilterC, constant, store));
 	}
 }

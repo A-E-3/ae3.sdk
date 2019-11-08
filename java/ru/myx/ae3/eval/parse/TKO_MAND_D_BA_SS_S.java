@@ -7,7 +7,6 @@
 package ru.myx.ae3.eval.parse;
 
 import ru.myx.ae3.base.BaseObject;
-import ru.myx.ae3.exec.InstructionA10;
 import ru.myx.ae3.exec.InstructionResult;
 import ru.myx.ae3.exec.Instructions;
 import ru.myx.ae3.exec.ModifierArgument;
@@ -18,6 +17,7 @@ import ru.myx.ae3.exec.ResultHandler;
 import ru.myx.ae3.exec.ResultHandlerBasic;
 import ru.myx.ae3.exec.parse.expression.TokenInstruction;
 import ru.myx.ae3.exec.parse.expression.TokenOperator;
+import ru.myx.vm_vliw32_2010.VIFmtA10;
 
 final class TKO_MAND_D_BA_SS_S extends TokenOperator {
 	
@@ -112,13 +112,13 @@ final class TKO_MAND_D_BA_SS_S extends TokenOperator {
 		final BaseObject constantB = argumentB.toConstantValue();
 		if (constantB != null && constantA == null) {
 			final int intB = constantB.baseToJavaInteger();
-			if (intB >= InstructionA10.CNST_MIN && intB <= InstructionA10.CNST_MAX) {
+			if (intB >= VIFmtA10.CNST_MIN && intB <= VIFmtA10.CNST_MAX) {
 				return new TKV_ZMAND(argumentA, intB, 1);
 			}
 		}
 		if (constantA != null && constantB == null) {
 			final int intA = constantA.baseToJavaInteger();
-			if (intA >= InstructionA10.CNST_MIN && intA <= InstructionA10.CNST_MAX) {
+			if (intA >= VIFmtA10.CNST_MIN && intA <= VIFmtA10.CNST_MAX) {
 				return new TKV_ZMAND(argumentB, intA, 1);
 			}
 		}

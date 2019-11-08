@@ -6,6 +6,8 @@ package ru.myx.ae3.exec;
 import ru.myx.ae3.base.BaseFunction;
 import ru.myx.ae3.base.BaseNativeArray;
 import ru.myx.ae3.base.BaseObject;
+import ru.myx.vm_vliw32_2010.InstructionIA;
+import ru.myx.vm_vliw32_2010.OperationA01;
 
 /** Special static optimization opportunities (lack of ModifierArgument stuff, small amount of
  * operations, predictable distribution of 'constant' values) are taken.
@@ -25,13 +27,13 @@ public enum OperationsA01 implements OperationA01 {
 		}
 
 		@Override
-		public final ExecStateCode execute(final ExecProcess process, final int constant, final ResultHandler store) {
+		public final ExecStateCode execute(final ExecProcess ctx, final int constant, final ResultHandler store) {
 
 			assert store instanceof ResultHandlerDirect;
 
 			return constant > 0
-				? process.vmFrameEntryOpCatch(process.ri08IP + 1 + constant)
-				: process.vmRaise("Incorrect frame size!");
+				? ctx.vmFrameEntryOpCatch(ctx.ri08IP + 1 + constant)
+				: ctx.vmRaise("Incorrect frame size!");
 		}
 
 		@Override
@@ -41,7 +43,7 @@ public enum OperationsA01 implements OperationA01 {
 		}
 
 		@Override
-		public final Instruction instruction(final int constant, final ResultHandler store) {
+		public final InstructionIA instruction(final int constant, final ResultHandler store) {
 
 			if (store == ResultHandler.FA_BNN_NXT) {
 				return constant > 0 && constant < 256
@@ -86,7 +88,7 @@ public enum OperationsA01 implements OperationA01 {
 		}
 
 		@Override
-		public final Instruction instruction(final int constant, final ResultHandler store) {
+		public final InstructionIA instruction(final int constant, final ResultHandler store) {
 
 			if (store == ResultHandler.FA_BNN_NXT) {
 				return constant > 0 && constant < 256
@@ -131,7 +133,7 @@ public enum OperationsA01 implements OperationA01 {
 		}
 
 		@Override
-		public final Instruction instruction(final int constant, final ResultHandler store) {
+		public final InstructionIA instruction(final int constant, final ResultHandler store) {
 
 			if (store == ResultHandler.FA_BNN_NXT) {
 				return constant > 0 && constant < 256
@@ -176,7 +178,7 @@ public enum OperationsA01 implements OperationA01 {
 		}
 
 		@Override
-		public final Instruction instruction(final int constant, final ResultHandler store) {
+		public final InstructionIA instruction(final int constant, final ResultHandler store) {
 
 			if (store == ResultHandler.FA_BNN_NXT) {
 				return constant > 0 && constant < 256
@@ -221,7 +223,7 @@ public enum OperationsA01 implements OperationA01 {
 		}
 
 		@Override
-		public final Instruction instruction(final int constant, final ResultHandler store) {
+		public final InstructionIA instruction(final int constant, final ResultHandler store) {
 
 			if (store == ResultHandler.FA_BNN_NXT) {
 				return constant > 0 && constant < 256
@@ -266,7 +268,7 @@ public enum OperationsA01 implements OperationA01 {
 		}
 
 		@Override
-		public final Instruction instruction(final int constant, final ResultHandler store) {
+		public final InstructionIA instruction(final int constant, final ResultHandler store) {
 
 			if (store == ResultHandler.FA_BNN_NXT) {
 				return constant > 0 && constant < 256
@@ -311,7 +313,7 @@ public enum OperationsA01 implements OperationA01 {
 		}
 
 		@Override
-		public final Instruction instruction(final int constant, final ResultHandler store) {
+		public final InstructionIA instruction(final int constant, final ResultHandler store) {
 
 			if (store == ResultHandler.FA_BNN_NXT) {
 				return constant > 0 && constant < 256
@@ -356,7 +358,7 @@ public enum OperationsA01 implements OperationA01 {
 		}
 
 		@Override
-		public final Instruction instruction(final int constant, final ResultHandler store) {
+		public final InstructionIA instruction(final int constant, final ResultHandler store) {
 
 			if (store == ResultHandler.FA_BNN_NXT) {
 				return constant > 0 && constant < 256
@@ -401,7 +403,7 @@ public enum OperationsA01 implements OperationA01 {
 		}
 
 		@Override
-		public final Instruction instruction(final int constant, final ResultHandler store) {
+		public final InstructionIA instruction(final int constant, final ResultHandler store) {
 
 			if (store == ResultHandler.FA_BNN_NXT) {
 				return constant >= 0 && constant < 256
@@ -444,7 +446,7 @@ public enum OperationsA01 implements OperationA01 {
 		}
 
 		@Override
-		public final Instruction instruction(final int constant, final ResultHandler store) {
+		public final InstructionIA instruction(final int constant, final ResultHandler store) {
 
 			if (store == ResultHandler.FA_BNN_NXT) {
 				return constant >= 0 && constant < 256
@@ -502,7 +504,7 @@ public enum OperationsA01 implements OperationA01 {
 		}
 
 		@Override
-		public Instruction instruction(final int constant, final ResultHandler store) {
+		public InstructionIA instruction(final int constant, final ResultHandler store) {
 
 			if (store == ResultHandler.FA_BNN_NXT) {
 				return constant >= 0 && constant < 256
@@ -567,7 +569,7 @@ public enum OperationsA01 implements OperationA01 {
 		}
 
 		@Override
-		public Instruction instruction(final int constant, final ResultHandler store) {
+		public InstructionIA instruction(final int constant, final ResultHandler store) {
 
 			if (store == ResultHandler.FA_BNN_NXT) {
 				return constant >= 0 && constant < 256
@@ -632,7 +634,7 @@ public enum OperationsA01 implements OperationA01 {
 		}
 
 		@Override
-		public Instruction instruction(final int constant, final ResultHandler store) {
+		public InstructionIA instruction(final int constant, final ResultHandler store) {
 
 			if (store == ResultHandler.FA_BNN_NXT) {
 				return constant >= 0 && constant < 256
@@ -697,7 +699,7 @@ public enum OperationsA01 implements OperationA01 {
 		}
 
 		@Override
-		public Instruction instruction(final int constant, final ResultHandler store) {
+		public InstructionIA instruction(final int constant, final ResultHandler store) {
 
 			if (store == ResultHandler.FA_BNN_NXT) {
 				return constant >= 0 && constant < 256
@@ -798,15 +800,15 @@ public enum OperationsA01 implements OperationA01 {
 			return true;
 		}
 	},
-	
+
 	/**
 	 *
 	 */
 	XRCALLA {
-		
+
 		@Override
 		public final ExecStateCode execute(final ExecProcess ctx, final int constant, final ResultHandler store) {
-			
+
 			switch (constant) {
 				case 0 : {
 					final BaseFunction callee = ctx.stackPop().baseCall();
@@ -837,7 +839,7 @@ public enum OperationsA01 implements OperationA01 {
 				}
 				default : {
 					final BaseNativeArray array = new BaseNativeArray(constant);
-					final BaseObject[] stack = ctx.fldStack;
+					final BaseObject[] stack = ctx.stackRaw();
 					final int rASP = ctx.ri0ASP;
 					for (int i = constant; i > 0; --i) {
 						array.putAppend(stack[rASP - i]);
@@ -853,16 +855,16 @@ public enum OperationsA01 implements OperationA01 {
 				}
 			}
 		}
-		
+
 		@Override
 		public final InstructionResult getResultType() {
-			
+
 			return InstructionResult.OBJECT;
 		}
-		
+
 		@Override
 		public final int getStackInputCount(final int constant) {
-			
+
 			return constant + 2;
 		}
 	},
@@ -877,7 +879,9 @@ public enum OperationsA01 implements OperationA01 {
 	 * @return */
 	public abstract InstructionResult getResultType();
 
-	final Instruction instructionCached(final int constant, final ResultHandler store) {
+	final Instruction instructionCached(//
+			final int constant,
+			final ResultHandler store) {
 
 		return InstructionA01.instructionCached(this.instruction(constant, store));
 	}

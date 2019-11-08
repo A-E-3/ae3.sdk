@@ -18,6 +18,7 @@ public final class IAVV_ARGS_SETUP implements Instruction {
 	 *            (NULL is unknown or hidden)
 	 * @param arguments */
 	public IAVV_ARGS_SETUP(final String calleeName, final BasePrimitiveString[] arguments) {
+
 		assert arguments != null : "Use CSCOPE instruction for NULL arguments";
 		assert calleeName != null || arguments.length > 0 : "Use CSCOPE instruction for zero arguments and no calleeName";
 		this.calleeName = calleeName == null
@@ -30,6 +31,7 @@ public final class IAVV_ARGS_SETUP implements Instruction {
 	 *            (NULL is unknown or hidden)
 	 * @param arguments */
 	public IAVV_ARGS_SETUP(final String calleeName, final String[] arguments) {
+
 		assert arguments != null : "Use CSCOPE instruction for NULL arguments";
 		assert calleeName != null || arguments.length > 0 : "Use CSCOPE instruction for zero arguments and no calleeName";
 		this.calleeName = calleeName == null

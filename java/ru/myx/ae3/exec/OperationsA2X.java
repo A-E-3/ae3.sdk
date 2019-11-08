@@ -15,6 +15,8 @@ import ru.myx.ae3.base.BaseProperty;
 import ru.myx.ae3.base.ToPrimitiveHint;
 import ru.myx.ae3.ecma.compare.ComparatorEcma;
 import ru.myx.ae3.help.Format;
+import ru.myx.vm_vliw32_2010.InstructionIA;
+import ru.myx.vm_vliw32_2010.OperationA2X;
 
 /** @author myx */
 public enum OperationsA2X implements OperationA2X {
@@ -22,11 +24,11 @@ public enum OperationsA2X implements OperationA2X {
 	 *
 	 */
 	XACALLS {
-
+		
 		@Override
 		
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
-
+			
 			assert argumentA != ctx || ctx == ctx.rb4CT : "Use FCALLS then";
 			
 			/** CANNOT BE USED WITH GETTERS, execution order is invalid, make RCALL <code>
@@ -35,11 +37,11 @@ public enum OperationsA2X implements OperationA2X {
 				// TODO: check if code should be analyzed
 				return access;
 			}
-
+			
 			final BaseObject candidate = ctx.ra0RB;
 			</code> */
 			final BaseObject candidate = argumentA.baseGet(argumentB, BaseObject.UNDEFINED);
-
+			
 			final BaseFunction callee = candidate.baseCall();
 			if (callee == null) {
 				if (candidate == BaseObject.UNDEFINED) {
@@ -57,19 +59,19 @@ public enum OperationsA2X implements OperationA2X {
 		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return InstructionResult.OBJECT;
 		}
 		
 		@Override
 		public final int getStackInputCount(final int constant) {
-
+			
 			return constant;
 		}
 		
 		@Override
 		public final boolean isConstantForArguments() {
-
+			
 			return false;
 		}
 	},
@@ -77,30 +79,30 @@ public enum OperationsA2X implements OperationA2X {
 	 *
 	 * always detach-able (LOAD is used for frame access) */
 	XACCESS_D {
-
+		
 		@Override
 		public OperationA2X execNativeResult() {
-
+			
 			return OperationsS2X.VACCESS_NA;
 		}
 		
 		@Override
 		
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
-
+			
 			assert argumentA != ctx : "Use LOAD";
 			return argumentA.vmPropertyRead(ctx, argumentB, BaseObject.UNDEFINED, store);
 		}
 		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return InstructionResult.OBJECT;
 		}
 		
 		@Override
 		public final boolean isConstantForArguments() {
-
+			
 			return false;
 		}
 	},
@@ -108,23 +110,23 @@ public enum OperationsA2X implements OperationA2X {
 	 *
 	 */
 	XADELETE {
-
+		
 		@Override
 		
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
-
+			
 			return store.execReturnBoolean(ctx, argumentA.baseDelete(argumentB));
 		}
 		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return InstructionResult.BOOLEAN;
 		}
 		
 		@Override
 		public final boolean isConstantForArguments() {
-
+			
 			return false;
 		}
 	},
@@ -145,12 +147,12 @@ public enum OperationsA2X implements OperationA2X {
 	 * • If either operand is NaN, the result is NaN. */
 	/** add & store then get */
 	XASADDGET {
-
+		
 		@SuppressWarnings("unchecked")
 		@Override
 		
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
-
+			
 			final BasePrimitive<?> keyPrimitive = argumentB.baseToPrimitive(null);
 			if (keyPrimitive.baseIsPrimitiveInteger()) {
 				final BaseArray array = argumentA.baseArray();
@@ -184,13 +186,13 @@ public enum OperationsA2X implements OperationA2X {
 		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return InstructionResult.NUMBER;
 		}
 		
 		@Override
 		public final boolean isConstantForArguments() {
-
+			
 			return false;
 		}
 	},
@@ -211,12 +213,12 @@ public enum OperationsA2X implements OperationA2X {
 	 * • If either operand is NaN, the result is NaN. */
 	/** get then add & store */
 	XASGETADD {
-
+		
 		@SuppressWarnings("unchecked")
 		@Override
 		
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
-
+			
 			final BasePrimitive<?> keyPrimitive = argumentB.baseToPrimitive(null);
 			if (keyPrimitive.baseIsPrimitiveInteger()) {
 				final BaseArray array = argumentA.baseArray();
@@ -250,13 +252,13 @@ public enum OperationsA2X implements OperationA2X {
 		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return InstructionResult.NUMBER;
 		}
 		
 		@Override
 		public final boolean isConstantForArguments() {
-
+			
 			return false;
 		}
 	},
@@ -264,23 +266,23 @@ public enum OperationsA2X implements OperationA2X {
 	 *
 	 */
 	XBEQU {
-
+		
 		@Override
 		
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
-
+			
 			return store.execReturnBoolean(ctx, BaseObject.equalsNative(argumentA, argumentB));
 		}
 		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return InstructionResult.BOOLEAN;
 		}
 		
 		@Override
 		public final boolean isConstantForArguments() {
-
+			
 			return true;
 		}
 	},
@@ -296,11 +298,11 @@ public enum OperationsA2X implements OperationA2X {
 	 * 6. Return the result of calling the [[HasProperty]] internal method of rval with argument
 	 * ToString(lval). */
 	XBIN {
-
+		
 		@Override
 		
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
-
+			
 			final BasePrimitive<?> primitiveA = argumentA.baseToPrimitive(null);
 			if (primitiveA.baseIsPrimitiveInteger()) {
 				final BaseArray array = argumentB.baseArray();
@@ -320,13 +322,13 @@ public enum OperationsA2X implements OperationA2X {
 		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return InstructionResult.BOOLEAN;
 		}
 		
 		@Override
 		public final boolean isConstantForArguments() {
-
+			
 			return true;
 		}
 	},
@@ -343,11 +345,11 @@ public enum OperationsA2X implements OperationA2X {
 	 * 7. Return the result of calling the [[HasInstance]] internal method of rval with argument
 	 * lval. */
 	XBINSTOF {
-
+		
 		@Override
 		
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
-
+			
 			final Object rightHand = argumentB.baseValue();
 			/** Can be java class with no constructor, abstract one or even an interface. */
 			if (rightHand instanceof Class) {
@@ -370,13 +372,13 @@ public enum OperationsA2X implements OperationA2X {
 		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return InstructionResult.BOOLEAN;
 		}
 		
 		@Override
 		public final boolean isConstantForArguments() {
-
+			
 			return true;
 		}
 	},
@@ -384,23 +386,23 @@ public enum OperationsA2X implements OperationA2X {
 	 *
 	 */
 	XBLESS {
-
+		
 		@Override
 		
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
-
+			
 			return store.execReturnBoolean(ctx, ComparatorEcma.compareLESS(argumentA, argumentB));
 		}
 		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return InstructionResult.BOOLEAN;
 		}
 		
 		@Override
 		public final boolean isConstantForArguments() {
-
+			
 			return true;
 		}
 	},
@@ -408,23 +410,23 @@ public enum OperationsA2X implements OperationA2X {
 	 *
 	 */
 	XBMORE {
-
+		
 		@Override
 		
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
-
+			
 			return store.execReturnBoolean(ctx, ComparatorEcma.compareMORE(argumentA, argumentB));
 		}
 		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return InstructionResult.BOOLEAN;
 		}
 		
 		@Override
 		public final boolean isConstantForArguments() {
-
+			
 			return true;
 		}
 	},
@@ -432,23 +434,23 @@ public enum OperationsA2X implements OperationA2X {
 	 *
 	 */
 	XBNEQU {
-
+		
 		@Override
 		
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
-
+			
 			return store.execReturnBoolean(ctx, !BaseObject.equalsNative(argumentA, argumentB));
 		}
 		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return InstructionResult.BOOLEAN;
 		}
 		
 		@Override
 		public final boolean isConstantForArguments() {
-
+			
 			return true;
 		}
 	},
@@ -456,23 +458,23 @@ public enum OperationsA2X implements OperationA2X {
 	 *
 	 */
 	XBNLESS {
-
+		
 		@Override
 		
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
-
+			
 			return store.execReturnBoolean(ctx, ComparatorEcma.compareNLESS(argumentA, argumentB));
 		}
 		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return InstructionResult.BOOLEAN;
 		}
 		
 		@Override
 		public final boolean isConstantForArguments() {
-
+			
 			return true;
 		}
 	},
@@ -480,23 +482,23 @@ public enum OperationsA2X implements OperationA2X {
 	 *
 	 */
 	XBNMORE {
-
+		
 		@Override
 		
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
-
+			
 			return store.execReturnBoolean(ctx, ComparatorEcma.compareNMORE(argumentA, argumentB));
 		}
 		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return InstructionResult.BOOLEAN;
 		}
 		
 		@Override
 		public final boolean isConstantForArguments() {
-
+			
 			return true;
 		}
 	},
@@ -524,11 +526,11 @@ public enum OperationsA2X implements OperationA2X {
 	 * <p>
 	 */
 	XBSEQU {
-
+		
 		@Override
 		
 		public final ExecStateCode execute(final ExecProcess ctx, BaseObject argumentA, BaseObject argumentB, final int constant, final ResultHandler store) {
-
+			
 			loop : for (;;) {
 				if (argumentA == BasePrimitiveNumber.NAN || argumentB == BasePrimitiveNumber.NAN) {
 					return store.execReturnFalse(ctx);
@@ -587,13 +589,13 @@ public enum OperationsA2X implements OperationA2X {
 		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return InstructionResult.BOOLEAN;
 		}
 		
 		@Override
 		public final boolean isConstantForArguments() {
-
+			
 			return true;
 		}
 	},
@@ -621,11 +623,11 @@ public enum OperationsA2X implements OperationA2X {
 	 * <p>
 	 */
 	XBSNEQU {
-
+		
 		@Override
 		
 		public final ExecStateCode execute(final ExecProcess ctx, BaseObject argumentA, BaseObject argumentB, final int constant, final ResultHandler store) {
-
+			
 			loop : for (;;) {
 				if (argumentA == BasePrimitiveNumber.NAN || argumentB == BasePrimitiveNumber.NAN) {
 					return store.execReturnTrue(ctx);
@@ -684,13 +686,13 @@ public enum OperationsA2X implements OperationA2X {
 		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return InstructionResult.BOOLEAN;
 		}
 		
 		@Override
 		public final boolean isConstantForArguments() {
-
+			
 			return true;
 		}
 	},
@@ -698,23 +700,23 @@ public enum OperationsA2X implements OperationA2X {
 	 *
 	 */
 	XEBOR_T {
-
+		
 		@Override
 		public OperationA2X execNativeResult() {
-
+			
 			return OperationsS2X.VEBOR_N;
 		}
 		
 		@Override
 		public OperationA2X execStackResult() {
-
+			
 			return OperationsS2X.VEBOR_D;
 		}
 		
 		@Override
 		
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
-
+			
 			switch (constant) {
 				/** return first argument if it is JS-boolean true, return second argument
 				 * otherwise. */
@@ -749,13 +751,13 @@ public enum OperationsA2X implements OperationA2X {
 		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return InstructionResult.OBJECT;
 		}
 		
 		@Override
 		public final boolean isConstantForArguments() {
-
+			
 			return true;
 		}
 	},
@@ -763,11 +765,11 @@ public enum OperationsA2X implements OperationA2X {
 	 *
 	 */
 	XFCALLM {
-
+		
 		@Override
 		
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
-
+			
 			final BaseFunction callee = argumentA.baseCall();
 			if (callee == null) {
 				if (argumentA == BaseObject.UNDEFINED) {
@@ -793,13 +795,13 @@ public enum OperationsA2X implements OperationA2X {
 		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return InstructionResult.OBJECT;
 		}
 		
 		@Override
 		public final boolean isConstantForArguments() {
-
+			
 			return false;
 		}
 	},
@@ -807,11 +809,11 @@ public enum OperationsA2X implements OperationA2X {
 	 *
 	 */
 	XFCALLO {
-
+		
 		@Override
 		
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
-
+			
 			final BaseFunction callee = argumentA.baseCall();
 			if (callee == null) {
 				if (argumentA == BaseObject.UNDEFINED) {
@@ -825,13 +827,13 @@ public enum OperationsA2X implements OperationA2X {
 		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return InstructionResult.OBJECT;
 		}
 		
 		@Override
 		public final boolean isConstantForArguments() {
-
+			
 			return false;
 		}
 	},
@@ -839,23 +841,23 @@ public enum OperationsA2X implements OperationA2X {
 	 *
 	 */
 	XFDECLARE_D {
-
+		
 		@Override
 		public OperationA2X execNativeResult() {
-
+			
 			return OperationsS2X.VFDECLARE_N;
 		}
 		
 		@Override
 		public OperationA2X execStackResult() {
-
+			
 			return OperationsA2X.XFDECLARE_D;
 		}
 		
 		@Override
 		
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
-
+			
 			final BaseObject value = ExecProcess.vmEnsureDetached(ctx, argumentB);
 			
 			ctx.contextCreateMutableBinding(argumentA, value, false);
@@ -865,13 +867,13 @@ public enum OperationsA2X implements OperationA2X {
 		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return InstructionResult.OBJECT;
 		}
 		
 		@Override
 		public final boolean isConstantForArguments() {
-
+			
 			return false;
 		}
 	},
@@ -892,23 +894,23 @@ public enum OperationsA2X implements OperationA2X {
 	 * nor to a non-existent property of an object whose [[Extensible]] internal property has the
 	 * value false. In these cases a TypeError exception is thrown. * */
 	XFSTORE_D {
-
+		
 		@Override
 		public OperationA2X execNativeResult() {
-
+			
 			return OperationsS2X.VFSTORE_N;
 		}
 		
 		@Override
 		public OperationA2X execStackResult() {
-
+			
 			return OperationsA2X.XFSTORE_D;
 		}
 		
 		@Override
 		
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
-
+			
 			final BaseObject value = ExecProcess.vmEnsureDetached(ctx, argumentB);
 			
 			ctx.contextSetMutableBinding(argumentA, value, false);
@@ -918,17 +920,16 @@ public enum OperationsA2X implements OperationA2X {
 		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return InstructionResult.OBJECT;
 		}
 		
 		@Override
-		
-		public Instruction instruction(final BaseObject constantArgumentA, final ModifierArgument defaultArgumentA, final ModifierArgument argumentB, final int constant) {
-
+		public InstructionIA instruction(final BaseObject constantArgumentA, final ModifierArgument defaultArgumentA, final ModifierArgument argumentB, final int constant) {
+			
 			/** Don't really care about constant for this OP */
 			// if (constant == 0) {
-			return new IA2X_VFSTORE_SB_X_NN_NXT(constantArgumentA.baseToString(), argumentB);
+			return new IA2_VFSTORE_SB_X_NN_NXT(constantArgumentA.baseToString(), argumentB);
 			// }
 			
 			// return super.instruction(constantArgumentA, defaultArgumentA,
@@ -936,18 +937,17 @@ public enum OperationsA2X implements OperationA2X {
 		}
 		
 		@Override
-		
-		public Instruction instruction(final BaseObject constantArgumentA,
+		public InstructionIA instruction(final BaseObject constantArgumentA,
 				final ModifierArgument defaultArgumentA,
 				final ModifierArgument argumentB,
 				final int constant,
 				final ResultHandler store) {
-
+			
 			/** Don't really care about constant for this OP */
 			// if (constant == 0) {
 			return store == ResultHandler.FA_BNN_NXT
-				? new IA2X_VFSTORE_SB_X_NN_NXT(constantArgumentA.baseToString(), argumentB)
-				: new IA2X_VFSTORE_SB_X_XX_XXX(constantArgumentA.baseToString(), argumentB, store);
+				? new IA2_VFSTORE_SB_X_NN_NXT(constantArgumentA.baseToString(), argumentB)
+				: new IA2_VFSTORE_SB_X_XX_XXX(constantArgumentA.baseToString(), argumentB, store);
 			// }
 			
 			// return super.instruction(constantArgumentA, defaultArgumentA,
@@ -956,7 +956,7 @@ public enum OperationsA2X implements OperationA2X {
 		
 		@Override
 		public final boolean isConstantForArguments() {
-
+			
 			return false;
 		}
 		
@@ -1030,32 +1030,32 @@ public enum OperationsA2X implements OperationA2X {
 	 * Date objects handle the absence of a hint as if the hint String were given. Host objects may
 	 * handle the absence of a hint in some other manner. */
 	XMADD_T {
-
+		
 		@Override
 		public OperationA2X execNativeResult() {
-
+			
 			return OperationsS2X.VMADD_N;
 		}
 		
 		@Override
 		public OperationA2X execStackResult() {
-
+			
 			return OperationsS2X.VMADD_D;
 		}
 		
 		@Override
 		
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
-
+			
 			if (argumentA instanceof CharSequence) {
 				return store.execReturnString(ctx, argumentA.baseToJavaString() + argumentB.baseToJavaString());
 			}
-
+			
 			final BasePrimitive<?> additive = argumentA.baseToPrimitive(null);
 			if (argumentB instanceof CharSequence) {
 				return store.execReturnString(ctx, additive.stringValue() + argumentB.toString());
 			}
-
+			
 			final BasePrimitive<?> multiplicative = argumentB.baseToPrimitive(null);
 			
 			return additive instanceof CharSequence || multiplicative instanceof CharSequence
@@ -1069,13 +1069,13 @@ public enum OperationsA2X implements OperationA2X {
 		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return InstructionResult.OBJECT;
 		}
 		
 		@Override
 		public final boolean isConstantForArguments() {
-
+			
 			return true;
 		}
 	},
@@ -1092,23 +1092,23 @@ public enum OperationsA2X implements OperationA2X {
 	 * integer.<br>
 	 * 8. Return Result(7). */
 	XMAND_T {
-
+		
 		@Override
 		public OperationA2X execNativeResult() {
-
+			
 			return OperationsS2X.VMBAND_N;
 		}
 		
 		@Override
 		public OperationA2X execStackResult() {
-
+			
 			return OperationsS2X.VMBAND_D;
 		}
 		
 		@Override
 		
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
-
+			
 			final int valueA = argumentA.baseToJavaInteger();
 			final int valueB = argumentB.baseToJavaInteger();
 			return store.execReturnNumeric(ctx, valueA & valueB);
@@ -1116,13 +1116,13 @@ public enum OperationsA2X implements OperationA2X {
 		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return InstructionResult.INTEGER;
 		}
 		
 		@Override
 		public final boolean isConstantForArguments() {
-
+			
 			return true;
 		}
 	},
@@ -1139,23 +1139,23 @@ public enum OperationsA2X implements OperationA2X {
 	 * integer.<br>
 	 * 8. Return Result(7). */
 	XMBOR_T {
-
+		
 		@Override
 		public OperationA2X execNativeResult() {
-
+			
 			return OperationsS2X.VMBOR_N;
 		}
 		
 		@Override
 		public OperationA2X execStackResult() {
-
+			
 			return OperationsS2X.VMBOR_D;
 		}
 		
 		@Override
 		
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
-
+			
 			final int valueA = argumentA.baseToJavaInteger();
 			final int valueB = argumentB.baseToJavaInteger();
 			return store.execReturnNumeric(ctx, valueA | valueB);
@@ -1163,13 +1163,13 @@ public enum OperationsA2X implements OperationA2X {
 		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return InstructionResult.INTEGER;
 		}
 		
 		@Override
 		public final boolean isConstantForArguments() {
-
+			
 			return true;
 		}
 	},
@@ -1192,23 +1192,23 @@ public enum OperationsA2X implements OperationA2X {
 	 * 9. Return Result(8). <br>
 	 */
 	XMBSHL_T {
-
+		
 		@Override
 		public OperationA2X execNativeResult() {
-
+			
 			return OperationsS2X.VMBSHL_N;
 		}
 		
 		@Override
 		public OperationA2X execStackResult() {
-
+			
 			return OperationsS2X.VMBSHL_D;
 		}
 		
 		@Override
 		
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
-
+			
 			final int shift = argumentA.baseToJavaInteger();
 			final int additive = argumentB.baseToJavaInteger();
 			return store.execReturnNumeric(ctx, shift << (additive & 0x1F));
@@ -1216,13 +1216,13 @@ public enum OperationsA2X implements OperationA2X {
 		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return InstructionResult.INTEGER;
 		}
 		
 		@Override
 		public final boolean isConstantForArguments() {
-
+			
 			return true;
 		}
 	},
@@ -1246,23 +1246,23 @@ public enum OperationsA2X implements OperationA2X {
 	 * 9. Return Result(8). <br>
 	 */
 	XMBSHRS_T {
-
+		
 		@Override
 		public OperationA2X execNativeResult() {
-
+			
 			return OperationsS2X.VMBSHRS_N;
 		}
 		
 		@Override
 		public OperationA2X execStackResult() {
-
+			
 			return OperationsS2X.VMBSHRS_D;
 		}
 		
 		@Override
 		
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
-
+			
 			final int shift = argumentA.baseToJavaInteger();
 			final int additive = argumentB.baseToJavaInteger();
 			return store.execReturnNumeric(ctx, shift >> (additive & 0x1F));
@@ -1270,13 +1270,13 @@ public enum OperationsA2X implements OperationA2X {
 		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return InstructionResult.INTEGER;
 		}
 		
 		@Override
 		public final boolean isConstantForArguments() {
-
+			
 			return true;
 		}
 	},
@@ -1300,23 +1300,23 @@ public enum OperationsA2X implements OperationA2X {
 	 * 9. Return Result(8). <br>
 	 */
 	XMBSHRU_T {
-
+		
 		@Override
 		public OperationA2X execNativeResult() {
-
+			
 			return OperationsS2X.VMBSHRU_N;
 		}
 		
 		@Override
 		public OperationA2X execStackResult() {
-
+			
 			return OperationsS2X.VMBSHRU_D;
 		}
 		
 		@Override
 		
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
-
+			
 			final int shift = argumentA.baseToJavaInteger();
 			final int additive = argumentB.baseToJavaInteger();
 			return store.execReturnNumeric(ctx, shift >>> (additive & 0x1F));
@@ -1324,13 +1324,13 @@ public enum OperationsA2X implements OperationA2X {
 		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return InstructionResult.INTEGER;
 		}
 		
 		@Override
 		public final boolean isConstantForArguments() {
-
+			
 			return true;
 		}
 	},
@@ -1347,23 +1347,23 @@ public enum OperationsA2X implements OperationA2X {
 	 * integer.<br>
 	 * 8. Return Result(7). */
 	XMBXOR_T {
-
+		
 		@Override
 		public OperationA2X execNativeResult() {
-
+			
 			return OperationsS2X.VMBXOR_N;
 		}
 		
 		@Override
 		public OperationA2X execStackResult() {
-
+			
 			return OperationsS2X.VMBXOR_D;
 		}
 		
 		@Override
 		
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
-
+			
 			final int valueA = argumentA.baseToJavaInteger();
 			final int valueB = argumentB.baseToJavaInteger();
 			return store.execReturnNumeric(ctx, valueA ^ valueB);
@@ -1371,13 +1371,13 @@ public enum OperationsA2X implements OperationA2X {
 		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return InstructionResult.INTEGER;
 		}
 		
 		@Override
 		public final boolean isConstantForArguments() {
-
+			
 			return true;
 		}
 	},
@@ -1433,28 +1433,28 @@ public enum OperationsA2X implements OperationA2X {
 	 * 8. Return Result(7). <br>
 	 */
 	XMDIV_T {
-
+		
 		@Override
 		public OperationA2X execNativeResult() {
-
+			
 			return OperationsS2X.VMDIV_N;
 		}
 		
 		@Override
 		public OperationA2X execStackResult() {
-
+			
 			return OperationsS2X.VMDIV_D;
 		}
 		
 		@Override
 		
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
-
+			
 			final BasePrimitive<?> dividend = argumentA.baseToPrimitive(ToPrimitiveHint.NUMBER);
 			if (dividend == BasePrimitiveNumber.NAN) {
 				return store.execReturn(ctx, dividend);
 			}
-
+			
 			final BasePrimitive<?> divisor = argumentB.baseToPrimitive(ToPrimitiveHint.NUMBER);
 			if (divisor == BasePrimitiveNumber.NAN) {
 				return store.execReturn(ctx, divisor);
@@ -1465,13 +1465,13 @@ public enum OperationsA2X implements OperationA2X {
 		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return InstructionResult.NUMBER;
 		}
 		
 		@Override
 		public final boolean isConstantForArguments() {
-
+			
 			return true;
 		}
 	},
@@ -1526,28 +1526,28 @@ public enum OperationsA2X implements OperationA2X {
 	 * 8. Return Result(7). <br>
 	 */
 	XMMOD_T {
-
+		
 		@Override
 		public OperationA2X execNativeResult() {
-
+			
 			return OperationsS2X.VMMOD_N;
 		}
 		
 		@Override
 		public OperationA2X execStackResult() {
-
+			
 			return OperationsS2X.VMMOD_D;
 		}
 		
 		@Override
 		
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
-
+			
 			final BasePrimitive<?> dividend = argumentA.baseToPrimitive(ToPrimitiveHint.NUMBER);
 			if (dividend == BasePrimitiveNumber.NAN) {
 				return store.execReturn(ctx, dividend);
 			}
-
+			
 			final BasePrimitive<?> divisor = argumentB.baseToPrimitive(ToPrimitiveHint.NUMBER);
 			if (divisor == BasePrimitiveNumber.NAN) {
 				return store.execReturn(ctx, divisor);
@@ -1558,13 +1558,13 @@ public enum OperationsA2X implements OperationA2X {
 		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return InstructionResult.NUMBER;
 		}
 		
 		@Override
 		public final boolean isConstantForArguments() {
-
+			
 			return true;
 		}
 	},
@@ -1609,28 +1609,28 @@ public enum OperationsA2X implements OperationA2X {
 	 * 8. Return Result(7). <br>
 	 */
 	XMMUL_T {
-
+		
 		@Override
 		public OperationA2X execNativeResult() {
-
+			
 			return OperationsS2X.VMMUL_N;
 		}
 		
 		@Override
 		public OperationA2X execStackResult() {
-
+			
 			return OperationsS2X.VMMUL_D;
 		}
 		
 		@Override
 		
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
-
+			
 			final BasePrimitive<?> multiplicative = argumentA.baseToPrimitive(ToPrimitiveHint.NUMBER);
 			if (multiplicative == BasePrimitiveNumber.NAN) {
 				return store.execReturn(ctx, multiplicative);
 			}
-
+			
 			final BasePrimitive<?> unary = argumentB.baseToPrimitive(ToPrimitiveHint.NUMBER);
 			if (unary == BasePrimitiveNumber.NAN) {
 				return store.execReturn(ctx, unary);
@@ -1641,13 +1641,13 @@ public enum OperationsA2X implements OperationA2X {
 		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return InstructionResult.NUMBER;
 		}
 		
 		@Override
 		public final boolean isConstantForArguments() {
-
+			
 			return true;
 		}
 	},
@@ -1655,28 +1655,28 @@ public enum OperationsA2X implements OperationA2X {
 	 *
 	 */
 	XMPOW_T {
-
+		
 		@Override
 		public OperationA2X execNativeResult() {
-
+			
 			return OperationsS2X.VMPOW_N;
 		}
 		
 		@Override
 		public OperationA2X execStackResult() {
-
+			
 			return OperationsS2X.VMPOW_D;
 		}
 		
 		@Override
 		
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
-
+			
 			final BasePrimitive<?> multiplicative = argumentA.baseToPrimitive(ToPrimitiveHint.NUMBER);
 			if (multiplicative == BasePrimitiveNumber.NAN) {
 				return store.execReturn(ctx, multiplicative);
 			}
-
+			
 			final BasePrimitive<?> unary = argumentB.baseToPrimitive(ToPrimitiveHint.NUMBER);
 			if (unary == BasePrimitiveNumber.NAN) {
 				return store.execReturn(ctx, unary);
@@ -1687,13 +1687,13 @@ public enum OperationsA2X implements OperationA2X {
 		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return InstructionResult.NUMBER;
 		}
 		
 		@Override
 		public final boolean isConstantForArguments() {
-
+			
 			return true;
 		}
 	},
@@ -1755,29 +1755,29 @@ public enum OperationsA2X implements OperationA2X {
 	 * <p>
 	 */
 	XMSUB_T {
-
+		
 		@Override
 		public OperationA2X execNativeResult() {
-
+			
 			return OperationsS2X.VMSUB_N;
 		}
 		
 		@Override
 		public OperationA2X execStackResult() {
-
+			
 			return OperationsS2X.VMSUB_D;
 		}
 		
 		@Override
 		
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
-
+			
 			final BasePrimitive<?> additive = argumentA.baseToPrimitive(ToPrimitiveHint.NUMBER);
 			// final BasePrimitiveNumber additive = argumentA.baseToNumber();
 			if (additive == BasePrimitiveNumber.NAN) {
 				return store.execReturn(ctx, additive);
 			}
-
+			
 			final BasePrimitive<?> multiplicative = argumentB.baseToPrimitive(ToPrimitiveHint.NUMBER);
 			// final BasePrimitiveNumber multiplicative =
 			// argumentB.baseToNumber();
@@ -1789,36 +1789,36 @@ public enum OperationsA2X implements OperationA2X {
 		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return InstructionResult.NUMBER;
 		}
 		
 		@Override
 		public final boolean isConstantForArguments() {
-
+			
 			return true;
 		}
 	},
 	/** macro ACALL RT, a, b */
 	ZTCALLM {
-
+		
 		@Override
 		
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentB, final BaseObject argumentC, final int constant, final ResultHandler store) {
-
+			
 			final BaseObject argumentA = ctx.rb4CT;
-
+			
 			/** CANNOT BE USED WITH GETTERS, execution order is invalid, make RCALL <code>
 			final ExecStateCode access = argumentA.vmPropertyRead(ctx, argumentB, BaseObject.UNDEFINED, ResultHandler.FA_BNN_NXT);
 			if (access != null) {
 				// TODO: check if code should be analyzed
 				return access;
 			}
-
+			
 			final BaseObject candidate = ctx.ra0RB;
 			</code> */
 			final BaseObject candidate = argumentA.baseGet(argumentB, BaseObject.UNDEFINED);
-
+			
 			final BaseFunction callee = candidate.baseCall();
 			if (callee == null) {
 				if (candidate == BaseObject.UNDEFINED) {
@@ -1847,23 +1847,23 @@ public enum OperationsA2X implements OperationA2X {
 		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return InstructionResult.OBJECT;
 		}
 		
 		@Override
 		public final boolean isConstantForArguments() {
-
+			
 			return false;
 		}
 	},
 	/** macro ACALLO RT, a, b */
 	ZTCALLO {
-
+		
 		@Override
 		
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentB, final BaseObject argumentC, final int constant, final ResultHandler store) {
-
+			
 			final BaseObject argumentA = ctx.rb4CT;
 			
 			/** CANNOT BE USED WITH GETTERS, execution order is invalid, make RCALL <code>
@@ -1893,36 +1893,36 @@ public enum OperationsA2X implements OperationA2X {
 		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return InstructionResult.OBJECT;
 		}
 		
 		@Override
 		public final boolean isConstantForArguments() {
-
+			
 			return false;
 		}
 	},
 	/** macro ASTORE RT, a, b */
 	ZTSTORE {
-
+		
 		@Override
 		
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentB, final BaseObject argumentC, final int constant, final ResultHandler store) {
-
+			
 			final BaseObject value = ExecProcess.vmEnsureNative(argumentC);
 			return ctx.rb4CT.vmPropertyDefine(ctx, argumentB, value, store);
 		}
 		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return InstructionResult.OBJECT;
 		}
 		
 		@Override
 		public final boolean isConstantForArguments() {
-
+			
 			return false;
 		}
 	},;
@@ -1930,21 +1930,21 @@ public enum OperationsA2X implements OperationA2X {
 	@Override
 	
 	public OperationA2X execDirectResult() {
-
+		
 		return this;
 	}
 	
 	@Override
 	
 	public OperationA2X execNativeResult() {
-
+		
 		return this;
 	}
 	
 	@Override
 	
 	public OperationA2X execStackResult() {
-
+		
 		return this;
 	}
 	
@@ -1952,9 +1952,13 @@ public enum OperationsA2X implements OperationA2X {
 	 *
 	 * @return */
 	public abstract InstructionResult getResultType();
-
-	Instruction instructionCached(final ModifierArgument argumentA, final ModifierArgument argumentB, final int constant, final ResultHandler store) {
-
+	
+	Instruction instructionCached(//
+			final ModifierArgument argumentA,
+			final ModifierArgument argumentB,
+			final int constant,
+			final ResultHandler store) {
+		
 		return InstructionA2X.instructionCached(this.instruction(argumentA, argumentB, constant, store));
 	}
 }

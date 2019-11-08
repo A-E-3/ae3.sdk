@@ -69,6 +69,7 @@ public final class ExecArgumentsMapX extends ExecArgumentsAbstract implements Ba
 	/** @param arguments */
 	@ReflectionHidden
 	public ExecArgumentsMapX(final BaseObject arguments) {
+
 		assert Base.hasKeys(arguments) : "Expected to have own properties!";
 		ExecArgumentsMapX.COUNT++;
 		final BaseArray array = arguments.baseArray();
@@ -99,6 +100,7 @@ public final class ExecArgumentsMapX extends ExecArgumentsAbstract implements Ba
 	 * @param length */
 	@ReflectionHidden
 	public ExecArgumentsMapX(final ExecArguments arguments, final int length) {
+
 		ExecArgumentsMapX.COUNT++;
 		this.argument = new BaseObject[length];
 		for (int i = length - 1; i >= 0; --i) {
@@ -117,6 +119,7 @@ public final class ExecArgumentsMapX extends ExecArgumentsAbstract implements Ba
 	 * @param length */
 	@ReflectionHidden
 	public ExecArgumentsMapX(final NamedToIndexMapper desc, final BaseArray arguments, final int length) {
+
 		ExecArgumentsMapX.COUNT++;
 		this.argument = new BaseObject[length];
 		for (int i = length - 1; i >= 0; --i) {

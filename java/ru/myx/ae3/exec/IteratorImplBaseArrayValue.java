@@ -6,37 +6,30 @@ import ru.myx.ae3.base.BaseHostEmpty;
 import ru.myx.ae3.base.BaseObject;
 import ru.myx.ae3.base.BasePrimitiveNumber;
 
-/**
- * @author myx
- */
+/** @author myx */
 final class IteratorImplBaseArrayValue extends BaseHostEmpty implements IteratorImpl {
-	
-	
-	/**
-	 * singular instance
-	 */
+
+	/** singular instance */
 	public static final IteratorImpl INSTANCE = new IteratorImplBaseArrayValue();
-	
+
 	private IteratorImplBaseArrayValue() {
+
 		// prevent
 	}
-	
+
 	@Override
 	public final boolean next(final ExecProcess ctx, final BaseObject object, final String name) {
-		
-		
+
 		final BaseArray array = (BaseArray) object;
 		int index = ((Number) ctx.ri13IV).intValue();
 		while (index < array.length()) {
 			final BaseObject element = array.baseGet(index++, null);
-			/**
-			 * only existing ones
-			 */
+			/** only existing ones */
 			if (element == null) {
 				continue;
 			}
 			ctx.contextSetMutableBinding(name, element, false);
-			
+
 			{
 				final BasePrimitiveNumber precached = Base.forIntegerPrecachedOrNull(index);
 				if (precached != null) {
@@ -44,7 +37,7 @@ final class IteratorImplBaseArrayValue extends BaseHostEmpty implements Iterator
 					return true;
 				}
 			}
-			
+
 			{
 				ctx.ri13IV = new ValueStackInteger(index);
 				return true;
@@ -52,11 +45,10 @@ final class IteratorImplBaseArrayValue extends BaseHostEmpty implements Iterator
 		}
 		return false;
 	}
-	
+
 	@Override
 	public String toString() {
-		
-		
+
 		return "[object " + this.getClass().getSimpleName() + "]";
 	}
 }

@@ -28,7 +28,7 @@ public final class ExecArgumentsList1 extends ExecArgumentsAbstractList {
 	/** @param object */
 	@ReflectionHidden
 	public ExecArgumentsList1(final BaseObject object) {
-		
+
 		assert object != null : "NULL java object!";
 		ExecArgumentsList1.COUNT++;
 		this.object = object;
@@ -113,8 +113,10 @@ public final class ExecArgumentsList1 extends ExecArgumentsAbstractList {
 	@ReflectionHidden
 	public final ExecStateCode vmPropertyRead(final ExecProcess ctx, final int index, final BaseObject originalIfKnown, final BaseObject defaultValue, final ResultHandler store) {
 
-		return store.execReturn(ctx, index == 0
-			? this.object
-			: defaultValue);
+		return store.execReturn(
+				ctx,
+				index == 0
+					? this.object
+					: defaultValue);
 	}
 }

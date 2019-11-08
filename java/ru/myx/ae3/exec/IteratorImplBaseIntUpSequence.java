@@ -5,26 +5,20 @@ import ru.myx.ae3.base.BaseHostEmpty;
 import ru.myx.ae3.base.BaseObject;
 import ru.myx.ae3.base.BasePrimitiveNumber;
 
-/**
- * @author myx
- * 
- */
+/** @author myx */
 final class IteratorImplBaseIntUpSequence extends BaseHostEmpty implements IteratorImpl {
-	
-	
-	/**
-	 * singular instance
-	 */
+
+	/** singular instance */
 	public static final IteratorImpl INSTANCE = new IteratorImplBaseIntUpSequence();
-	
+
 	private IteratorImplBaseIntUpSequence() {
+
 		// prevent
 	}
-	
+
 	@Override
 	public final boolean next(final ExecProcess ctx, final BaseObject object, final String name) {
-		
-		
+
 		final BasePrimitiveNumber length = (BasePrimitiveNumber) object;
 		final int index = ((BasePrimitiveNumber) ctx.ri13IV).baseToJavaInteger() + 1; // faster???
 		if (index < length.intValue()) {
@@ -35,11 +29,10 @@ final class IteratorImplBaseIntUpSequence extends BaseHostEmpty implements Itera
 		}
 		return false;
 	}
-	
+
 	@Override
 	public String toString() {
-		
-		
+
 		return "[object " + this.getClass().getSimpleName() + "]";
 	}
 }

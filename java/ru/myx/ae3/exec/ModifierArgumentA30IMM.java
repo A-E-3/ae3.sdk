@@ -12,12 +12,12 @@ import ru.myx.ae3.ecma.Ecma;
 
 /** @author myx */
 public final class ModifierArgumentA30IMM implements ModifierArgument {
-	
+
 	/**
 	 *
 	 */
 	public static final ModifierArgument EMPTY_STRING = new ModifierArgumentA30IMM(BaseString.EMPTY);
-	
+
 	/**
 	 *
 	 */
@@ -62,6 +62,7 @@ public final class ModifierArgumentA30IMM implements ModifierArgument {
 
 	/** @param value */
 	public ModifierArgumentA30IMM(@NotNull final BaseObject value) {
+
 		assert value != null : "NULL java value";
 		assert !(value instanceof ModifierArgument) : "Oops!";
 		this.value = value;
@@ -69,42 +70,44 @@ public final class ModifierArgumentA30IMM implements ModifierArgument {
 
 	/** @param value */
 	public ModifierArgumentA30IMM(final Object value) {
+
 		this.value = Base.forUnknown(value);
 		assert this.value != null : "NULL java value";
 	}
 
 	/** @param value */
 	public ModifierArgumentA30IMM(final String value) {
+
 		this.value = Base.forString(value);
 	}
 
 	@Override
 	public final BaseObject argumentConstantValue() {
-		
+
 		return this.value;
 	}
 
 	@Override
 	public boolean argumentHasSideEffects() {
-		
+
 		return false;
 	}
 
 	@Override
 	public final String argumentNotation() {
-		
+
 		return Ecma.toEcmaSourceCompact(this.value);
 	}
 
 	@Override
 	public final BaseObject argumentRead(final ExecProcess process) {
-		
+
 		return this.value;
 	}
 
 	@Override
 	public final String toString() {
-		
+
 		return Ecma.toEcmaSourceCompact(this.value);
 	}
 }

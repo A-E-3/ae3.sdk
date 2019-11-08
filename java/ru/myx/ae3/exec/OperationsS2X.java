@@ -10,6 +10,8 @@ import ru.myx.ae3.base.BasePrimitiveNumber;
 import ru.myx.ae3.base.BaseProperty;
 import ru.myx.ae3.base.ToPrimitiveHint;
 import ru.myx.ae3.help.Format;
+import ru.myx.vm_vliw32_2010.InstructionIA;
+import ru.myx.vm_vliw32_2010.OperationA2X;
 
 /** @author myx
  *
@@ -19,7 +21,7 @@ public enum OperationsS2X implements OperationA2X {
 	VACALLS_XS {
 
 		@Override
-		
+
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
 
 			assert argumentA != ctx || ctx == ctx.rb4CT : "Use FCALLS then";
@@ -30,7 +32,7 @@ public enum OperationsS2X implements OperationA2X {
 				// TODO: check if code should be analyzed
 				return access;
 			}
-			
+
 			final BaseObject candidate = ctx.ra0RB;
 			</code> */
 			final BaseObject candidate = argumentA.baseGet((CharSequence) argumentB, BaseObject.UNDEFINED);
@@ -76,7 +78,7 @@ public enum OperationsS2X implements OperationA2X {
 		}
 
 		@Override
-		
+
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
 
 			assert argumentA != ctx : "Use LOAD";
@@ -106,7 +108,7 @@ public enum OperationsS2X implements OperationA2X {
 		}
 
 		@Override
-		
+
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
 
 			assert argumentA != ctx : "Use LOAD";
@@ -121,23 +123,23 @@ public enum OperationsS2X implements OperationA2X {
 		}
 
 		@Override
-		public Instruction instruction(final ModifierArgument argumentA, final BaseObject constantArgumentB, final ModifierArgument defaultArgumentB, final int constant) {
+		public InstructionIA instruction(final ModifierArgument argumentA, final BaseObject constantArgumentB, final ModifierArgument defaultArgumentB, final int constant) {
 
 			if (constant == 0) {
-				return new IA2X_VACCESSDS_AS_0_NN_NXT(argumentA, constantArgumentB);
+				return new IA2_VACCESSDS_AS_0_NN_NXT(argumentA, constantArgumentB);
 			}
 			return super.instruction(argumentA, constantArgumentB, defaultArgumentB, constant);
 		}
 
 		@Override
-		public Instruction instruction(final ModifierArgument argumentA,
+		public InstructionIA instruction(final ModifierArgument argumentA,
 				final BaseObject constantArgumentB,
 				final ModifierArgument defaultArgumentB,
 				final int constant,
 				final ResultHandler store) {
 
 			if (constant == 0 && store == ResultHandler.FB_BSN_NXT) {
-				return new IA2X_VACCESSDS_AS_0_SN_NXT(argumentA, constantArgumentB);
+				return new IA2_VACCESSDS_AS_0_SN_NXT(argumentA, constantArgumentB);
 			}
 			return super.instruction(argumentA, constantArgumentB, defaultArgumentB, constant, store);
 		}
@@ -165,7 +167,7 @@ public enum OperationsS2X implements OperationA2X {
 		}
 
 		@Override
-		
+
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
 
 			assert argumentA != ctx : "Use LOAD";
@@ -201,7 +203,7 @@ public enum OperationsS2X implements OperationA2X {
 		}
 
 		@Override
-		
+
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
 
 			assert argumentA != ctx : "Use LOAD";
@@ -237,7 +239,7 @@ public enum OperationsS2X implements OperationA2X {
 		}
 
 		@Override
-		
+
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
 
 			assert argumentA != ctx : "Use LOAD";
@@ -382,7 +384,7 @@ public enum OperationsS2X implements OperationA2X {
 		}
 
 		@Override
-		
+
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
 
 			final BaseObject value = ExecProcess.vmEnsureNative(argumentB);
@@ -420,7 +422,7 @@ public enum OperationsS2X implements OperationA2X {
 		}
 
 		@Override
-		
+
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
 
 			final BaseObject value = ExecProcess.vmEnsureNative(argumentB);
@@ -452,7 +454,7 @@ public enum OperationsS2X implements OperationA2X {
 		}
 
 		@Override
-		
+
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
 
 			if (argumentA instanceof CharSequence) {
@@ -492,7 +494,7 @@ public enum OperationsS2X implements OperationA2X {
 	VMADD_N {
 
 		@Override
-		
+
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
 
 			if (argumentA instanceof CharSequence) {
@@ -532,7 +534,7 @@ public enum OperationsS2X implements OperationA2X {
 	VMADDN_D {
 
 		@Override
-		
+
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
 
 			final BasePrimitiveNumber additive = argumentA.baseToNumber();
@@ -562,7 +564,7 @@ public enum OperationsS2X implements OperationA2X {
 	VMADDN_N {
 
 		@Override
-		
+
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
 
 			final BasePrimitiveNumber additive = argumentA.baseToNumber();
@@ -604,7 +606,7 @@ public enum OperationsS2X implements OperationA2X {
 		}
 
 		@Override
-		
+
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
 
 			final BasePrimitiveNumber additive = argumentA.baseToNumber();
@@ -634,7 +636,7 @@ public enum OperationsS2X implements OperationA2X {
 	VMADDS_D {
 
 		@Override
-		
+
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
 
 			return store.execReturnString(ctx, argumentA.baseToJavaString() + argumentB.baseToJavaString());
@@ -656,7 +658,7 @@ public enum OperationsS2X implements OperationA2X {
 	VMADDS_N {
 
 		@Override
-		
+
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
 
 			return store.execReturnString(ctx, argumentA.baseToJavaString() + argumentB.baseToJavaString());
@@ -690,7 +692,7 @@ public enum OperationsS2X implements OperationA2X {
 		}
 
 		@Override
-		
+
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
 
 			return store.execReturnString(ctx, argumentA.baseToJavaString() + argumentB.baseToJavaString());
@@ -718,7 +720,7 @@ public enum OperationsS2X implements OperationA2X {
 		}
 
 		@Override
-		
+
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
 
 			final int valueA = argumentA.baseToJavaInteger();
@@ -742,7 +744,7 @@ public enum OperationsS2X implements OperationA2X {
 	VMBAND_N {
 
 		@Override
-		
+
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
 
 			final int valueA = argumentA.baseToJavaInteger();
@@ -1032,7 +1034,7 @@ public enum OperationsS2X implements OperationA2X {
 		}
 
 		@Override
-		
+
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
 
 			final BasePrimitive<?> dividend = argumentA.baseToPrimitive(ToPrimitiveHint.NUMBER);
@@ -1064,7 +1066,7 @@ public enum OperationsS2X implements OperationA2X {
 	VMDIV_N {
 
 		@Override
-		
+
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
 
 			final BasePrimitive<?> dividend = argumentA.baseToPrimitive(ToPrimitiveHint.NUMBER);
@@ -1072,7 +1074,7 @@ public enum OperationsS2X implements OperationA2X {
 				return store.execReturn(ctx, dividend);
 
 			}
-			
+
 			final BasePrimitive<?> divisor = argumentB.baseToPrimitive(ToPrimitiveHint.NUMBER);
 			if (divisor == BasePrimitiveNumber.NAN) {
 				return store.execReturn(ctx, divisor);
@@ -1355,7 +1357,7 @@ public enum OperationsS2X implements OperationA2X {
 	VTSTORE_S {
 
 		@Override
-		
+
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentB, final BaseObject argumentC, final int constant, final ResultHandler store) {
 
 			final BaseObject value = ExecProcess.vmEnsureNative(argumentC);
@@ -1400,7 +1402,11 @@ public enum OperationsS2X implements OperationA2X {
 	 * @return */
 	public abstract InstructionResult getResultType();
 
-	Instruction instructionCached(final ModifierArgument argumentA, final ModifierArgument argumentB, final int constant, final ResultHandler store) {
+	Instruction instructionCached(//
+			final ModifierArgument argumentA,
+			final ModifierArgument argumentB,
+			final int constant,
+			final ResultHandler store) {
 
 		return InstructionA2X.instructionCached(this.instruction(argumentA, argumentB, constant, store));
 	}
