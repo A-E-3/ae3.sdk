@@ -9,7 +9,6 @@ package ru.myx.ae3.eval.parse;
 import static ru.myx.ae3.exec.ModifierArguments.AA0RB;
 import static ru.myx.ae3.exec.ModifierArguments.AE21POP;
 
-import com.sun.istack.internal.NotNull;
 
 import ru.myx.ae3.base.BasePrimitiveString;
 import ru.myx.ae3.exec.InstructionResult;
@@ -71,7 +70,6 @@ public final class TKV_FDECLARE_BA_VC_S extends TokenValue {
 		 * flush all values to assembly
 		 */
 
-		@NotNull
 		final ModifierArgument modifierA = this.argumentB.toDirectModifier();
 
 		if (modifierA == AA0RB) {

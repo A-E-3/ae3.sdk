@@ -5,7 +5,6 @@ package ru.myx.vm_vliw32_2010;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.sun.istack.internal.NotNull;
 
 import ru.myx.ae3.exec.Instruction;
 import ru.myx.ae3.exec.ModifierArgument;
@@ -46,7 +45,6 @@ public abstract class InstructionIA1A implements InstructionIA {
 	}
 
 	/** @return */
-	@NotNull
 	public abstract ModifierArgument getModifierA();
 
 	@Override
@@ -61,7 +59,6 @@ public abstract class InstructionIA1A implements InstructionIA {
 
 	/** @return */
 	@Override
-	@NotNull
 	public abstract ResultHandler getStore();
 
 	@Override

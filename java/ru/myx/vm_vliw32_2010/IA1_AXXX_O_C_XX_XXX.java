@@ -3,7 +3,6 @@
  */
 package ru.myx.vm_vliw32_2010;
 
-import com.sun.istack.internal.NotNull;
 
 import ru.myx.ae3.base.BaseObject;
 import ru.myx.ae3.eval.parse.ParseConstants;
@@ -48,7 +47,6 @@ class IA1_AXXX_O_C_XX_XXX extends InstructionIA1I {
 	}
 	
 	@Override
-	@NotNull
 	public ModifierArgument getModifierA() {
 
 		return ParseConstants.getConstantValue(this.argumentA).toConstantModifier();

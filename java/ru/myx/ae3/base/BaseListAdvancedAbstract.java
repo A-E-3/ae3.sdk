@@ -184,7 +184,7 @@ public abstract class BaseListAdvancedAbstract<T> implements BaseHost, List<T>, 
 		if (size == 0) {
 			return Collections.emptyIterator();
 		}
-		return new Iterator<BaseObject>() {
+		return new Iterator<>() {
 			
 			
 			int index = 0;
@@ -299,7 +299,7 @@ public abstract class BaseListAdvancedAbstract<T> implements BaseHost, List<T>, 
 		if (size == 0) {
 			return Collections.emptyIterator();
 		}
-		return new Iterator<T>() {
+		return new Iterator<>() {
 			
 			
 			int index = 0;
@@ -359,7 +359,7 @@ public abstract class BaseListAdvancedAbstract<T> implements BaseHost, List<T>, 
 		if (size == 0) {
 			return Collections.emptyListIterator();
 		}
-		return new ListIterator<T>() {
+		return new ListIterator<>() {
 			
 			
 			int index = indexInitial;

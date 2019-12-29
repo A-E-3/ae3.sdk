@@ -3,7 +3,6 @@
  */
 package ru.myx.ae3.exec;
 
-import com.sun.istack.internal.NotNull;
 
 import ru.myx.ae3.base.Base;
 import ru.myx.ae3.base.BaseObject;
@@ -61,7 +60,7 @@ public final class ModifierArgumentA30IMM implements ModifierArgument {
 	private final BaseObject value;
 
 	/** @param value */
-	public ModifierArgumentA30IMM(@NotNull final BaseObject value) {
+	public ModifierArgumentA30IMM(final BaseObject value) {
 
 		assert value != null : "NULL java value";
 		assert !(value instanceof ModifierArgument) : "Oops!";

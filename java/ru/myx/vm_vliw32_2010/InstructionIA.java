@@ -3,7 +3,6 @@
  */
 package ru.myx.vm_vliw32_2010;
 
-import com.sun.istack.internal.NotNull;
 
 import ru.myx.ae3.exec.Instruction;
 import ru.myx.ae3.exec.ResultHandler;
@@ -15,7 +14,6 @@ public interface InstructionIA extends Instruction {
 	public abstract VOFmt getOperation();
 
 	/** @return */
-	@NotNull
 	public abstract ResultHandler getStore();
 	
 	@Override

@@ -233,7 +233,7 @@ public class BaseSealed implements BaseObjectNotWritable, BaseArrayAdvanced<Obje
 		final BaseArray array = this.wrapped.baseArray();
 		assert array != null : "Not an array actually!";
 		final Iterator<? extends BaseObject> iterator = array.baseIterator();
-		return new Iterator<Object>() {
+		return new Iterator<>() {
 
 			@Override
 			public boolean hasNext() {

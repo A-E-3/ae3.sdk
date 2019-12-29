@@ -44,7 +44,7 @@ final class FactoryFilter implements ObjectFactory<ServeRequest, ServeRequest> {
 		if (Report.MODE_DEBUG) {
 			query.addAttribute("X-Debug-Via", "GEO-PR");
 		}
-		return new ObjectSource<ServeRequest>() {
+		return new ObjectSource<>() {
 			
 			@Override
 			public ServeRequest next() {

@@ -8,6 +8,9 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
 
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParserFactory;
+
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.EntityResolver;
@@ -17,7 +20,6 @@ import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.XMLReaderFactory;
 
 import ru.myx.ae3.base.Base;
 import ru.myx.ae3.base.BaseList;
@@ -29,13 +31,14 @@ import ru.myx.ae3.help.Format;
 
 class XmlToMapContentHandler extends InputSource implements ContentHandler, ErrorHandler, EntityResolver {
 	
+	private static final SAXParserFactory SAX_PARSER_FACTORY = SAXParserFactory.newInstance();
 	
 	// base 64 character scheme
 	private static final char[] B64_STATICS = {
 			'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g',
 			'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'
 	};
-	
+
 	// this is the encoded character's values
 	private static final byte[] MATRIX = new byte[256];
 	static {
@@ -45,57 +48,58 @@ class XmlToMapContentHandler extends InputSource implements ContentHandler, Erro
 			XmlToMapContentHandler.MATRIX[XmlToMapContentHandler.B64_STATICS[i]] = (byte) i;
 		}
 	}
-	
+
 	Object attachment;
-	
+
 	private final char[] decodeBuffer;
-	
+
 	private int decodeBufferSize;
-	
+
 	ExternalHandler handler;
-	
+
 	BaseObject map;
-	
+
 	BaseList<Object> order;
-	
+
 	// instance data
 	private final byte[] readBuffer;
-	
+
 	private int readBufferIndex;
-	
+
 	private int readBufferSize;
-	
+
 	XmlToMapState state = null;
-	
+
 	final StringBuilder stringBuilder;
-	
+
 	StringBuilder stringBuilderUnknown = null;
-	
+
 	TransferCollector targetCollector = null;
-	
+
 	BaseObject targetMap = null;
-	
+
 	String targetName = null;
-	
+
 	String targetParam1 = null;
-	
+
 	private Object[] stack = new Object[128];
-	
+
 	private int stackPointer;
-	
+
 	private String uri;
-	
+
 	private String identity;
-	
+
 	private final XMLReader parser;
-	
+
 	private int skipCounter = 0;
-	
+
 	private String skipDefaultURI = null;
-	
-	XmlToMapContentHandler() throws SAXException {
+
+	XmlToMapContentHandler() throws SAXException, ParserConfigurationException {
+		
 		this.stringBuilder = new StringBuilder(1024);
-		this.parser = XMLReaderFactory.createXMLReader();
+		this.parser = XmlToMapContentHandler.SAX_PARSER_FACTORY.newSAXParser().getXMLReader();
 		this.parser.setEntityResolver(this);
 		this.parser.setContentHandler(this);
 		this.parser.setErrorHandler(this);
@@ -105,17 +109,15 @@ class XmlToMapContentHandler extends InputSource implements ContentHandler, Erro
 		this.readBufferSize = 0;
 		this.stackPointer = 0;
 	}
-	
+
 	@Override
 	public final void characters(final char[] ch, final int start, final int length) {
 		
-		
 		this.state.onCharacters(this, ch, start, length);
 	}
-	
+
 	@Override
 	public final void endDocument() {
-		
 		
 		this.setByteStream(null);
 		this.setCharacterStream(null);
@@ -128,10 +130,9 @@ class XmlToMapContentHandler extends InputSource implements ContentHandler, Erro
 		this.targetMap = null;
 		this.targetName = null;
 	}
-	
+
 	@Override
 	public final void endElement(final String uri, final String localName, final String qName) {
-		
 		
 		if (this.skipCounter > 0) {
 			this.skipCounter--;
@@ -139,41 +140,34 @@ class XmlToMapContentHandler extends InputSource implements ContentHandler, Erro
 		}
 		this.state.onThisElementEnd(this);
 	}
-	
+
 	@Override
 	public final void endPrefixMapping(final String prefix) {
-		
 		
 		if (this.skipDefaultURI != null && this.skipDefaultURI.equals(prefix)) {
 			this.skipDefaultURI = null;
 		}
 	}
-	
+
 	@Override
 	public void error(final SAXParseException exception) throws SAXException {
 		
-		
 		// throw exception;
 	}
-	
+
 	@Override
 	public void fatalError(final SAXParseException exception) throws SAXException {
 		
-		
 		// throw exception;
 	}
-	
-	/**
-	 * This method decodes four encoded characters into three unencoded bytes in
-	 * the read buffer and return the size of the buffer. (Ie: zero if we're at
-	 * the end of the stream).
-	 * 
+
+	/** This method decodes four encoded characters into three unencoded bytes in the read buffer
+	 * and return the size of the buffer. (Ie: zero if we're at the end of the stream).
+	 *
 	 * @param chars
 	 * @param offset
-	 * @param length
-	 */
+	 * @param length */
 	final void fillBase64(final char[] chars, final int offset, final int length) {
-		
 		
 		for (int index = offset, left = length;;) {
 			while (this.readBufferIndex < this.readBufferSize) {
@@ -229,9 +223,8 @@ class XmlToMapContentHandler extends InputSource implements ContentHandler, Erro
 			this.readBufferIndex = 0;
 		}
 	}
-	
+
 	final void flushBase64() {
-		
 		
 		while (this.readBufferIndex < this.readBufferSize) {
 			this.targetCollector.getTarget().absorb(this.readBuffer[this.readBufferIndex++] & 0xFF);
@@ -239,16 +232,14 @@ class XmlToMapContentHandler extends InputSource implements ContentHandler, Erro
 		this.decodeBufferSize = 0;
 		this.readBufferSize = 0;
 	}
-	
+
 	@Override
 	public final void ignorableWhitespace(final char[] ch, final int start, final int length) {
 		
-		
 		this.state.onWhitespace(this, ch, start, length);
 	}
-	
+
 	final BaseObject parse() throws IOException, SAXException {
-		
 		
 		this.parser.parse(this);
 		try {
@@ -257,18 +248,16 @@ class XmlToMapContentHandler extends InputSource implements ContentHandler, Erro
 			this.map = null;
 		}
 	}
-	
+
 	final Object peek() {
-		
 		
 		if (this.stackPointer == 0) {
 			throw new RuntimeException("Stack underflow!");
 		}
 		return this.stack[this.stackPointer - 1];
 	}
-	
+
 	final Object pop() {
-		
 		
 		if (this.stackPointer == 0) {
 			throw new RuntimeException("Stack underflow!");
@@ -279,9 +268,8 @@ class XmlToMapContentHandler extends InputSource implements ContentHandler, Erro
 			this.stack[this.stackPointer + 1] = null;
 		}
 	}
-	
+
 	final void prepareCollector() {
-		
 		
 		if (this.targetCollector == null) {
 			this.targetCollector = Transfer.createCollector();
@@ -289,16 +277,14 @@ class XmlToMapContentHandler extends InputSource implements ContentHandler, Erro
 			this.targetCollector.reset();
 		}
 	}
-	
+
 	@Override
 	public final void processingInstruction(final String target, final String data) {
 		
-		
 		// ignore
 	}
-	
+
 	final void push(final Object o) {
-		
 		
 		if (this.stackPointer == this.stack.length) {
 			final Object[] newStack = new Object[this.stack.length << 1];
@@ -307,9 +293,8 @@ class XmlToMapContentHandler extends InputSource implements ContentHandler, Erro
 		}
 		this.stack[this.stackPointer++] = o;
 	}
-	
+
 	final void put(final BaseObject o) {
-		
 		
 		if (this.targetName != null) {
 			this.put(this.targetName, o);
@@ -318,9 +303,8 @@ class XmlToMapContentHandler extends InputSource implements ContentHandler, Erro
 			this.targetMap = this.map = o;
 		}
 	}
-	
+
 	final void put(final String targetName, final BaseObject o) {
-		
 		
 		if (o == this.map) {
 			return;
@@ -347,17 +331,15 @@ class XmlToMapContentHandler extends InputSource implements ContentHandler, Erro
 			}
 		}
 	}
-	
+
 	@Override
 	public InputSource resolveEntity(final String publicId, final String systemId) {
-		
 		
 		// dummy source
 		return new InputSource(new StringReader("<?xml version='1.0' encoding='UTF-8'?>"));
 	}
-	
+
 	final void reuse(final String identity, final InputStream input, final String uri, final BaseObject map, final ExternalHandler handler, final Object attachment) {
-		
 		
 		this.identity = identity;
 		this.stringBuilder.setLength(0);
@@ -368,9 +350,8 @@ class XmlToMapContentHandler extends InputSource implements ContentHandler, Erro
 		this.handler = handler;
 		this.attachment = attachment;
 	}
-	
+
 	final void reuse(final String identity, final Reader input, final String uri, final BaseObject map, final ExternalHandler handler, final Object attachment) {
-		
 		
 		this.identity = identity;
 		this.stringBuilder.setLength(0);
@@ -381,43 +362,35 @@ class XmlToMapContentHandler extends InputSource implements ContentHandler, Erro
 		this.handler = handler;
 		this.attachment = attachment;
 	}
-	
+
 	@Override
 	public final void setDocumentLocator(final Locator locator) {
 		
-		
 		// ignore
 	}
-	
+
 	@Override
 	public final void skippedEntity(final String name) {
 		
-		
 		// ignore
 	}
-	
+
 	@Override
 	public final void startDocument() {
 		
-		
 		this.state = this.map == null
-			/**
-			 * MAP will create objects and put it as a root
-			 */
+			/** MAP will create objects and put it as a root */
 			? XmlToMapState.MAP
-			/**
-			 * ROOT can reuse map passed
-			 */
+			/** ROOT can reuse map passed */
 			: XmlToMapState.ROOT;
 		this.targetName = null;
 		this.targetMap = this.map;
 		this.skipCounter = 0;
 		this.skipDefaultURI = null;
 	}
-	
+
 	@Override
 	public final void startElement(final String uri, final String localName, final String qName, final Attributes atts) {
-		
 		
 		if (this.skipCounter > 0 || this.uri != null && (this.skipDefaultURI != null && uri.length() == 0 || this.uri != uri && !this.uri.equals(uri))) {
 			this.skipCounter++;
@@ -426,19 +399,17 @@ class XmlToMapContentHandler extends InputSource implements ContentHandler, Erro
 		assert this.state != null : "state should never be NULL";
 		this.state.onChildElementStart(this, localName, atts);
 	}
-	
+
 	@Override
 	public final void startPrefixMapping(final String prefix, final String uri) {
-		
 		
 		if (this.uri != null && this.uri.equals(uri)) {
 			this.skipDefaultURI = prefix;
 			this.uri = uri; // with hope that it will be reused
 		}
 	}
-	
+
 	final String toState() {
-		
 		
 		final StringBuilder builder = new StringBuilder(64);
 		builder.append(this.identity);
@@ -452,17 +423,15 @@ class XmlToMapContentHandler extends InputSource implements ContentHandler, Erro
 		}
 		return builder.toString();
 	}
-	
+
 	@Override
 	public String toString() {
 		
-		
 		return "state: " + this.toState() + ", current: " + this.state + ", target: " + Format.Describe.toEcmaSource(this.targetMap, "") + ", targetName: " + this.targetName;
 	}
-	
+
 	@Override
 	public void warning(final SAXParseException exception) throws SAXException {
-		
 		
 		// throw exception;
 	}

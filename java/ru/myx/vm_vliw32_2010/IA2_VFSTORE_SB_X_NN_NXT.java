@@ -3,7 +3,6 @@
  */
 package ru.myx.vm_vliw32_2010;
 
-import com.sun.istack.internal.NotNull;
 
 import ru.myx.ae3.base.BaseObject;
 import ru.myx.ae3.base.BasePrimitiveString;
@@ -29,7 +28,6 @@ class IA2_VFSTORE_SB_X_NN_NXT extends InstructionIA2A {
 	@Override
 	public final ExecStateCode execCall(final ExecProcess ctx) throws Exception {
 
-		@NotNull
 		final BaseObject argumentB = ExecProcess.vmEnsureDetached(ctx, this.modifierB.argumentRead(ctx));
 		
 		ctx.contextSetMutableBinding(this.argumentA, argumentB, false);
@@ -38,14 +36,12 @@ class IA2_VFSTORE_SB_X_NN_NXT extends InstructionIA2A {
 	}
 	
 	@Override
-	@NotNull
 	public ModifierArgument getModifierA() {
 
 		return ParseConstants.getConstantValue(this.argumentA).toConstantModifier();
 	}
 	
 	@Override
-	@NotNull
 	public ModifierArgument getModifierB() {
 
 		return this.modifierB;
@@ -70,7 +66,6 @@ class IA2_VFSTORE_SB_X_NN_NXT extends InstructionIA2A {
 	}
 	
 	@Override
-	@NotNull
 	public ResultHandler getStore() {
 
 		return ResultHandler.FA_BNN_NXT;

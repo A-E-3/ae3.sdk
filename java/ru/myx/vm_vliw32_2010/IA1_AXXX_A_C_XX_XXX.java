@@ -3,7 +3,6 @@
  */
 package ru.myx.vm_vliw32_2010;
 
-import com.sun.istack.internal.NotNull;
 
 import ru.myx.ae3.exec.ExecProcess;
 import ru.myx.ae3.exec.ExecStateCode;
@@ -46,7 +45,6 @@ class IA1_AXXX_A_C_XX_XXX extends InstructionIA1I {
 	}
 	
 	@Override
-	@NotNull
 	public ModifierArgument getModifierA() {
 
 		return this.modifierA;

@@ -23,21 +23,19 @@ import ru.myx.ae3.reflect.ReflectionIgnore;
 import ru.myx.ae3.report.Report;
 import ru.myx.ae3.skinner.Skinner;
 
-/**
- *
- * @author myx
+/** @author myx
  * @param <T>
- *            target
- *
- */
+ *            target */
 @ReflectionIgnore
 public abstract class TargetContextAbstract<T extends TargetContextAbstract<?>> extends BaseHostObject implements TargetContext<BaseObject>, ContextHandler<T, BaseObject> {
 
-	/**
-	 * @param cssClassOld
+	static {
+		LayoutEngine.getDocumentation();
+	}
+
+	/** @param cssClassOld
 	 * @param cssClass
-	 * @return
-	 */
+	 * @return */
 	private static String injectCssClass(final String cssClassOld, final String cssClass) {
 
 		if (cssClassOld.length() == 0) {
@@ -50,10 +48,6 @@ public abstract class TargetContextAbstract<T extends TargetContextAbstract<?>> 
 			}
 		}
 		return cssClassOld + " " + cssClass;
-	}
-
-	static {
-		LayoutEngine.getDocumentation();
 	}
 
 	ExecProcess context;
@@ -80,15 +74,10 @@ public abstract class TargetContextAbstract<T extends TargetContextAbstract<?>> 
 
 	ContextData<T, BaseObject> stack;
 
-	/**
-	 * current zoom
-	 */
+	/** current zoom */
 	ZoomType zoom;
 
-	/**
-	 * @param iface
-	 *
-	 */
+	/** @param iface */
 	protected TargetContextAbstract(final TargetInterface iface) {
 
 		this.iface = iface;
@@ -104,17 +93,13 @@ public abstract class TargetContextAbstract<T extends TargetContextAbstract<?>> 
 		// empty
 	}
 
-	/**
-	 * @param skin
-	 */
+	/** @param skin */
 	public void doSetSkin(final Skin skin) {
 
 		this.currentSkin = skin;
 	}
 
-	/**
-	 * @param skinner
-	 */
+	/** @param skinner */
 	public void doSetSkinner(final Skinner skinner) {
 
 		this.currentSkinner = skinner;
@@ -142,14 +127,12 @@ public abstract class TargetContextAbstract<T extends TargetContextAbstract<?>> 
 		return true;
 	}
 
-	/**
-	 * you should return from loop after call this method
+	/** you should return from loop after call this method
 	 *
 	 * @param handler
 	 *
 	 * @param layout
-	 * @return
-	 */
+	 * @return */
 	protected BaseObject enterContent(final ContextHandler<T, BaseObject> handler, final BaseObject layout) {
 
 		this.dump("enter content, handler=" + handler + ", layout=" + Ecma.toEcmaSourceCompact(layout));
@@ -172,14 +155,12 @@ public abstract class TargetContextAbstract<T extends TargetContextAbstract<?>> 
 		return null;
 	}
 
-	/**
-	 * you should return from loop after call this method
+	/** you should return from loop after call this method
 	 *
 	 * @param handler
 	 *
 	 * @param array
-	 * @return
-	 */
+	 * @return */
 	protected BaseObject enterSequence(final ContextHandler<T, BaseObject> handler, final BaseArray array) {
 
 		this.dump("enter sequence, handler=" + handler + ", size=" + array.length());
@@ -208,35 +189,27 @@ public abstract class TargetContextAbstract<T extends TargetContextAbstract<?>> 
 		return this.context;
 	}
 
-	/**
-	 * @return current context handler
-	 */
+	/** @return current context handler */
 	protected ContextHandler<T, BaseObject> getContextHandler() {
 
 		return this.currentHandler;
 	}
 
-	/**
-	 * replace
+	/** replace
 	 *
-	 * @return
-	 */
+	 * @return */
 	protected TargetContextAbstract<?> getContextLayoutSource() {
 
 		return this;
 	}
 
-	/**
-	 * @return number of steps taken to render this context up to date
-	 */
+	/** @return number of steps taken to render this context up to date */
 	public int getCountSteps() {
 
 		return this.countSteps;
 	}
 
-	/**
-	 * @return date when context was created
-	 */
+	/** @return date when context was created */
 	public long getDateStarted() {
 
 		return this.dateStarted;
@@ -248,9 +221,7 @@ public abstract class TargetContextAbstract<T extends TargetContextAbstract<?>> 
 		return this.iface;
 	}
 
-	/**
-	 * @return
-	 */
+	/** @return */
 	public BaseObject getLayoutAbout() {
 
 		try {
@@ -263,15 +234,11 @@ public abstract class TargetContextAbstract<T extends TargetContextAbstract<?>> 
 		}
 	}
 
-	/**
-	 * @param name
-	 * @return null or interface/context layout for given name
-	 */
+	/** @param name
+	 * @return null or interface/context layout for given name */
 	protected abstract LayoutDefinition<T> getLayoutForContext(final String name);
 
-	/**
-	 * @return
-	 */
+	/** @return */
 	public BaseObject getResultLayout() {
 
 		return this.currentObject;
@@ -313,14 +280,13 @@ public abstract class TargetContextAbstract<T extends TargetContextAbstract<?>> 
 	private final boolean step() {
 
 		if (Report.MODE_DEBUG) {
-			this.dump("step: " + (this.currentObject == null
-				? null
-				: Ecma.toEcmaSourceCompact(this.currentObject)));
+			this.dump(
+					"step: " + (this.currentObject == null
+						? null
+						: Ecma.toEcmaSourceCompact(this.currentObject)));
 		}
 
-		/**
-		 * check undefined
-		 */
+		/** check undefined */
 		if (this.currentObject == null || this.currentObject == BaseObject.UNDEFINED) {
 			switch (this.currentState) {
 				case SEQUENCE :
@@ -347,11 +313,10 @@ public abstract class TargetContextAbstract<T extends TargetContextAbstract<?>> 
 					this.currentSkin = data.currentSkin;
 					this.currentState = data.currentState;
 					return true;
+				default :
 			}
 		}
-		/**
-		 * Convert primitive object to layouts
-		 */
+		/** Convert primitive object to layouts */
 		if (this.currentObject.baseIsPrimitiveBoolean()) {
 			final BaseObject replacement = BaseObject.createObject();
 			replacement.baseDefine("layout", "boolean");
@@ -382,9 +347,7 @@ public abstract class TargetContextAbstract<T extends TargetContextAbstract<?>> 
 		final String name = Base.getString(this.currentObject, "layout", "").trim();
 		if (name.length() != 0) {
 			final BaseObject previous = this.currentObject;
-			/**
-			 * Check nest handler
-			 */
+			/** Check nest handler */
 			{
 				final BaseObject replacement = this.currentHandler.onNest(this.toTarget(), this.currentObject);
 				if (this.currentObject != previous) {
@@ -396,9 +359,7 @@ public abstract class TargetContextAbstract<T extends TargetContextAbstract<?>> 
 					return true;
 				}
 			}
-			/**
-			 * Check skin?
-			 */
+			/** Check skin? */
 			{
 				for (Skin skin = this.currentSkin; skin != null;) {
 					{
@@ -414,19 +375,14 @@ public abstract class TargetContextAbstract<T extends TargetContextAbstract<?>> 
 						}
 					}
 					{
-						/**
-						 * TODO: this is actually not protecting from anything
-						 * more than trivial
-						 */
+						/** TODO: this is actually not protecting from anything more than trivial */
 						final Skin next = skin.getSkinParent();
 						assert skin != next : "Oops - same skin: " + next;
 						skin = next;
 					}
 				}
 			}
-			/**
-			 * Check context
-			 */
+			/** Check context */
 			{
 				@SuppressWarnings("unchecked")
 				final TargetContextAbstract<T> contextReplacement = (TargetContextAbstract<T>) this.getContextLayoutSource();
@@ -444,9 +400,7 @@ public abstract class TargetContextAbstract<T extends TargetContextAbstract<?>> 
 					}
 				}
 			}
-			/**
-			 * Check defaults
-			 */
+			/** Check defaults */
 			{
 				final LayoutDefinition<TargetContext<?>> definition = Skin.SKIN_FAILOVER.getLayoutDefinition(name);
 				if (definition != null) {
@@ -463,17 +417,12 @@ public abstract class TargetContextAbstract<T extends TargetContextAbstract<?>> 
 		}
 
 		if ("string".equals(name)) {
-			/**
-			 * layout string is not found, however it is required for this loop
-			 * to work
-			 */
+			/** layout string is not found, however it is required for this loop to work */
 			this.currentObject = this.currentObject.baseGet("value", BaseString.EMPTY);
 			return false;
 		}
 
-		/**
-		 * Check super-defaults
-		 */
+		/** Check super-defaults */
 		{
 			{
 				final BaseObject content = this.currentObject.baseGet("content", BaseObject.UNDEFINED);
@@ -482,9 +431,7 @@ public abstract class TargetContextAbstract<T extends TargetContextAbstract<?>> 
 					final String cssClassNew = TargetContextAbstract.injectCssClass(cssClassOld, "ui-" + name);
 
 					if (content.baseIsPrimitive()) {
-						/**
-						 * Convert primitive object to layouts
-						 */
+						/** Convert primitive object to layouts */
 						if (content.baseIsPrimitiveNumber()) {
 							final BaseObject prototype = this.currentObject;
 							final BaseObject replacement = BaseObject.createObject(prototype);
@@ -575,9 +522,10 @@ public abstract class TargetContextAbstract<T extends TargetContextAbstract<?>> 
 			return true;
 		}
 
-		this.currentObject = Base.forString(Report.MODE_ASSERT || Report.MODE_DEBUG
-			? "[Layout '" + name + "' is not known, " + this.toString() + "]"
-			: "[Layout '" + name + "' is not known!]");
+		this.currentObject = Base.forString(
+				Report.MODE_ASSERT || Report.MODE_DEBUG
+					? "[Layout '" + name + "' is not known, " + this.toString() + "]"
+					: "[Layout '" + name + "' is not known!]");
 		return true;
 	}
 
@@ -592,38 +540,21 @@ public abstract class TargetContextAbstract<T extends TargetContextAbstract<?>> 
 				+ ")]";
 	}
 
-	/**
-	 * @return this object casted to target type
-	 */
+	/** @return this object casted to target type */
 	@SuppressWarnings("unchecked")
 	protected T toTarget() {
 
 		return (T) this;
 	}
 
-	@Override
-	public final BaseObject transformLayout(final BaseObject layout) {
-
-		try {
-			this.transform(layout).baseValue();
-			return this.getResultLayout();
-		} catch (final AbstractReplyException e) {
-			return Base.forUnknown(e.getReply().getObject());
-		}
-	}
-
-	/**
-	 * @param layout
-	 * @return
-	 */
+	/** @param layout
+	 * @return */
 	@Override
 	public final Value<Void> transform(final BaseObject layout) {
 
 		if (layout == null || layout.baseIsPrimitive()) {
-			/**
-			 * TODO: move to some general place, idea is to wrap single text
-			 * string layout into a document.
-			 */
+			/** TODO: move to some general place, idea is to wrap single text string layout into a
+			 * document. */
 			final BaseMapEditable currentObject = BaseObject.createObject();
 			this.currentObject = currentObject;
 			currentObject.baseDefine("layout", "document");
@@ -651,10 +582,22 @@ public abstract class TargetContextAbstract<T extends TargetContextAbstract<?>> 
 			count++;
 			this.countSteps++;
 		}
-		this.dump("transform finished, " + count + (this.countSteps == count
-			? " step(s)"
-			: " step(s), " + this.countSteps + " step(s) total") + ", " + Format.Compact.toPeriod(System.currentTimeMillis() - this.dateStarted));
+		this.dump(
+				"transform finished, " + count + (this.countSteps == count
+					? " step(s)"
+					: " step(s), " + this.countSteps + " step(s) total") + ", " + Format.Compact.toPeriod(System.currentTimeMillis() - this.dateStarted));
 		this.doFinish();
 		return new HolderSimple<>(null);
+	}
+
+	@Override
+	public final BaseObject transformLayout(final BaseObject layout) {
+
+		try {
+			this.transform(layout).baseValue();
+			return this.getResultLayout();
+		} catch (final AbstractReplyException e) {
+			return Base.forUnknown(e.getReply().getObject());
+		}
 	}
 }

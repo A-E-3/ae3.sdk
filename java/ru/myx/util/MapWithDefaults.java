@@ -74,10 +74,10 @@ public class MapWithDefaults<K, V> implements Map<K, V> {
 		if (this.isEmpty()) {
 			return Collections.emptySet();
 		}
-		return new AbstractSet<Map.Entry<K, V>>() {
+		return new AbstractSet<>() {
 			@Override
 			public Iterator<Map.Entry<K, V>> iterator() {
-				return new Iterator<Map.Entry<K, V>>() {
+				return new Iterator<>() {
 					private final Iterator<K>	e	= MapWithDefaults.this.keys();
 					
 					@Override
@@ -126,7 +126,7 @@ public class MapWithDefaults<K, V> implements Map<K, V> {
 	Iterator<K> keys() {
 		final Set<K> result = new TreeSet<>( this.defaults.keySet() );
 		result.addAll( this.values.keySet() );
-		return new Iterator<K>() {
+		return new Iterator<>() {
 			private final Iterator<K>	e	= result.iterator();
 			
 			private K					key;
@@ -153,7 +153,7 @@ public class MapWithDefaults<K, V> implements Map<K, V> {
 		if (this.isEmpty()) {
 			return Collections.emptySet();
 		}
-		return new AbstractSet<K>() {
+		return new AbstractSet<>() {
 			@Override
 			public Iterator<K> iterator() {
 				return MapWithDefaults.this.keys();
@@ -201,10 +201,10 @@ public class MapWithDefaults<K, V> implements Map<K, V> {
 		if (this.isEmpty()) {
 			return Collections.emptySet();
 		}
-		return new AbstractCollection<V>() {
+		return new AbstractCollection<>() {
 			@Override
 			public Iterator<V> iterator() {
-				return new Iterator<V>() {
+				return new Iterator<>() {
 					private final Iterator<K>	e	= MapWithDefaults.this.keys();
 					
 					@Override

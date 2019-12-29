@@ -3,8 +3,7 @@
  */
 package ru.myx.vm_vliw32_2010;
 
-import com.sun.istack.internal.NotNull;
-import com.sun.istack.internal.Nullable;
+
 
 import ru.myx.ae3.base.BaseObject;
 import ru.myx.ae3.base.BasePrimitiveString;
@@ -29,8 +28,7 @@ final class IA2_VACCESSDS_AS_0_SN_NXT extends InstructionIA2I {
 	}
 
 	@Override
-	@Nullable
-	public final ExecStateCode execCall(@NotNull final ExecProcess process) throws Exception {
+	public final ExecStateCode execCall(final ExecProcess process) throws Exception {
 		
 		final BaseObject argumentA = this.modifierA.argumentRead(process);
 
@@ -44,14 +42,12 @@ final class IA2_VACCESSDS_AS_0_SN_NXT extends InstructionIA2I {
 	}
 
 	@Override
-	@NotNull
 	public ModifierArgument getModifierA() {
 		
 		return this.modifierA;
 	}
 
 	@Override
-	@NotNull
 	public ModifierArgument getModifierB() {
 		
 		return ParseConstants.getConstantValue(this.argumentB).toConstantModifier();
@@ -64,7 +60,6 @@ final class IA2_VACCESSDS_AS_0_SN_NXT extends InstructionIA2I {
 	}
 
 	@Override
-	@NotNull
 	public final OperationA2X getOperation() {
 		
 		return OperationsS2X.VACCESS_DS;

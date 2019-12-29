@@ -5,7 +5,6 @@ package ru.myx.vm_vliw32_2010;
 
 import static ru.myx.ae3.exec.ModifierArguments.AA0RB;
 
-import com.sun.istack.internal.NotNull;
 
 import ru.myx.ae3.base.BaseObject;
 import ru.myx.ae3.exec.ExecProcess;
@@ -44,14 +43,12 @@ final class IA2_AXXX_AR_C_NN_NXT extends IA2_AAAA_XX_X_NN_NXT {
 	}
 
 	@Override
-	@NotNull
 	public ModifierArgument getModifierA() {
 		
 		return this.modifierA;
 	}
 
 	@Override
-	@NotNull
 	public ModifierArgument getModifierB() {
 		
 		return AA0RB;

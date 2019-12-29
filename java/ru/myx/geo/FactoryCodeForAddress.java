@@ -25,7 +25,7 @@ final class FactoryCodeForAddress implements ObjectFactory<Object, Function<Stri
 			"GEOGRAPHY/COUNTRY_CODE_FOR_ADDRESS", "GEOGRAPHY/COUNTRY_CODE_FOR_IP"
 	};
 	
-	private static final Function<String, String> FN_CODE_FOR_ADDRESS = new Function<String, String>() {
+	private static final Function<String, String> FN_CODE_FOR_ADDRESS = new Function<>() {
 
 		@Override
 		public String apply(String argument) {

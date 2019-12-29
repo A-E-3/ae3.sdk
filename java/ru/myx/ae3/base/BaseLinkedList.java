@@ -192,7 +192,7 @@ public class BaseLinkedList<T> extends LinkedList<T> implements BaseListNoOwnPro
 		
 		
 		final Iterator<T> iterator = this.iterator();
-		return new Iterator<BaseObject>() {
+		return new Iterator<>() {
 			
 			
 			@Override

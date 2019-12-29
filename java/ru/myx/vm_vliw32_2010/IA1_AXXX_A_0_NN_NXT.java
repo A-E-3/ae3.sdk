@@ -3,7 +3,6 @@
  */
 package ru.myx.vm_vliw32_2010;
 
-import com.sun.istack.internal.NotNull;
 
 import ru.myx.ae3.exec.ExecProcess;
 import ru.myx.ae3.exec.ExecStateCode;
@@ -39,7 +38,6 @@ final class IA1_AXXX_A_0_NN_NXT extends InstructionIA1I {
 	}
 	
 	@Override
-	@NotNull
 	public ModifierArgument getModifierA() {
 
 		return this.modifierA;
@@ -65,7 +63,6 @@ final class IA1_AXXX_A_0_NN_NXT extends InstructionIA1I {
 	}
 	
 	@Override
-	@NotNull
 	public ResultHandler getStore() {
 
 		return ResultHandler.FA_BNN_NXT;

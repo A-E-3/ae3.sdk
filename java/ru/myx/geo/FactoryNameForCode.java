@@ -25,7 +25,7 @@ final class FactoryNameForCode implements ObjectFactory<Object, Function<String,
 			"GEOGRAPHY/COUNTRY_NAME_FOR_CODE"
 	};
 
-	private static final Function<String, String> FN_NAME_FOR_CODE = new Function<String, String>() {
+	private static final Function<String, String> FN_NAME_FOR_CODE = new Function<>() {
 
 		@Override
 		public String apply(String argument) {

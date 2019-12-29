@@ -14,7 +14,7 @@ import ru.myx.ae3.help.Format;
  *            context class */
 public class OneJobThread<T> extends ContextThread<T> {
 
-	private static final Function<Object, Object> NULL_JOB = new Function<Object, Object>() {
+	private static final Function<Object, Object> NULL_JOB = new Function<>() {
 
 		@Override
 		public Object apply(final Object arg) {

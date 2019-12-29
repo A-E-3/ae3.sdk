@@ -3,7 +3,6 @@
  */
 package ru.myx.vm_vliw32_2010;
 
-import com.sun.istack.internal.NotNull;
 
 import ru.myx.ae3.exec.ExecProcess;
 import ru.myx.ae3.exec.ExecStateCode;
@@ -52,7 +51,6 @@ final class InstructionIA1E extends InstructionIA1A implements InstructionEditab
 	}
 
 	@Override
-	@NotNull
 	public ModifierArgument getModifierA() {
 		
 		return this.modifierA;

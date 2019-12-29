@@ -13,7 +13,7 @@ class TaskReadNumber extends TaskReadStringAbstract<Number> {
 	@Override
 	ConsoleTtyTask<?> onDoneRead(final ConsoleTty console, final String string) {
 		console.setStateNormal();
-		this.setResult( new Double( Double.parseDouble( string ) ) );
+		this.setResult( Double.valueOf( Double.parseDouble( string ) ) );
 		return null;
 	}
 	

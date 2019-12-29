@@ -22,7 +22,7 @@ import ru.myx.ae3.reflect.ReflectionIgnore;
 @ReflectionIgnore
 public abstract class AbstractServeRequest<T extends ServeRequestEditable<T>> extends AbstractMessage<T> implements ServeRequestEditable<T> {
 
-	static final Function<ReplyAnswer, Boolean> NUL_RESPONSE_TARGET = new Function<ReplyAnswer, Boolean>() {
+	static final Function<ReplyAnswer, Boolean> NUL_RESPONSE_TARGET = new Function<>() {
 		
 		@Override
 		public Boolean apply(final ReplyAnswer arg) {

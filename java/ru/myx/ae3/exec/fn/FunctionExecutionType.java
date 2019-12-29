@@ -1,54 +1,49 @@
 package ru.myx.ae3.exec.fn;
 
-/**
- * @author myx
- * 
- */
+/** @author myx */
 public enum FunctionExecutionType {
 	/**
-	 * 
+	 *
 	 */
 	ALWAYS {
 		//
 	},
 	/**
-	 * 
+	 *
 	 */
 	AUTO {
 		//
 	},
 	/**
-	 * 
+	 *
 	 */
 	BUFFERED {
 		//
 	},
 	/**
-	 * 
+	 *
 	 */
 	CACHE {
 		//
 	},
 	/**
-	 * 
+	 *
 	 */
 	DEFERRED {
 		//
 	},
 	/**
-	 * 
+	 *
 	 */
 	ONCE {
 		//
 	};
-	
-	/**
-	 * @param string
+
+	/** @param string
 	 * @param defaultValue
-	 * @return execution type
-	 */
+	 * @return execution type */
 	public static final FunctionExecutionType getExecutionType(final String string, final FunctionExecutionType defaultValue) {
-		
+
 		if (string == null) {
 			return defaultValue;
 		}
@@ -90,6 +85,7 @@ public enum FunctionExecutionType {
 				}
 				break;
 			}
+			default :
 		}
 		return defaultValue;
 	}

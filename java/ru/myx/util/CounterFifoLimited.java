@@ -144,7 +144,7 @@ public final class CounterFifoLimited extends Number {
 	 * @param value
 	 */
 	public void register(final double value) {
-		this.values.addLast( new Double( value ) );
+		this.values.addLast( Double.valueOf( value ) );
 		this.value += value;
 		++this.count;
 		if (value > this.maximum) {

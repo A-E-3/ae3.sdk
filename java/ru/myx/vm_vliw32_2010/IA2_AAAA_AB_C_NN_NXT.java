@@ -3,7 +3,6 @@
  */
 package ru.myx.vm_vliw32_2010;
 
-import com.sun.istack.internal.NotNull;
 
 import ru.myx.ae3.exec.ModifierArgument;
 
@@ -32,14 +31,12 @@ public abstract class IA2_AAAA_AB_C_NN_NXT extends IA2_AAAA_XX_X_NN_NXT {
 	}
 
 	@Override
-	@NotNull
 	public ModifierArgument getModifierA() {
 
 		return this.modifierA;
 	}
 
 	@Override
-	@NotNull
 	public ModifierArgument getModifierB() {
 
 		return this.modifierB;

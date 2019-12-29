@@ -3,7 +3,6 @@
  */
 package ru.myx.ae3.exec;
 
-import com.sun.istack.internal.NotNull;
 
 import ru.myx.ae3.base.BasePrimitiveString;
 import ru.myx.vm_vliw32_2010.InstructionIA1I;
@@ -34,7 +33,6 @@ final class IA10_XLOAD_P_F_0_SN_NXT extends InstructionIA1I {
 	}
 
 	@Override
-	@NotNull
 	public ModifierArgument getModifierA() {
 
 		return new ModifierArgumentA32FVIMM(this.argumentA);
@@ -60,7 +58,6 @@ final class IA10_XLOAD_P_F_0_SN_NXT extends InstructionIA1I {
 	}
 
 	@Override
-	@NotNull
 	public ResultHandler getStore() {
 
 		return ResultHandler.FB_BSN_NXT;

@@ -166,7 +166,7 @@ public class BaseNativeArray extends BaseNativeAbstract implements BaseProperty,
 			public Iterator<BaseObject> iterator() {
 				
 				final Iterator<?> iterator = c.iterator();
-				return new Iterator<BaseObject>() {
+				return new Iterator<>() {
 					
 					@Override
 					public boolean hasNext() {
@@ -205,7 +205,7 @@ public class BaseNativeArray extends BaseNativeAbstract implements BaseProperty,
 			public Iterator<BaseObject> iterator() {
 				
 				final Iterator<?> iterator = c.iterator();
-				return new Iterator<BaseObject>() {
+				return new Iterator<>() {
 					
 					@Override
 					public boolean hasNext() {
@@ -822,7 +822,7 @@ public class BaseNativeArray extends BaseNativeAbstract implements BaseProperty,
 	public Iterator<Object> iterator() {
 		
 		final Iterator<BaseObject> iterator = this.baseIterator();
-		return new Iterator<Object>() {
+		return new Iterator<>() {
 			
 			@Override
 			public boolean hasNext() {
@@ -866,7 +866,7 @@ public class BaseNativeArray extends BaseNativeAbstract implements BaseProperty,
 	public ListIterator<Object> listIterator(final int index) {
 		
 		final ListIterator<BaseObject> iterator = this.array.listIterator(index);
-		return new ListIterator<Object>() {
+		return new ListIterator<>() {
 			
 			@Override
 			public void add(final Object e) {

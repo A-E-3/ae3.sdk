@@ -112,7 +112,7 @@ public class BaseTreeSet<T extends Object> extends TreeSet<T> implements BaseObj
 		
 		
 		final Iterator<T> iterator = this.iterator();
-		return new Iterator<BaseObject>() {
+		return new Iterator<>() {
 			
 			
 			@Override

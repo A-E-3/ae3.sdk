@@ -1,6 +1,5 @@
 package ru.myx.ae3.exec.fn;
 
-import com.sun.istack.internal.NotNull;
 
 import ru.myx.ae3.base.Base;
 import ru.myx.ae3.base.BaseArray;
@@ -329,7 +328,7 @@ public final class FunctionReturnArgumentsObject extends BaseFunctionAbstract {
 
 	@Override
 	@ReflectionHidden
-	public String callSJ0(@NotNull final BaseObject instance) {
+	public String callSJ0(final BaseObject instance) {
 		
 		return "[ExecArguments]";
 	}

@@ -68,7 +68,7 @@ public class IpGeography {
 	
 	static {
 		for (int i = IpGeography.COUNTRIES.length - 1; i >= 0; --i) {
-			IpGeography.COUNTRY_TO_INDEX.put(IpGeography.COUNTRIES[i], new Integer(i));
+			IpGeography.COUNTRY_TO_INDEX.put(IpGeography.COUNTRIES[i], Integer.valueOf(i));
 		}
 	}
 	

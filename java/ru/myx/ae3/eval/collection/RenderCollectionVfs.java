@@ -1,8 +1,8 @@
 package ru.myx.ae3.eval.collection;
 
 import java.nio.charset.Charset;
-
 import java.util.function.Function;
+
 import ru.myx.ae3.binary.Transfer;
 import ru.myx.ae3.binary.TransferBuffer;
 import ru.myx.ae3.cache.Cache;
@@ -12,33 +12,29 @@ import ru.myx.ae3.eval.LanguageImpl;
 import ru.myx.ae3.exec.ProgramPart;
 import ru.myx.ae3.vfs.Entry;
 
-/**
- * @author myx
- * 
- */
+/** @author myx */
 public final class RenderCollectionVfs extends RenderCollectionAbstract {
-
-	private static final CacheL2<RenderCacheEntry> cache = Cache.createL2("vfs_collections", "Prepared Renderers From File Collections");
-
+	
+	private static final CacheL2<RenderCacheEntry> CACHE = Cache.createL2("vfs_collections", "Prepared Renderers From File Collections");
+	
 	private final Entry root;
-
+	
 	private final String cacheId;
-
+	
 	private final Charset charset;
-
+	
 	private final String extensionSuffix;
-
+	
 	private Function<String, String> characterSource = null;
-
+	
 	private Function<String, TransferBuffer> binarySource = null;
-
-	/**
-	 * @param charset
+	
+	/** @param charset
 	 * @param root
 	 * @param renderer
-	 * @param extensionSuffix
-	 */
+	 * @param extensionSuffix */
 	public RenderCollectionVfs(final Charset charset, final Entry root, final LanguageImpl renderer, final String extensionSuffix) {
+		
 		super(renderer);
 		this.root = root;
 		this.charset = charset;
@@ -47,27 +43,20 @@ public final class RenderCollectionVfs extends RenderCollectionAbstract {
 			: extensionSuffix;
 		this.cacheId = "RCV:" + String.valueOf(System.identityHashCode(this));
 	}
-
-	@Override
-	protected void finalize() throws Throwable {
-
-		RenderCollectionVfs.cache.remove(this.cacheId);
-		super.finalize();
-	}
-
+	
 	@Override
 	public final Function<String, TransferBuffer> getBinarySource() {
-
+		
 		if (this.binarySource == null) {
 			synchronized (this) {
 				if (this.binarySource == null) {
 					final Entry root = this.root;
 					// final String extensionSuffix = this.extensionSuffix;
-					this.binarySource = new Function<String, TransferBuffer>() {
-
+					this.binarySource = new Function<>() {
+						
 						@Override
 						public TransferBuffer apply(final String argument) {
-
+							
 							final Entry file = root.relative(
 									argument,
 									// extensionSuffix == null
@@ -78,10 +67,10 @@ public final class RenderCollectionVfs extends RenderCollectionAbstract {
 								? file.toBinary().getBinaryContent().baseValue().nextCopy()
 								: null;
 						}
-
+						
 						@Override
 						public String toString() {
-
+							
 							return "binary(" + RenderCollectionVfs.this.toString() + ")";
 						}
 					};
@@ -90,21 +79,21 @@ public final class RenderCollectionVfs extends RenderCollectionAbstract {
 		}
 		return this.binarySource;
 	}
-
+	
 	@Override
 	public final Function<String, String> getCharacterSource() {
-
+		
 		if (this.characterSource == null) {
 			synchronized (this) {
 				if (this.characterSource == null) {
 					final Entry root = this.root;
 					// final String extensionSuffix = this.extensionSuffix;
 					final Charset charset = this.charset;
-					this.characterSource = new Function<String, String>() {
-
+					this.characterSource = new Function<>() {
+						
 						@Override
 						public String apply(final String argument) throws Transfer.TransferOperationException {
-
+							
 							final Entry file = root.relative(
 									argument,
 									// extensionSuffix == null
@@ -115,10 +104,10 @@ public final class RenderCollectionVfs extends RenderCollectionAbstract {
 								? file.toBinary().getBinaryContent().baseValue().toString(charset)
 								: null;
 						}
-
+						
 						@Override
 						public String toString() {
-
+							
 							return "character(" + RenderCollectionVfs.this.toString() + ")";
 						}
 					};
@@ -127,15 +116,15 @@ public final class RenderCollectionVfs extends RenderCollectionAbstract {
 		}
 		return this.characterSource;
 	}
-
+	
 	@Override
 	public final ProgramPart prepare(final String argument) throws Throwable {
-
+		
 		final String extensionSuffix = this.extensionSuffix;
 		final String name = extensionSuffix == null
 			? argument
 			: argument + extensionSuffix;
-		final RenderCacheEntry cached = RenderCollectionVfs.cache.get(this.cacheId, name);
+		final RenderCacheEntry cached = RenderCollectionVfs.CACHE.get(this.cacheId, name);
 		final Entry file = this.root.relative(name, null);
 		if (file != null && file.isExist() && file.isBinary()) {
 			final long modified = file.getLastModified();
@@ -147,7 +136,7 @@ public final class RenderCollectionVfs extends RenderCollectionAbstract {
 					this + "/" + name,
 					this.getCharacterSource(),
 					name);
-			RenderCollectionVfs.cache.put(
+			RenderCollectionVfs.CACHE.put(
 					this.cacheId, //
 					name,
 					new RenderCacheEntry(prepared, modified),
@@ -159,10 +148,10 @@ public final class RenderCollectionVfs extends RenderCollectionAbstract {
 		}
 		return null;
 	}
-
+	
 	@Override
 	public String toString() {
-
+		
 		return "[object " + this.baseClass() + "(" + "identityHashCode:" + System.identityHashCode(this) + ", location:" + this.root.getLocation() + ")]";
 	}
 }

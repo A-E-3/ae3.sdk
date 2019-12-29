@@ -1,12 +1,9 @@
 /**
- * 
+ *
  */
 package ru.myx.ae3.mime;
 
-/**
- * @author myx
- * 
- */
+/** @author myx */
 public enum MimeMediaType {
 	/**
 	 */
@@ -53,11 +50,11 @@ public enum MimeMediaType {
 	OTHER(null, MimeTypeCompressibility.DEFAULT),
 	//
 	;
-	/**
-	 * @param name
-	 * @return
-	 */
+
+	/** @param name
+	 * @return */
 	public static final MimeMediaType getMediaTypeForName(final String name) {
+
 		if (name == null) {
 			return OTHER;
 		}
@@ -65,79 +62,79 @@ public enum MimeMediaType {
 		if (length < 2) {
 			return OTHER;
 		}
-		switch (name.charAt( 0 )) {
-		case 'a': {
-			if (length == 11 && "application".equals( name )) {
-				return APPLICATION;
+		switch (name.charAt(0)) {
+			case 'a' : {
+				if (length == 11 && "application".equals(name)) {
+					return APPLICATION;
+				}
+				if (length == 5 && "audio".equals(name)) {
+					return AUDIO;
+				}
+				return OTHER;
 			}
-			if (length == 5 && "audio".equals( name )) {
-				return AUDIO;
+			case 'e' : {
+				if (length == 7 && "example".equals(name)) {
+					return EXAMPLE;
+				}
+				return OTHER;
 			}
-			return OTHER;
-		}
-		case 'e': {
-			if (length == 7 && "example".equals( name )) {
-				return EXAMPLE;
+			case 'i' : {
+				if (length == 5 && "image".equals(name)) {
+					return IMAGE;
+				}
+				return OTHER;
 			}
-			return OTHER;
-		}
-		case 'i': {
-			if (length == 5 && "image".equals( name )) {
-				return IMAGE;
+			case 'm' : {
+				if (length == 7 && "message".equals(name)) {
+					return MESSAGE;
+				}
+				if (length == 5 && "model".equals(name)) {
+					return MODEL;
+				}
+				if (length == 9 && "multipart".equals(name)) {
+					return MULTIPART;
+				}
+				return OTHER;
 			}
-			return OTHER;
-		}
-		case 'm': {
-			if (length == 7 && "message".equals( name )) {
-				return MESSAGE;
+			case 't' : {
+				if (length == 4 && "text".equals(name)) {
+					return TEXT;
+				}
+				return OTHER;
 			}
-			if (length == 5 && "model".equals( name )) {
-				return MODEL;
+			case 'v' : {
+				if (length == 5 && "video".equals(name)) {
+					return VIDEO;
+				}
+				if (length == 3 && "vnd".equals(name)) {
+					return VND;
+				}
+				return OTHER;
 			}
-			if (length == 9 && "multipart".equals( name )) {
-				return MULTIPART;
-			}
-			return OTHER;
-		}
-		case 't': {
-			if (length == 4 && "text".equals( name )) {
-				return TEXT;
-			}
-			return OTHER;
-		}
-		case 'v': {
-			if (length == 5 && "video".equals( name )) {
-				return VIDEO;
-			}
-			if (length == 3 && "vnd".equals( name )) {
-				return VND;
-			}
-			return OTHER;
-		}
+			default :
 		}
 		return OTHER;
 	}
-	
-	private final String					name;
-	
-	private final MimeTypeCompressibility	compression;
-	
+
+	private final String name;
+
+	private final MimeTypeCompressibility compression;
+
 	MimeMediaType(final String name, final MimeTypeCompressibility compression) {
+
 		this.name = name;
 		this.compression = compression;
 	}
-	
-	/**
-	 * @return
-	 */
+
+	/** @return */
 	public final MimeTypeCompressibility getCompressibility() {
+
 		return this.compression;
 	}
-	
-	/**
-	 * @return null for OTHER
-	 */
+
+	/** @return null for OTHER */
 	public final String getName() {
+
 		return this.name;
 	}
 }

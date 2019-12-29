@@ -524,23 +524,23 @@ public final class BaseMapSqlResultSet implements BaseHost, BaseMap, BaseArray, 
 					final long l = this.record.getLong(index);
 					final double d = this.record.getDouble(index);
 					return l == d
-						? (Number) new Long(l)
-						: (Number) new Double(d);
+						? (Number) Long.valueOf(l)
+						: (Number) Double.valueOf(d);
 				}
 				case java.sql.Types.DOUBLE : {
-					return new Double(this.record.getDouble(index));
+					return Double.valueOf(this.record.getDouble(index));
 				}
 				case java.sql.Types.FLOAT : {
-					return new Float(this.record.getFloat(index));
+					return Float.valueOf(this.record.getFloat(index));
 				}
 				case java.sql.Types.INTEGER : {
-					return new Integer(this.record.getInt(index));
+					return Integer.valueOf(this.record.getInt(index));
 				}
 				case java.sql.Types.BIGINT : {
-					return new Long(this.record.getLong(index));
+					return Long.valueOf(this.record.getLong(index));
 				}
 				case java.sql.Types.SMALLINT : {
-					return new Integer(this.record.getInt(index));
+					return Integer.valueOf(this.record.getInt(index));
 				}
 				case java.sql.Types.BIT : {
 					return this.record.getBoolean(index)

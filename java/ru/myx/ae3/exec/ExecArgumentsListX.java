@@ -103,7 +103,7 @@ public final class ExecArgumentsListX extends ExecArgumentsAbstractList {
 
 		final BaseObject[] value = this.arguments;
 		final int size = value.length;
-		return new Iterator<BaseObject>() {
+		return new Iterator<>() {
 
 			private int index = 0;
 
@@ -147,7 +147,7 @@ public final class ExecArgumentsListX extends ExecArgumentsAbstractList {
 
 		final BaseObject[] value = this.arguments;
 		final int size = value.length;
-		return new Iterator<Object>() {
+		return new Iterator<>() {
 
 			private int index = 0;
 

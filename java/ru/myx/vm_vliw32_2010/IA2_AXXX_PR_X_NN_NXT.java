@@ -6,7 +6,6 @@ package ru.myx.vm_vliw32_2010;
 import static ru.myx.ae3.exec.ModifierArguments.AA0RB;
 import static ru.myx.ae3.exec.ModifierArguments.AE21POP;
 
-import com.sun.istack.internal.NotNull;
 
 import ru.myx.ae3.exec.ExecProcess;
 import ru.myx.ae3.exec.ExecStateCode;
@@ -44,14 +43,12 @@ final class IA2_AXXX_PR_X_NN_NXT extends InstructionIA2I {
 	}
 	
 	@Override
-	@NotNull
 	public ModifierArgument getModifierA() {
 
 		return AE21POP;
 	}
 	
 	@Override
-	@NotNull
 	public ModifierArgument getModifierB() {
 
 		return AA0RB;
@@ -76,7 +73,6 @@ final class IA2_AXXX_PR_X_NN_NXT extends InstructionIA2I {
 	}
 	
 	@Override
-	@NotNull
 	public ResultHandler getStore() {
 
 		return ResultHandler.FA_BNN_NXT;

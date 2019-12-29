@@ -1021,7 +1021,7 @@ public class ProgramAssembly {
 			final BasePrimitive<?> primitive = constant.baseToPrimitive(null);
 			Integer position = this.constantMap.get(primitive);
 			if (position == null) {
-				position = new Integer(this.constants.size());
+				position = Integer.valueOf(this.constants.size());
 				this.constantMap.put(primitive, position);
 				this.constants.add(ParseConstants.getConstantValue(constant));
 			}
@@ -1048,7 +1048,7 @@ public class ProgramAssembly {
 		final BasePrimitiveString primitive = Base.forString(constant);
 		Integer position = this.constantMap.get(primitive);
 		if (position == null) {
-			position = new Integer(this.constants.size());
+			position = Integer.valueOf(this.constants.size());
 			this.constantMap.put(primitive, position);
 			this.constants.add(ParseConstants.getConstantValue(primitive));
 		}
@@ -1071,7 +1071,7 @@ public class ProgramAssembly {
 			final BasePrimitive<?> primitive = value.baseToPrimitive(null);
 			Integer position = this.constantMap.get(primitive);
 			if (position == null) {
-				position = new Integer(this.constants.size());
+				position = Integer.valueOf(this.constants.size());
 				this.constantMap.put(primitive, position);
 				this.constants.add(constant);
 			}

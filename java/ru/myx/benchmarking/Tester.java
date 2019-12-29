@@ -1,25 +1,22 @@
 /**
  * Created on 06.02.2003
- * 
+ *
  * myx - barachta */
 package ru.myx.benchmarking;
 
-import ru.myx.ae3.act.Act;
 import java.util.function.Function;
+
+import ru.myx.ae3.act.Act;
 import ru.myx.ae3.act.ContextThread;
 import ru.myx.ae3.exec.Exec;
 import ru.myx.ae3.exec.ExecProcess;
 import ru.myx.ae3.help.Format;
 import ru.myx.ae3.report.Report;
 
-/**
- * @author myx
- * 		
- * myx - barachta 
- *         "typecomment": Window>Preferences>Java>Templates. To enable and
- *         disable the creation of type comments go to
- *         Window>Preferences>Java>Code Generation.
- */
+/** @author myx
+ *
+ *         myx - barachta "typecomment": Window>Preferences>Java>Templates. To enable and disable
+ *         the creation of type comments go to Window>Preferences>Java>Code Generation. */
 final class Tester extends ContextThread<ExecProcess> {
 	
 	private final Queue q;
@@ -29,6 +26,7 @@ final class Tester extends ContextThread<ExecProcess> {
 	long started = 0;
 	
 	Tester(final Queue queue) {
+
 		super(Exec.getRootProcess(), "Microbenchmark tester thread");
 		this.setPriority(Thread.MAX_PRIORITY);
 		this.setDaemon(false);
@@ -54,10 +52,7 @@ final class Tester extends ContextThread<ExecProcess> {
 					final Function<Object, ?> test = request.test;
 					final Object argument = request.argument;
 					Benchmark.LOG.event(Benchmark.OWNER, "INFO", "starting test=" + test + ".");
-					// Compiler.enable();
-					// Compiler.compileClass(test.getClass());
 					double bestIterationTime = Double.POSITIVE_INFINITY;
-					// Compiler.disable();
 					try {
 						for (int loops = 6; loops > 0; loops--) {
 							if (Report.MODE_DEBUG) {
@@ -109,7 +104,6 @@ final class Tester extends ContextThread<ExecProcess> {
 					Act.launch(request.context, new Feedback(request.target, null, bestIterationTime - bestOverheadIterationTime, bestIterationTime));
 				}
 			} finally {
-				// Compiler.enable();
 				controller.stop = true;
 			}
 		} catch (final Exception e) {

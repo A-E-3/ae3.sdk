@@ -25,7 +25,7 @@ public class CoarseDelayCache implements BaseHost, BaseObjectNoOwnProperties {
 
 	private static final ExecProcess ROOT = Exec.createProcess(Exec.getRootProcess(), "CoarseDelayCache cleaner loop");
 
-	private static final Function<CoarseDelayCache, Void> TASK = new Function<CoarseDelayCache, Void>() {
+	private static final Function<CoarseDelayCache, Void> TASK = new Function<>() {
 
 		@Override
 		public Void apply(final CoarseDelayCache arg) {

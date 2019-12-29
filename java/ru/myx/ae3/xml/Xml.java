@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;
@@ -476,9 +478,7 @@ public final class Xml {
 			}
 			/** end of oops. */
 			
-		} catch (final SAXException e) {
-			throw new RuntimeException("Identity: " + identity, e);
-		} catch (final IOException e) {
+		} catch (ParserConfigurationException | SAXException | IOException e) {
 			throw new RuntimeException("Identity: " + identity, e);
 		} finally {
 			/** oops - there's no way to reset parser (internal sax parser) at the moment so the
@@ -494,12 +494,8 @@ public final class Xml {
 	 * @param handler
 	 * @param attachment
 	 * @return map */
-	public static final BaseObject toBase(final String identity,
-			final TransferCopier xml,
-			final Charset charsetOverride,
-			final String uri,
-			final ExternalHandler handler,
-			final Object attachment) {
+	public static final BaseObject
+			toBase(final String identity, final TransferCopier xml, final Charset charsetOverride, final String uri, final ExternalHandler handler, final Object attachment) {
 
 		if (xml == null || xml.length() == 0) {
 			return BaseObject.UNDEFINED;
@@ -536,9 +532,7 @@ public final class Xml {
 			}
 			/** end of oops. */
 			
-		} catch (final SAXException e) {
-			throw new RuntimeException("Identity: " + identity, e);
-		} catch (final IOException e) {
+		} catch (ParserConfigurationException | SAXException | IOException e) {
 			throw new RuntimeException("Identity: " + identity, e);
 		} finally {
 			/** oops - there's no way to reset parser (internal sax parser) at the moment so the
@@ -735,12 +729,8 @@ public final class Xml {
 	 * @param attachment
 	 * @param maxFieldLength
 	 * @return element */
-	public static final Element toElement(final String rootName,
-			final BaseObject object,
-			final boolean readable,
-			final ExternalHandler handler,
-			final Object attachment,
-			final int maxFieldLength) {
+	public static final Element
+			toElement(final String rootName, final BaseObject object, final boolean readable, final ExternalHandler handler, final Object attachment, final int maxFieldLength) {
 
 		final Document doc = Dom.createDocument();
 		final Element element = Dom.createElement(doc, rootName);
@@ -950,12 +940,9 @@ public final class Xml {
 	 * @param handler
 	 * @param attachment
 	 * @return map */
-	public static final <T extends BaseObject> T toMap(final String identity,
-			final CharSequence xml,
-			final String uri,
-			final T target,
-			final ExternalHandler handler,
-			final Object attachment) {
+	public static final <T extends BaseObject>
+			T
+			toMap(final String identity, final CharSequence xml, final String uri, final T target, final ExternalHandler handler, final Object attachment) {
 
 		assert target != null : "Target object must not be NULL";
 		if (xml == null || xml.length() == 0) {
@@ -996,7 +983,7 @@ public final class Xml {
 						? "Identity: " + identity + ", xml=" + Format.Ecma.string(xmlString)
 						: "Identity: " + identity, //
 					e);
-		} catch (final IOException e) {
+		} catch (ParserConfigurationException | IOException e) {
 			throw new RuntimeException("Identity: " + identity, e);
 		} finally {
 			/** oops - there's no way to reset parser (internal sax parser) at the moment so the
@@ -1060,9 +1047,7 @@ public final class Xml {
 			}
 			/** end of oops. */
 			
-		} catch (final SAXException e) {
-			throw new RuntimeException("Identity: " + identity, e);
-		} catch (final IOException e) {
+		} catch (ParserConfigurationException | SAXException | IOException e) {
 			throw new RuntimeException("Identity: " + identity, e);
 		} finally {
 			/** oops - there's no way to reset parser (internal sax parser) at the moment so the
@@ -1134,9 +1119,11 @@ public final class Xml {
 			}
 			if (o.baseIsPrimitiveBoolean()) {
 				target.setAttribute("class", "boolean");
-				target.appendChild(doc.createTextNode(o.baseToJavaBoolean()
-					? "true"
-					: "false"));
+				target.appendChild(
+						doc.createTextNode(
+								o.baseToJavaBoolean()
+									? "true"
+									: "false"));
 				return target;
 			}
 			if (o.baseIsPrimitiveInteger()) {
@@ -1257,9 +1244,13 @@ public final class Xml {
 			}
 			target.setAttribute("class", "copier");
 			target.setAttribute("type", "base64");
-			target.appendChild(doc.createCDATASection(Base64.encode(((TransferCopier) o)//
-					.nextCopy()//
-					.toDirectArray(), true)));
+			target.appendChild(
+					doc.createCDATASection(
+							Base64.encode(
+									((TransferCopier) o)//
+											.nextCopy()//
+											.toDirectArray(),
+									true)));
 			return target;
 		}
 		if (o instanceof ControlFieldset<?>) {
@@ -1346,11 +1337,13 @@ public final class Xml {
 		if (o instanceof Date) {
 			final Date date = (Date) o;
 			target.setAttribute("class", "date");
-			target.setAttribute("value", date == BaseDate.NOW
-				? "now"
-				: date == BaseDate.UNKNOWN
-					? "undefined"
-					: Long.toString(date.getTime()));
+			target.setAttribute(
+					"value",
+					date == BaseDate.NOW
+						? "now"
+						: date == BaseDate.UNKNOWN
+							? "undefined"
+							: Long.toString(date.getTime()));
 			target.appendChild(doc.createTextNode(date.toString()));
 			return target;
 		}
@@ -1442,9 +1435,11 @@ public final class Xml {
 		}
 		if (cls == Boolean.class || cls == boolean.class) {
 			target.setAttribute("class", "boolean");
-			target.appendChild(doc.createTextNode(((Boolean) o).booleanValue()
-				? "true"
-				: "false"));
+			target.appendChild(
+					doc.createTextNode(
+							((Boolean) o).booleanValue()
+								? "true"
+								: "false"));
 			return target;
 		}
 		if (cls == Integer.class || cls == int.class) {
@@ -1669,9 +1664,13 @@ public final class Xml {
 			}
 			target.setAttribute("class", "copier");
 			target.setAttribute("type", "base64");
-			target.appendChild(doc.createCDATASection(Base64.encode(((TransferCopier) o)//
-					.nextCopy()//
-					.toDirectArray(), true)));
+			target.appendChild(
+					doc.createCDATASection(
+							Base64.encode(
+									((TransferCopier) o)//
+											.nextCopy()//
+											.toDirectArray(),
+									true)));
 			return target;
 		}
 		if (o instanceof BaseMessage) {
@@ -1725,24 +1724,28 @@ public final class Xml {
 		if (o instanceof Date) {
 			final Date date = (Date) o;
 			target.setAttribute("class", "date");
-			target.setAttribute("value", date == BaseDate.NOW
-				? "now"
-				: date == BaseDate.UNKNOWN
-					? "undefined"
-					: Long.toString(date.getTime()));
+			target.setAttribute(
+					"value",
+					date == BaseDate.NOW
+						? "now"
+						: date == BaseDate.UNKNOWN
+							? "undefined"
+							: Long.toString(date.getTime()));
 			target.appendChild(doc.createTextNode(date.toString()));
 			return target;
 		}
 		if (o instanceof Number) {
 			final Number number = (Number) o;
 			target.setAttribute("class", "number");
-			target.setAttribute("type", number instanceof Integer
-				? "integer"
-				: number instanceof Long
-					? "long"
-					: number instanceof Float
-						? "float"
-						: "double");
+			target.setAttribute(
+					"type",
+					number instanceof Integer
+						? "integer"
+						: number instanceof Long
+							? "long"
+							: number instanceof Float
+								? "float"
+								: "double");
 			target.appendChild(doc.createTextNode(number.toString()));
 			return target;
 		}
@@ -1770,12 +1773,8 @@ public final class Xml {
 	 * @param attachment
 	 * @param maxFieldLength
 	 * @return string */
-	public static final TransferCopier toXmlBinary(final String rootName,
-			final BaseObject object,
-			final boolean readable,
-			final ExternalHandler handler,
-			final Object attachment,
-			final int maxFieldLength) {
+	public static final TransferCopier
+			toXmlBinary(final String rootName, final BaseObject object, final boolean readable, final ExternalHandler handler, final Object attachment, final int maxFieldLength) {
 
 		final Document doc = Dom.createDocument();
 		final Element element = Dom.createElement(doc, rootName);
@@ -1786,12 +1785,8 @@ public final class Xml {
 			: Dom.toXmlCompactBinary(element);
 	}
 	
-	private static final TransferCopier toXmlBinary(final String name,
-			final Map<?, ?> map,
-			final boolean readable,
-			final ExternalHandler handler,
-			final Object attachment,
-			final int maxFieldLength) {
+	private static final TransferCopier
+			toXmlBinary(final String name, final Map<?, ?> map, final boolean readable, final ExternalHandler handler, final Object attachment, final int maxFieldLength) {
 
 		if (map == null || map.isEmpty()) {
 			final int length = name.length();
@@ -1838,12 +1833,8 @@ public final class Xml {
 	 * @param attachment
 	 * @param maxFieldLength
 	 * @return string */
-	public static final String toXmlString(final String rootName,
-			final BaseObject map,
-			final boolean readable,
-			final ExternalHandler handler,
-			final Object attachment,
-			final int maxFieldLength) {
+	public static final String
+			toXmlString(final String rootName, final BaseObject map, final boolean readable, final ExternalHandler handler, final Object attachment, final int maxFieldLength) {
 
 		final Document doc = Dom.createDocument();
 		final Element element = Dom.createElement(doc, rootName);

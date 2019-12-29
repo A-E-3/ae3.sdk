@@ -537,7 +537,7 @@ public class Geography {
 		COUNTRY_INDEX_FOR_CODE = new HashMap<>();
 		{
 			for (int i = Geography.COUNTRY_CODES.length - 1; i >= 0; --i) {
-				Geography.COUNTRY_INDEX_FOR_CODE.put(Geography.COUNTRY_CODES[i].toUpperCase(), new Integer(i));
+				Geography.COUNTRY_INDEX_FOR_CODE.put(Geography.COUNTRY_CODES[i].toUpperCase(), Integer.valueOf(i));
 			}
 		}
 	}

@@ -3,7 +3,6 @@
  */
 package ru.myx.vm_vliw32_2010;
 
-import com.sun.istack.internal.NotNull;
 
 import ru.myx.ae3.base.BaseObject;
 import ru.myx.ae3.eval.parse.ParseConstants;
@@ -62,14 +61,12 @@ final class IA3_AXXX_AOC_C_NN_NXT extends InstructionIA3I {
 	}
 
 	@Override
-	@NotNull
 	public ModifierArgument getModifierA() {
 		
 		return this.modifierA;
 	}
 
 	@Override
-	@NotNull
 	public ModifierArgument getModifierB() {
 		
 		return this.modifierB == null
@@ -78,7 +75,6 @@ final class IA3_AXXX_AOC_C_NN_NXT extends InstructionIA3I {
 	}
 
 	@Override
-	@NotNull
 	public ModifierArgument getModifierC() {
 		
 		return this.modifierC;
@@ -105,7 +101,6 @@ final class IA3_AXXX_AOC_C_NN_NXT extends InstructionIA3I {
 	}
 
 	@Override
-	@NotNull
 	public ResultHandler getStore() {
 		
 		return ResultHandler.FA_BNN_NXT;
