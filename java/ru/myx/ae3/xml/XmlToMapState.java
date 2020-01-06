@@ -28,47 +28,41 @@ import ru.myx.ae3.help.Format;
 import ru.myx.ae3.produce.BaseProduceReferenceCached;
 import ru.myx.ae3.transform.Transform;
 
-/**
- * @author myx
- */
+/** @author myx */
 enum XmlToMapState {
 	/**
 	 *
 	 */
 	BOOLEAN {
-		
-		
+
 		@Override
 		public void onCharacters(final XmlToMapContentHandler handler, final char[] buffer, final int offset, final int length) {
-			
-			
+
 			handler.stringBuilder.append(buffer, offset, length);
 		}
-		
+
 		@Override
 		public void onChildElementEnd(final XmlToMapContentHandler handler) {
-			
-			
+
 			// empty
 		}
-		
+
 		@Override
 		public void onChildElementStart(final XmlToMapContentHandler handler, final String name, final Attributes attributes) {
-			
-			
+
 			throw new IllegalStateException("Unexpected element!");
 		}
-		
+
 		@Override
 		public void onThisElementEnd(final XmlToMapContentHandler handler) {
-			
-			
+
 			if (handler.stringBuilder.length() == 0) {
 				handler.put(BaseObject.FALSE);
 			} else {
-				handler.put(Convert.Any.toBoolean(handler.stringBuilder.toString(), false)
-					? BaseObject.TRUE
-					: BaseObject.FALSE);
+				handler.put(
+						Convert.Any.toBoolean(handler.stringBuilder.toString(), false)
+							? BaseObject.TRUE
+							: BaseObject.FALSE);
 				handler.stringBuilder.setLength(0);
 			}
 			handler.targetName = Convert.Any.toAny(handler.pop());
@@ -76,11 +70,10 @@ enum XmlToMapState {
 			assert handler.state != null : "state should never be NULL";
 			handler.state.onChildElementEnd(handler);
 		}
-		
+
 		@Override
 		public void onWhitespace(final XmlToMapContentHandler handler, final char[] buffer, final int offset, final int length) {
-			
-			
+
 			// empty
 		}
 	},
@@ -88,42 +81,36 @@ enum XmlToMapState {
 	 *
 	 */
 	CONTENTLESS {
-		
-		
+
 		@Override
 		public void onCharacters(final XmlToMapContentHandler handler, final char[] buffer, final int offset, final int length) {
-			
-			
+
 			// empty
 		}
-		
+
 		@Override
 		public void onChildElementEnd(final XmlToMapContentHandler handler) {
-			
-			
+
 			// empty
 		}
-		
+
 		@Override
 		public void onChildElementStart(final XmlToMapContentHandler handler, final String name, final Attributes attributes) {
-			
-			
+
 			throw new IllegalStateException("Unexpected element {name=" + name + ", attrs=" + Format.Describe.toEcmaSource(attributes, "") + "}, handler=" + handler);
 		}
-		
+
 		@Override
 		public void onThisElementEnd(final XmlToMapContentHandler handler) {
-			
-			
+
 			handler.state = (XmlToMapState) handler.pop();
 			assert handler.state != null : "state should never be NULL";
 			handler.state.onChildElementEnd(handler);
 		}
-		
+
 		@Override
 		public void onWhitespace(final XmlToMapContentHandler handler, final char[] buffer, final int offset, final int length) {
-			
-			
+
 			// empty
 		}
 	},
@@ -131,33 +118,28 @@ enum XmlToMapState {
 	 *
 	 */
 	COPIER64 {
-		
-		
+
 		@Override
 		public void onCharacters(final XmlToMapContentHandler handler, final char[] buffer, final int offset, final int length) {
-			
-			
+
 			handler.fillBase64(buffer, offset, length);
 		}
-		
+
 		@Override
 		public void onChildElementEnd(final XmlToMapContentHandler handler) {
-			
-			
+
 			// empty
 		}
-		
+
 		@Override
 		public void onChildElementStart(final XmlToMapContentHandler handler, final String name, final Attributes attributes) {
-			
-			
+
 			throw new IllegalStateException("Unexpected element!");
 		}
-		
+
 		@Override
 		public void onThisElementEnd(final XmlToMapContentHandler handler) {
-			
-			
+
 			handler.flushBase64();
 			final TransferCopier copier = handler.targetCollector.toBinary();
 			handler.put(copier);
@@ -167,11 +149,10 @@ enum XmlToMapState {
 			assert handler.state != null : "state should never be NULL";
 			handler.state.onChildElementEnd(handler);
 		}
-		
+
 		@Override
 		public void onWhitespace(final XmlToMapContentHandler handler, final char[] buffer, final int offset, final int length) {
-			
-			
+
 			// ignore
 		}
 	},
@@ -179,28 +160,24 @@ enum XmlToMapState {
 	 *
 	 */
 	FIELDSET {
-		
-		
+
 		@Override
 		public void onCharacters(final XmlToMapContentHandler handler, final char[] buffer, final int offset, final int length) {
-			
-			
+
 			// ignore
 		}
-		
+
 		@Override
 		public void onChildElementEnd(final XmlToMapContentHandler handler) {
-			
-			
+
 			final BaseObject data = Convert.Any.toAny(handler.pop());
 			final ControlFieldset<?> fieldset = Convert.Any.toAny(handler.peek());
 			fieldset.add(ControlFieldFactory.createField(Base.getString(data, "class", "string"), data));
 		}
-		
+
 		@Override
 		public void onChildElementStart(final XmlToMapContentHandler handler, final String name, final Attributes attributes) {
-			
-			
+
 			if ("field".equals(name)) {
 				final BaseObject data = new BaseNativeObject();
 				for (int i = attributes.getLength() - 1; i >= 0; --i) {
@@ -220,21 +197,19 @@ enum XmlToMapState {
 			}
 			throw new IllegalStateException("Unexpected element!");
 		}
-		
+
 		@Override
 		public void onThisElementEnd(final XmlToMapContentHandler handler) {
-			
-			
+
 			handler.pop();
 			handler.state = (XmlToMapState) handler.pop();
 			assert handler.state != null : "state should never be NULL";
 			handler.state.onChildElementEnd(handler);
 		}
-		
+
 		@Override
 		public void onWhitespace(final XmlToMapContentHandler handler, final char[] buffer, final int offset, final int length) {
-			
-			
+
 			// empty
 		}
 	},
@@ -242,33 +217,28 @@ enum XmlToMapState {
 	 *
 	 */
 	LIST {
-		
-		
+
 		@Override
 		public void onCharacters(final XmlToMapContentHandler handler, final char[] buffer, final int offset, final int length) {
-			
-			
+
 			// ignore
 		}
-		
+
 		@Override
 		public void onChildElementEnd(final XmlToMapContentHandler handler) {
-			
-			
+
 			// empty
 		}
-		
+
 		@Override
 		public void onChildElementStart(final XmlToMapContentHandler handler, final String name, final Attributes attributes) {
-			
-			
+
 			XmlToMapState.MAP.onChildElementStart(handler, name, attributes);
 		}
-		
+
 		@Override
 		public void onThisElementEnd(final XmlToMapContentHandler handler) {
-			
-			
+
 			final XmlMultiple multiple = (XmlMultiple) handler.targetMap;
 			{
 				final BaseObject list = multiple.baseGet(handler.targetName, BaseObject.UNDEFINED);
@@ -290,7 +260,7 @@ enum XmlToMapState {
 				}
 				multiple.baseDelete(handler.targetName);
 			}
-			
+
 			handler.targetMap = Convert.Any.toAny(handler.pop());
 			handler.targetName = (String) handler.pop();
 			handler.order = Convert.Any.toAny(handler.pop());
@@ -298,11 +268,10 @@ enum XmlToMapState {
 			assert handler.state != null : "state should never be NULL";
 			handler.state.onChildElementEnd(handler);
 		}
-		
+
 		@Override
 		public void onWhitespace(final XmlToMapContentHandler handler, final char[] buffer, final int offset, final int length) {
-			
-			
+
 			// ignore
 		}
 	},
@@ -310,26 +279,22 @@ enum XmlToMapState {
 	 *
 	 */
 	MAP {
-		
-		
+
 		@Override
 		public void onCharacters(final XmlToMapContentHandler handler, final char[] buffer, final int offset, final int length) {
-			
-			
+
 			// empty
 		}
-		
+
 		@Override
 		public void onChildElementEnd(final XmlToMapContentHandler handler) {
-			
-			
+
 			// empty
 		}
-		
+
 		@Override
 		public void onChildElementStart(final XmlToMapContentHandler handler, final String localName, final Attributes attributes) {
-			
-			
+
 			final String targetName;
 			final int extraAttribute;
 			if ("param".equals(localName)) {
@@ -399,11 +364,13 @@ enum XmlToMapState {
 						if (value == null || value.length() == 0) {
 							throw new IllegalArgumentException("No value for date");
 						}
-						handler.put(targetName, value.equalsIgnoreCase("NOW")
-							? BaseDate.NOW
-							: value.equalsIgnoreCase("UNDEFINED")
-								? BaseObject.UNDEFINED
-								: Base.forDateMillis(Long.parseLong(value)));
+						handler.put(
+								targetName,
+								value.equalsIgnoreCase("NOW")
+									? BaseDate.NOW
+									: value.equalsIgnoreCase("UNDEFINED")
+										? BaseObject.UNDEFINED
+										: Base.forDateMillis(Long.parseLong(value)));
 						handler.push(handler.state);
 						handler.state = XmlToMapState.CONTENTLESS;
 						assert handler.state != null : "state should never be NULL";
@@ -601,13 +568,10 @@ enum XmlToMapState {
 						handler.targetName = targetName;
 						handler.targetMap = map;
 						if (handler.map == null) {
-							/**
-							 * it is put here - not in the end! be sure not to
-							 * put in the end if it was put here!
+							/** it is put here - not in the end! be sure not to put in the end if it
+							 * was put here!
 							 *
-							 * cause otherwise embedded item will become root
-							 * one!
-							 */
+							 * cause otherwise embedded item will become root one! */
 							handler.map = map;
 						}
 						handler.order = order;
@@ -790,32 +754,27 @@ enum XmlToMapState {
 			handler.targetName = targetName;
 			handler.targetMap = map;
 			if (handler.map == null) {
-				/**
-				 * it is put here - not in the end! be sure not to put in the
-				 * end if it was put here!
+				/** it is put here - not in the end! be sure not to put in the end if it was put
+				 * here!
 				 *
-				 * cause otherwise embedded item will become root one!
-				 */
+				 * cause otherwise embedded item will become root one! */
 				handler.map = map;
 			}
-			
+
 			handler.order = order;
 			handler.stringBuilderUnknown = null;
 			handler.state = XmlToMapState.UNKNOWN;
 			assert handler.state != null : "state should never be NULL";
 			return;
 		}
-		
+
 		@Override
 		public void onThisElementEnd(final XmlToMapContentHandler handler) {
-			
-			
+
 			final BaseObject current = handler.targetMap;
 			handler.targetMap = Convert.Any.toAny(handler.pop());
 			if (handler.map != current) {
-				/**
-				 * Put here only is it haven't been put before!
-				 */
+				/** Put here only is it haven't been put before! */
 				handler.put(current);
 			}
 			handler.targetName = (String) handler.pop();
@@ -824,11 +783,10 @@ enum XmlToMapState {
 			assert handler.state != null : "state should never be NULL";
 			handler.state.onChildElementEnd(handler);
 		}
-		
+
 		@Override
 		public void onWhitespace(final XmlToMapContentHandler handler, final char[] buffer, final int offset, final int length) {
-			
-			
+
 			// empty
 		}
 	},
@@ -836,33 +794,28 @@ enum XmlToMapState {
 	 *
 	 */
 	MESSAGE_SEQUENCE {
-		
-		
+
 		@Override
 		public void onCharacters(final XmlToMapContentHandler handler, final char[] buffer, final int offset, final int length) {
-			
-			
+
 			// ignore
 		}
-		
+
 		@Override
 		public void onChildElementEnd(final XmlToMapContentHandler handler) {
-			
-			
+
 			// empty
 		}
-		
+
 		@Override
 		public void onChildElementStart(final XmlToMapContentHandler handler, final String name, final Attributes attributes) {
-			
-			
+
 			XmlToMapState.MAP.onChildElementStart(handler, name, attributes);
 		}
-		
+
 		@Override
 		public void onThisElementEnd(final XmlToMapContentHandler handler) {
-			
-			
+
 			final BaseObject map = handler.targetMap;
 			final BaseMessage[] sequence;
 			{
@@ -893,11 +846,10 @@ enum XmlToMapState {
 			assert handler.state != null : "state should never be NULL";
 			handler.state.onChildElementEnd(handler);
 		}
-		
+
 		@Override
 		public void onWhitespace(final XmlToMapContentHandler handler, final char[] buffer, final int offset, final int length) {
-			
-			
+
 			// ignore
 		}
 	},
@@ -905,33 +857,28 @@ enum XmlToMapState {
 	 *
 	 */
 	MESSAGE_TEXT {
-		
-		
+
 		@Override
 		public void onCharacters(final XmlToMapContentHandler handler, final char[] buffer, final int offset, final int length) {
-			
-			
+
 			handler.stringBuilder.append(buffer, offset, length);
 		}
-		
+
 		@Override
 		public void onChildElementEnd(final XmlToMapContentHandler handler) {
-			
-			
+
 			// empty
 		}
-		
+
 		@Override
 		public void onChildElementStart(final XmlToMapContentHandler handler, final String name, final Attributes attributes) {
-			
-			
+
 			throw new IllegalStateException("Unexpected element!");
 		}
-		
+
 		@Override
 		public void onThisElementEnd(final XmlToMapContentHandler handler) {
-			
-			
+
 			final BaseObject map = handler.targetMap;
 			final String owner = Base.getString(map, "message_owner", "XML-SAX/MATERIALIZE");
 			final String title = Base.getString(map, "message_title", "Untitled");
@@ -945,11 +892,10 @@ enum XmlToMapState {
 			assert handler.state != null : "state should never be NULL";
 			handler.state.onChildElementEnd(handler);
 		}
-		
+
 		@Override
 		public void onWhitespace(final XmlToMapContentHandler handler, final char[] buffer, final int offset, final int length) {
-			
-			
+
 			handler.stringBuilder.append(buffer, offset, length);
 		}
 	},
@@ -957,33 +903,28 @@ enum XmlToMapState {
 	 *
 	 */
 	MESSAGE64 {
-		
-		
+
 		@Override
 		public void onCharacters(final XmlToMapContentHandler handler, final char[] buffer, final int offset, final int length) {
-			
-			
+
 			handler.fillBase64(buffer, offset, length);
 		}
-		
+
 		@Override
 		public void onChildElementEnd(final XmlToMapContentHandler handler) {
-			
-			
+
 			// empty
 		}
-		
+
 		@Override
 		public void onChildElementStart(final XmlToMapContentHandler handler, final String name, final Attributes attributes) {
-			
-			
+
 			throw new IllegalStateException("Unexpected element!");
 		}
-		
+
 		@Override
 		public void onThisElementEnd(final XmlToMapContentHandler handler) {
-			
-			
+
 			final TransferCopier copier = handler.targetCollector.toBinary();
 			final BaseObject map = handler.targetMap;
 			final String owner = Base.getString(map, "message_owner", "XML-SAX/MATERIALIZE");
@@ -998,11 +939,10 @@ enum XmlToMapState {
 			assert handler.state != null : "state should never be NULL";
 			handler.state.onChildElementEnd(handler);
 		}
-		
+
 		@Override
 		public void onWhitespace(final XmlToMapContentHandler handler, final char[] buffer, final int offset, final int length) {
-			
-			
+
 			// ignore
 		}
 	},
@@ -1010,33 +950,28 @@ enum XmlToMapState {
 	 *
 	 */
 	NUMBER_FLOATING {
-		
-		
+
 		@Override
 		public void onCharacters(final XmlToMapContentHandler handler, final char[] buffer, final int offset, final int length) {
-			
-			
+
 			handler.stringBuilder.append(buffer, offset, length);
 		}
-		
+
 		@Override
 		public void onChildElementEnd(final XmlToMapContentHandler handler) {
-			
-			
+
 			// empty
 		}
-		
+
 		@Override
 		public void onChildElementStart(final XmlToMapContentHandler handler, final String name, final Attributes attributes) {
-			
-			
+
 			throw new IllegalStateException("Unexpected element!");
 		}
-		
+
 		@Override
 		public void onThisElementEnd(final XmlToMapContentHandler handler) {
-			
-			
+
 			if (handler.stringBuilder.length() > 0) {
 				handler.put(Base.forDouble(Convert.Any.toDouble(handler.stringBuilder.toString(), Double.NaN)));
 				handler.stringBuilder.setLength(0);
@@ -1046,11 +981,10 @@ enum XmlToMapState {
 			assert handler.state != null : "state should never be NULL";
 			handler.state.onChildElementEnd(handler);
 		}
-		
+
 		@Override
 		public void onWhitespace(final XmlToMapContentHandler handler, final char[] buffer, final int offset, final int length) {
-			
-			
+
 			// empty
 		}
 	},
@@ -1058,33 +992,28 @@ enum XmlToMapState {
 	 *
 	 */
 	NUMBER_INTEGER {
-		
-		
+
 		@Override
 		public void onCharacters(final XmlToMapContentHandler handler, final char[] buffer, final int offset, final int length) {
-			
-			
+
 			handler.stringBuilder.append(buffer, offset, length);
 		}
-		
+
 		@Override
 		public void onChildElementEnd(final XmlToMapContentHandler handler) {
-			
-			
+
 			// empty
 		}
-		
+
 		@Override
 		public void onChildElementStart(final XmlToMapContentHandler handler, final String name, final Attributes attributes) {
-			
-			
+
 			throw new IllegalStateException("Unexpected element!");
 		}
-		
+
 		@Override
 		public void onThisElementEnd(final XmlToMapContentHandler handler) {
-			
-			
+
 			if (handler.stringBuilder.length() > 0) {
 				handler.put(Base.forLong(Convert.Any.toLong(handler.stringBuilder.toString(), 0L)));
 				handler.stringBuilder.setLength(0);
@@ -1094,11 +1023,10 @@ enum XmlToMapState {
 			assert handler.state != null : "state should never be NULL";
 			handler.state.onChildElementEnd(handler);
 		}
-		
+
 		@Override
 		public void onWhitespace(final XmlToMapContentHandler handler, final char[] buffer, final int offset, final int length) {
-			
-			
+
 			// empty
 		}
 	},
@@ -1106,26 +1034,22 @@ enum XmlToMapState {
 	 *
 	 */
 	ROOT {
-		
-		
+
 		@Override
 		public void onCharacters(final XmlToMapContentHandler handler, final char[] buffer, final int offset, final int length) {
-			
-			
+
 			// empty
 		}
-		
+
 		@Override
 		public void onChildElementEnd(final XmlToMapContentHandler handler) {
-			
-			
+
 			// empty
 		}
-		
+
 		@Override
 		public void onChildElementStart(final XmlToMapContentHandler handler, final String localName, final Attributes attributes) {
-			
-			
+
 			handler.push(ROOT);
 			handler.push(handler.order);
 			handler.push(handler.targetName);
@@ -1133,18 +1057,16 @@ enum XmlToMapState {
 			handler.state = MAP;
 			return;
 		}
-		
+
 		@Override
 		public void onThisElementEnd(final XmlToMapContentHandler handler) {
-			
-			
+
 			// empty
 		}
-		
+
 		@Override
 		public void onWhitespace(final XmlToMapContentHandler handler, final char[] buffer, final int offset, final int length) {
-			
-			
+
 			// empty
 		}
 	},
@@ -1152,33 +1074,28 @@ enum XmlToMapState {
 	 *
 	 */
 	SCRIPT {
-		
-		
+
 		@Override
 		public void onCharacters(final XmlToMapContentHandler handler, final char[] buffer, final int offset, final int length) {
-			
-			
+
 			handler.stringBuilder.append(buffer, offset, length);
 		}
-		
+
 		@Override
 		public void onChildElementEnd(final XmlToMapContentHandler handler) {
-			
-			
+
 			// empty
 		}
-		
+
 		@Override
 		public void onChildElementStart(final XmlToMapContentHandler handler, final String name, final Attributes attributes) {
-			
-			
+
 			throw new IllegalStateException("Unexpected element!");
 		}
-		
+
 		@Override
 		public void onThisElementEnd(final XmlToMapContentHandler handler) {
-			
-			
+
 			final LanguageImpl language = Evaluate.getLanguageImpl(handler.targetParam1);
 			if (language == null) {
 				handler.put(Base.forString(handler.stringBuilder.toString()));
@@ -1186,9 +1103,10 @@ enum XmlToMapState {
 				final String description = handler.toState();
 				final String identity = "xmat{" + description + '}';
 				final String source = handler.stringBuilder.toString();
-				handler.put(Engine.MODE_SIZE || source.length() > Transfer.BUFFER_SMALL
-					? new BaseLazyCompilationString(language, identity, source)
-					: Evaluate.compileProgramSilent(language, identity, source));
+				handler.put(
+						Engine.MODE_SIZE || source.length() > Transfer.BUFFER_SMALL
+							? new BaseLazyCompilationString(language, identity, source)
+							: Evaluate.compileProgramSilent(language, identity, source));
 			}
 			handler.stringBuilder.setLength(0);
 			handler.targetName = Convert.Any.toAny(handler.pop());
@@ -1197,11 +1115,10 @@ enum XmlToMapState {
 			assert handler.state != null : "state should never be NULL";
 			handler.state.onChildElementEnd(handler);
 		}
-		
+
 		@Override
 		public void onWhitespace(final XmlToMapContentHandler handler, final char[] buffer, final int offset, final int length) {
-			
-			
+
 			handler.stringBuilder.append(buffer, offset, length);
 		}
 	},
@@ -1209,33 +1126,28 @@ enum XmlToMapState {
 	 *
 	 */
 	SERIALIZED64 {
-		
-		
+
 		@Override
 		public void onCharacters(final XmlToMapContentHandler handler, final char[] buffer, final int offset, final int length) {
-			
-			
+
 			handler.fillBase64(buffer, offset, length);
 		}
-		
+
 		@Override
 		public void onChildElementEnd(final XmlToMapContentHandler handler) {
-			
-			
+
 			// empty
 		}
-		
+
 		@Override
 		public void onChildElementStart(final XmlToMapContentHandler handler, final String name, final Attributes attributes) {
-			
-			
+
 			throw new IllegalStateException("Unexpected element!");
 		}
-		
+
 		@Override
 		public void onThisElementEnd(final XmlToMapContentHandler handler) {
-			
-			
+
 			final TransferCopier copier = handler.targetCollector.toBinary();
 			handler.put(Base.forUnknown(Transform.materialize(Object.class, handler.targetParam1, new BaseNativeObject("Content-Type", handler.targetParam1), copier.nextCopy())));
 			handler.targetCollector.reset();
@@ -1245,11 +1157,10 @@ enum XmlToMapState {
 			assert handler.state != null : "state should never be NULL";
 			handler.state.onChildElementEnd(handler);
 		}
-		
+
 		@Override
 		public void onWhitespace(final XmlToMapContentHandler handler, final char[] buffer, final int offset, final int length) {
-			
-			
+
 			// ignore
 		}
 	},
@@ -1257,33 +1168,28 @@ enum XmlToMapState {
 	 *
 	 */
 	STRING_COLLECT {
-		
-		
+
 		@Override
 		public void onCharacters(final XmlToMapContentHandler handler, final char[] buffer, final int offset, final int length) {
-			
-			
+
 			handler.stringBuilder.append(buffer, offset, length);
 		}
-		
+
 		@Override
 		public void onChildElementEnd(final XmlToMapContentHandler handler) {
-			
-			
+
 			// empty
 		}
-		
+
 		@Override
 		public void onChildElementStart(final XmlToMapContentHandler handler, final String name, final Attributes attributes) {
-			
-			
+
 			throw new IllegalStateException("Unexpected element!");
 		}
-		
+
 		@Override
 		public void onThisElementEnd(final XmlToMapContentHandler handler) {
-			
-			
+
 			final StringBuilder builder = handler.stringBuilder;
 			if (builder.length() > 0) {
 				handler.put(Base.forString(builder.toString()));
@@ -1296,11 +1202,10 @@ enum XmlToMapState {
 			assert handler.state != null : "state should never be NULL";
 			handler.state.onChildElementEnd(handler);
 		}
-		
+
 		@Override
 		public void onWhitespace(final XmlToMapContentHandler handler, final char[] buffer, final int offset, final int length) {
-			
-			
+
 			handler.stringBuilder.append(buffer, offset, length);
 		}
 	},
@@ -1308,29 +1213,25 @@ enum XmlToMapState {
 	 *
 	 */
 	UNKNOWN {
-		
-		
+
 		@Override
 		public void onCharacters(final XmlToMapContentHandler handler, final char[] buffer, final int offset, final int length) {
-			
-			
+
 			if (handler.stringBuilderUnknown == null) {
 				handler.stringBuilderUnknown = new StringBuilder(64);
 			}
 			handler.stringBuilderUnknown.append(buffer, offset, length);
 		}
-		
+
 		@Override
 		public void onChildElementEnd(final XmlToMapContentHandler handler) {
-			
-			
+
 			// empty
 		}
-		
+
 		@Override
 		public void onChildElementStart(final XmlToMapContentHandler handler, final String name, final Attributes attributes) {
-			
-			
+
 			if (handler.targetMap == null) {
 				handler.targetMap = new BaseNativeObject();
 				if (handler.map == null) {
@@ -1339,25 +1240,26 @@ enum XmlToMapState {
 			}
 			XmlToMapState.MAP.onChildElementStart(handler, name, attributes);
 		}
-		
+
 		@Override
 		public void onThisElementEnd(final XmlToMapContentHandler handler) {
-			
-			
+
 			final StringBuilder builder = handler.stringBuilderUnknown;
 			final BaseObject current = handler.targetMap;
 			handler.stringBuilderUnknown = (StringBuilder) handler.pop();
 			handler.targetMap = Convert.Any.toAny(handler.pop());
 			if (builder == null) {
-				handler.put(current == null
-					? BaseString.EMPTY
-					: current);
+				handler.put(
+						current == null
+							? BaseString.EMPTY
+							: current);
 			} else {
 				final String textual = builder.toString().trim();
 				if (textual.length() == 0) {
-					handler.put(current == null
-						? BaseString.EMPTY
-						: current);
+					handler.put(
+							current == null
+								? BaseString.EMPTY
+								: current);
 					// Engine.trace("M=" + current);
 				} else {
 					handler.put(Base.forString(textual));
@@ -1370,45 +1272,34 @@ enum XmlToMapState {
 			assert handler.state != null : "state should never be NULL";
 			handler.state.onChildElementEnd(handler);
 		}
-		
+
 		@Override
 		public void onWhitespace(final XmlToMapContentHandler handler, final char[] buffer, final int offset, final int length) {
-			
-			
+
 			// ignore
 		}
 	},;
-	
-	/**
-	 * @param handler
+
+	/** @param handler
 	 * @param buffer
 	 * @param offset
-	 * @param length
-	 */
+	 * @param length */
 	public abstract void onCharacters(final XmlToMapContentHandler handler, final char[] buffer, final int offset, final int length);
-	
-	/**
-	 * @param handler
-	 */
+
+	/** @param handler */
 	public abstract void onChildElementEnd(final XmlToMapContentHandler handler);
-	
-	/**
-	 * @param handler
+
+	/** @param handler
 	 * @param name
-	 * @param attributes
-	 */
+	 * @param attributes */
 	public abstract void onChildElementStart(final XmlToMapContentHandler handler, final String name, final Attributes attributes);
-	
-	/**
-	 * @param handler
-	 */
+
+	/** @param handler */
 	public abstract void onThisElementEnd(final XmlToMapContentHandler handler);
-	
-	/**
-	 * @param handler
+
+	/** @param handler
 	 * @param buffer
 	 * @param offset
-	 * @param length
-	 */
+	 * @param length */
 	public abstract void onWhitespace(final XmlToMapContentHandler handler, final char[] buffer, final int offset, final int length);
 }

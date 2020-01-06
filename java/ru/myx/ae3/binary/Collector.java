@@ -22,41 +22,41 @@ import ru.myx.util.FifoQueueLinked;
  *         myx - barachta "typecomment": Window>Preferences>Java>Templates. To enable and disable
  *         the creation of type comments go to Window>Preferences>Java>Code Generation. */
 final class Collector extends OutputStream implements TransferCollector, TransferTarget {
-	
+
 	private static final byte[] CHUNK_STOP_SEQUENCE = "0\r\n\r\n".getBytes();
-
-	private static final int CHUNK_STOP_SEQUENCE_LENGTH = Collector.CHUNK_STOP_SEQUENCE.length;
-
-	private static final byte[] CRLF = "\r\n".getBytes();
-
-	private static final int CRLF_LENGTH = Collector.CRLF.length;
-
-	CollBuf binary;
-
-	private int chunkCollected = 0;
-
-	private Collector chunkCollector = null;
-
-	private boolean chunking = false;
-
-	private int chunkMaxLimit = 0;
-
-	private int chunkMinLimit = 0;
-
-	private boolean closed;
-
-	FifoQueueLinked<TransferBuffer> sequence;
-
-	private TransferTarget connected;
 	
+	private static final int CHUNK_STOP_SEQUENCE_LENGTH = Collector.CHUNK_STOP_SEQUENCE.length;
+	
+	private static final byte[] CRLF = "\r\n".getBytes();
+	
+	private static final int CRLF_LENGTH = Collector.CRLF.length;
+	
+	CollBuf binary;
+	
+	private int chunkCollected = 0;
+	
+	private Collector chunkCollector = null;
+	
+	private boolean chunking = false;
+	
+	private int chunkMaxLimit = 0;
+	
+	private int chunkMinLimit = 0;
+	
+	private boolean closed;
+	
+	FifoQueueLinked<TransferBuffer> sequence;
+	
+	private TransferTarget connected;
+
 	Collector() {
-		
+
 		// empty
 	}
-	
+
 	@Override
 	public final void abort(final String reason) {
-		
+
 		final FifoQueueLinked<TransferBuffer> sequence = this.sequence;
 		if (sequence != null) {
 			this.sequence = null;
@@ -77,10 +77,10 @@ final class Collector extends OutputStream implements TransferCollector, Transfe
 			connected.abort(reason);
 		}
 	}
-	
+
 	@Override
 	public final boolean absorb(final int i) {
-		
+
 		if (this.closed) {
 			throw new IllegalStateException("Collector is closed!");
 		}
@@ -105,10 +105,10 @@ final class Collector extends OutputStream implements TransferCollector, Transfe
 		}
 		return true;
 	}
-	
+
 	@Override
 	public final boolean absorbArray(final byte[] bytes, final int offset, final int length) {
-		
+
 		if (this.closed) {
 			throw new IllegalStateException("Collector is closed!");
 		}
@@ -150,10 +150,10 @@ final class Collector extends OutputStream implements TransferCollector, Transfe
 		}
 		return true;
 	}
-	
+
 	@Override
 	public final boolean absorbBuffer(final TransferBuffer buffer) {
-		
+
 		if (this.closed) {
 			throw new IllegalStateException("Collector is closed!");
 		}
@@ -194,10 +194,10 @@ final class Collector extends OutputStream implements TransferCollector, Transfe
 		}
 		return true;
 	}
-	
+
 	@Override
 	public final boolean absorbNio(final ByteBuffer buffer) {
-		
+
 		if (this.closed) {
 			throw new IllegalStateException("Collector is closed!");
 		}
@@ -253,24 +253,24 @@ final class Collector extends OutputStream implements TransferCollector, Transfe
 		}
 		return true;
 	}
-	
+
 	// ///////////////////////////////////////////////////////////////////////
 	// ///////////////////////////////////////////////////////////////////////
 	// ///////////////////////////////////////////////////////////////////////
 	// ///////////////////////////////////////////////////////////////////////
 	// Output stream
 	private final void addSequence(final TransferBuffer buffer, final CollBuf binary) {
-		
+
 		if (this.sequence == null) {
 			this.sequence = new FifoQueueLinked<>();
 		}
 		this.sequence.offerLast(buffer);
 		this.binary = binary;
 	}
-	
+
 	@Override
 	public final void close() {
-		
+
 		if (this.closed) {
 			return;
 		}
@@ -287,17 +287,18 @@ final class Collector extends OutputStream implements TransferCollector, Transfe
 		}
 		this.closed = true;
 	}
-	
+
 	// ///////////////////////////////////////////////////////////////////////
 	// ///////////////////////////////////////////////////////////////////////
 	// ///////////////////////////////////////////////////////////////////////
 	// ///////////////////////////////////////////////////////////////////////
 	// Target
-
+	
 	@Override
 	public boolean connectTarget(final TransferTarget target) throws IllegalStateException {
-		
+
 		if (this.closed) {
+			/** transfer all that we collected at once */
 			final TransferBuffer buffer = this.toBuffer();
 			if (!target.absorbBuffer(buffer)) {
 				if (buffer.hasRemaining()) {
@@ -329,16 +330,16 @@ final class Collector extends OutputStream implements TransferCollector, Transfe
 		}
 		return false;
 	}
-	
+
 	@Override
 	public final <A, R> boolean enqueueAction(final ExecProcess process, final Function<A, R> function, final A argument) {
-		
+
 		Act.launch(process, function, argument);
 		return true;
 	}
-	
+
 	private final void flushChunk() {
-		
+
 		this.chunkCollector.close();
 		final TransferBuffer buffer = this.chunkCollector.toBuffer();
 		this.chunkCollector.reset();
@@ -355,74 +356,74 @@ final class Collector extends OutputStream implements TransferCollector, Transfe
 		this.chunkCollected = 0;
 		this.chunking = true;
 	}
-	
+
 	@Override
 	public final void force() {
-		
+
 		// empty
 	}
-	
+
 	@Override
 	public final OutputStream getOutputStream() {
-		
+
 		return this;
 	}
-	
+
 	@Override
 	public final TransferTarget getTarget() {
-		
+
 		return this;
 	}
-	
+
 	private final int length() {
-		
+
 		if (this.sequence == null) {
 			return 0;
 		}
-
+		
 		class QueueLengthCallback implements BasicQueue.IterationAllCallback<TransferBuffer> {
-
-			int length;
 			
+			int length;
+
 			@Override
 			public boolean onNextItem(final TransferBuffer item) {
-				
+
 				this.length += item.remaining();
 				return true;
 			}
 		}
-
+		
 		final QueueLengthCallback callback = new QueueLengthCallback();
 		this.sequence.iterateAll(callback);
 		return callback.length;
 	}
-	
+
 	@Override
 	public void printBinary(final TransferCopier binary) {
-
+		
 		this.absorbBuffer(binary.nextCopy());
 	}
-	
+
 	@Override
 	public void printByte(final int i) {
-
+		
 		this.absorb(i);
 	}
-	
+
 	@Override
 	public void printBytes(final byte[] bytes) {
-		
+
 		this.absorbArray(bytes, 0, bytes.length);
 	}
-	
+
 	/** TODO optimizations are very much possible: CharsetEncoder and more */
 	@Override
 	public void printUtf8(final String string) {
-		
+
 		final byte[] bytes = string.getBytes(Engine.CHARSET_UTF8);
 		this.absorbArray(bytes, 0, bytes.length);
 	}
-	
+
 	// ///////////////////////////////////////////////////////////////////////
 	// ///////////////////////////////////////////////////////////////////////
 	// ///////////////////////////////////////////////////////////////////////
@@ -430,7 +431,7 @@ final class Collector extends OutputStream implements TransferCollector, Transfe
 	// Common
 	@Override
 	public final void reset() {
-		
+
 		final FifoQueueLinked<TransferBuffer> sequence = this.sequence;
 		if (sequence != null) {
 			this.sequence = null;
@@ -452,10 +453,10 @@ final class Collector extends OutputStream implements TransferCollector, Transfe
 		this.closed = false;
 		this.connected = null;
 	}
-	
+
 	@Override
 	public final void startChunking(final int minChunk, final int maxChunk) throws IllegalStateException, IllegalArgumentException {
-		
+
 		if (this.chunking) {
 			throw new IllegalStateException("Already in chunking state!");
 		}
@@ -467,10 +468,10 @@ final class Collector extends OutputStream implements TransferCollector, Transfe
 			this.chunkCollector = new Collector();
 		}
 	}
-	
+
 	@Override
 	public final void stopChunking() throws IllegalStateException {
-		
+
 		if (!this.chunking) {
 			throw new IllegalStateException("Not in chunking state!");
 		}
@@ -480,19 +481,19 @@ final class Collector extends OutputStream implements TransferCollector, Transfe
 		this.chunking = false;
 		this.absorbArray(Collector.CHUNK_STOP_SEQUENCE, 0, Collector.CHUNK_STOP_SEQUENCE_LENGTH);
 	}
-	
+
 	@Override
 	public final TransferCopier toBinary() {
-		
+
 		if (!this.closed) {
 			this.close();
 		}
 		return this.toCloneFactory();
 	}
-	
+
 	@Override
 	public final TransferBuffer toBuffer() {
-		
+
 		if (!this.closed) {
 			throw new IllegalStateException("Collector is not closed!");
 		}
@@ -526,10 +527,10 @@ final class Collector extends OutputStream implements TransferCollector, Transfe
 		}
 		return new BufferSequence(list.toArray(new TransferBuffer[size]));
 	}
-	
+
 	@Override
 	public final TransferCopier toCloneFactory() {
-		
+
 		if (!this.closed) {
 			throw new IllegalStateException("Collector is not closed!");
 		}
@@ -563,16 +564,16 @@ final class Collector extends OutputStream implements TransferCollector, Transfe
 		}
 		return new CopierSequence(list.toArray(new TransferCopier[size]));
 	}
-	
+
 	@Override
 	public String toString() {
-		
+
 		return this.getClass().getSimpleName() + "(length=" + this.length() + ", chunking=" + this.chunking + ", closed=" + this.closed + ")";
 	}
-	
+
 	@Override
 	public final void write(final byte[] bytes) throws IOException {
-		
+
 		if (this.closed) {
 			throw new IllegalStateException("Collector is closed!");
 		}
@@ -609,10 +610,10 @@ final class Collector extends OutputStream implements TransferCollector, Transfe
 			}
 		}
 	}
-	
+
 	@Override
 	public final void write(final byte[] bytes, final int offset, final int length) throws IOException {
-		
+
 		if (this.closed) {
 			throw new IllegalStateException("Collector is closed!");
 		}
@@ -649,10 +650,10 @@ final class Collector extends OutputStream implements TransferCollector, Transfe
 			}
 		}
 	}
-	
+
 	@Override
 	public final void write(final int i) throws IOException {
-		
+
 		if (this.closed) {
 			throw new IllegalStateException("Collector is closed!");
 		}

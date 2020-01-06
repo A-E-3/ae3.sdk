@@ -126,6 +126,7 @@ public final class RenderCollectionVfs extends RenderCollectionAbstract {
 			: argument + extensionSuffix;
 		final RenderCacheEntry cached = RenderCollectionVfs.CACHE.get(this.cacheId, name);
 		final Entry file = this.root.relative(name, null);
+		// System.out.println(" >>> >>>>> Q: " + this + ", name: " + name + ", file: " + file);
 		if (file != null && file.isExist() && file.isBinary()) {
 			final long modified = file.getLastModified();
 			if (cached != null && cached.modified == modified) {

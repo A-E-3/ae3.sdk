@@ -31,17 +31,23 @@ import ru.myx.ae3.help.Format;
 
 class XmlToMapContentHandler extends InputSource implements ContentHandler, ErrorHandler, EntityResolver {
 	
-	private static final SAXParserFactory SAX_PARSER_FACTORY = SAXParserFactory.newInstance();
+	private static final SAXParserFactory SAX_PARSER_FACTORY;
 	
 	// base 64 character scheme
-	private static final char[] B64_STATICS = {
-			'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g',
-			'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'
-	};
+	private static final char[] B64_STATICS;
 
 	// this is the encoded character's values
 	private static final byte[] MATRIX = new byte[256];
+	
 	static {
+		
+		SAX_PARSER_FACTORY = SAXParserFactory.newInstance();
+		XmlToMapContentHandler.SAX_PARSER_FACTORY.setNamespaceAware(true);
+		
+		B64_STATICS = new char[]{
+				'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g',
+				'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'
+		};
 		// fill values so that the matrix holds every encoded characters
 		// actual value at it's own position in the matrix
 		for (int i = 0; i < XmlToMapContentHandler.B64_STATICS.length; ++i) {

@@ -67,22 +67,24 @@ import ru.myx.util.FifoQueueBuffered;
 public final class Xml {
 
 	private static final Comparator<Object> COMPARATOR_XML = new ComparatorFast();
-	
+
 	private static final int SAX_PARSER_LIMIT_FACTOR = 4;
-	
-	private static final FifoQueueBuffered<XmlToMapContentHandler>[] SAX_PARSERS = Convert.Array.toAny(new FifoQueueBuffered[]{
-			new FifoQueueBuffered<XmlToMapContentHandler>(Xml.SAX_PARSER_LIMIT_FACTOR), new FifoQueueBuffered<XmlToMapContentHandler>(Xml.SAX_PARSER_LIMIT_FACTOR),
-			new FifoQueueBuffered<XmlToMapContentHandler>(Xml.SAX_PARSER_LIMIT_FACTOR), new FifoQueueBuffered<XmlToMapContentHandler>(Xml.SAX_PARSER_LIMIT_FACTOR),
+
+	private static final FifoQueueBuffered<XmlToMapContentHandler>[] SAX_PARSERS = Convert.Array.toAny(new FifoQueueBuffered[]{//
+			new FifoQueueBuffered<XmlToMapContentHandler>(Xml.SAX_PARSER_LIMIT_FACTOR), //
+			new FifoQueueBuffered<XmlToMapContentHandler>(Xml.SAX_PARSER_LIMIT_FACTOR), //
+			new FifoQueueBuffered<XmlToMapContentHandler>(Xml.SAX_PARSER_LIMIT_FACTOR), //
+			new FifoQueueBuffered<XmlToMapContentHandler>(Xml.SAX_PARSER_LIMIT_FACTOR), //
 	});
-	
+
 	private static final int SAX_PARSERS_MASK = Xml.SAX_PARSERS.length - 1;
-	
+
 	private static final String[] LIST_ITEM_NAME = {
 			"item", "li", "element"
 	};
-	
+
 	private static int saxParserIndex = 0;
-	
+
 	private static final boolean cleanStringReadable(final CharSequence string) {
 
 		boolean prevSpace = false;
@@ -104,23 +106,27 @@ public final class Xml {
 		}
 		return true;
 	}
-	
+
 	/** @param doc
 	 * @param target
 	 * @param value
 	 * @throws DOMException */
-	private static final void createCData(final Document doc, final Element target, final String value) throws DOMException {
+	private static final void createCData(//
+			final Document doc,
+			final Element target,
+			final String value//
+	) throws DOMException {
 
 		assert Format.Xml.isValidCharacterData(value) : "Illegal CDATA characters: " + Format.Describe.toEcmaSource(value, "");
 		target.setAttribute("type", "cdata");
 		target.appendChild(doc.createCDATASection(value));
 	}
-	
+
 	private static final Map<Object, String> createLookup() {
 
 		return new TreeMap<>(Xml.COMPARATOR_XML);
 	}
-	
+
 	private static final String getListItemName(final BaseObject o) {
 
 		for (final String name : Xml.LIST_ITEM_NAME) {
@@ -130,7 +136,7 @@ public final class Xml {
 		}
 		return "li-" + Engine.createGuid();
 	}
-	
+
 	/** @param e
 	 * @param classExplicit
 	 *            null or override 'class' attribute
@@ -138,7 +144,13 @@ public final class Xml {
 	 * @param handler
 	 * @param attachment
 	 * @return */
-	public static final BaseObject toBase(final Element e, final String classExplicit, final String namespace, final ExternalHandler handler, final Object attachment) {
+	public static final BaseObject toBase(//
+			final Element e,
+			final String classExplicit,
+			final String namespace,
+			final ExternalHandler handler,
+			final Object attachment//
+	) {
 
 		final String cls = classExplicit == null
 			? e.getAttribute("class")
@@ -438,14 +450,20 @@ public final class Xml {
 		}
 		return Base.forString(Dom.innerValue(e, namespace));
 	}
-	
+
 	/** @param identity
 	 * @param xml
 	 * @param uri
 	 * @param handler
 	 * @param attachment
 	 * @return map */
-	public static final BaseObject toBase(final String identity, final CharSequence xml, final String uri, final ExternalHandler handler, final Object attachment) {
+	public static final BaseObject toBase(//
+			final String identity,
+			final CharSequence xml,
+			final String uri,
+			final ExternalHandler handler,
+			final Object attachment//
+	) {
 
 		if (xml == null || xml.length() == 0) {
 			return BaseObject.UNDEFINED;
@@ -471,13 +489,13 @@ public final class Xml {
 			}
 			reader.reuse(identity, new StringReader(xmlString), uri, null, handler, attachment);
 			target = reader.parse();
-			
+
 			/** oops - there's no way to reset parser (internal sax parser) at the moment */
 			synchronized (parserQueue) {
 				parserQueue.offerLast(reader);
 			}
 			/** end of oops. */
-			
+
 		} catch (ParserConfigurationException | SAXException | IOException e) {
 			throw new RuntimeException("Identity: " + identity, e);
 		} finally {
@@ -486,7 +504,7 @@ public final class Xml {
 		}
 		return target;
 	}
-	
+
 	/** @param identity
 	 * @param xml
 	 * @param charsetOverride
@@ -494,8 +512,14 @@ public final class Xml {
 	 * @param handler
 	 * @param attachment
 	 * @return map */
-	public static final BaseObject
-			toBase(final String identity, final TransferCopier xml, final Charset charsetOverride, final String uri, final ExternalHandler handler, final Object attachment) {
+	public static final BaseObject toBase(//
+			final String identity,
+			final TransferCopier xml,
+			final Charset charsetOverride,
+			final String uri,
+			final ExternalHandler handler,
+			final Object attachment//
+	) {
 
 		if (xml == null || xml.length() == 0) {
 			return BaseObject.UNDEFINED;
@@ -524,14 +548,14 @@ public final class Xml {
 				reader.reuse(identity, input, uri, null, handler, attachment);
 			}
 			target = reader.parse();
-			
+
 			/** oops - there's no way to reset parser (internal sax parser) at the moment. So on
 			 * error we are not even trying to reuse it. */
 			synchronized (parserQueue) {
 				parserQueue.offerLast(reader);
 			}
 			/** end of oops. */
-			
+
 		} catch (ParserConfigurationException | SAXException | IOException e) {
 			throw new RuntimeException("Identity: " + identity, e);
 		} finally {
@@ -540,8 +564,13 @@ public final class Xml {
 		}
 		return target;
 	}
-	
-	private static final Element toElement(final Document doc, final Element target, final String value, final boolean readable) {
+
+	private static final Element toElement(//
+			final Document doc,
+			final Element target,
+			final String value,
+			final boolean readable//
+	) {
 
 		if (readable) {
 			if (value.length() == 0) {
@@ -567,8 +596,9 @@ public final class Xml {
 		}
 		return target;
 	}
-	
-	private static final Element toElement(final Document doc,
+
+	private static final Element toElement(//
+			final Document doc,
 			final Element target,
 			final String namePrefix,
 			final String name,
@@ -577,7 +607,8 @@ public final class Xml {
 			final ExternalHandler handler,
 			final Object attachment,
 			final int maxFieldLength,
-			final Map<Object, String> lookup) {
+			final Map<Object, String> lookup//
+	) {
 
 		target.setAttribute("class", "message");
 		target.setAttribute("message_owner", data.getEventTypeId());
@@ -624,8 +655,9 @@ public final class Xml {
 			return target;
 		}
 	}
-	
-	private static final Element toElement(final Document doc,
+
+	private static final Element toElement(//
+			final Document doc,
 			final Element target,
 			final String namePrefix,
 			final String mapName,
@@ -634,7 +666,8 @@ public final class Xml {
 			final ExternalHandler handler,
 			final Object attachment,
 			final int maxFieldLength,
-			final Map<Object, String> lookup) {
+			final Map<Object, String> lookup//
+	) {
 
 		if (readable) {
 			if (map.isEmpty()) {
@@ -686,13 +719,18 @@ public final class Xml {
 		}
 		return target;
 	}
-	
+
 	/** @param doc
 	 * @param mapName
 	 * @param object
 	 * @param readable
 	 * @return element */
-	public static final Element toElement(final Document doc, final String mapName, final BaseObject object, final boolean readable) {
+	public static final Element toElement(//
+			final Document doc,
+			final String mapName,
+			final BaseObject object,
+			final boolean readable//
+	) {
 
 		final Element element = doc.createElement(mapName);
 		final Node node = Xml.toNode(doc, element, null, mapName, object, readable, null, null, 0, null);
@@ -711,17 +749,21 @@ public final class Xml {
 		}
 		throw new IllegalStateException("Cannot convert node (" + node + ") to an element, source=" + object);
 	}
-	
+
 	/** @param rootName
 	 * @param object
 	 * @param readable
 	 * @return element */
-	public static final Element toElement(final String rootName, final BaseObject object, final boolean readable) {
+	public static final Element toElement(//
+			final String rootName,
+			final BaseObject object,
+			final boolean readable//
+	) {
 
 		final Document doc = Dom.createDocument();
 		return Xml.toElement(doc, rootName, object, readable);
 	}
-	
+
 	/** @param rootName
 	 * @param object
 	 * @param readable
@@ -729,8 +771,14 @@ public final class Xml {
 	 * @param attachment
 	 * @param maxFieldLength
 	 * @return element */
-	public static final Element
-			toElement(final String rootName, final BaseObject object, final boolean readable, final ExternalHandler handler, final Object attachment, final int maxFieldLength) {
+	public static final Element toElement(//
+			final String rootName,
+			final BaseObject object,
+			final boolean readable,
+			final ExternalHandler handler,
+			final Object attachment,
+			final int maxFieldLength//
+	) {
 
 		final Document doc = Dom.createDocument();
 		final Element element = Dom.createElement(doc, rootName);
@@ -750,15 +798,17 @@ public final class Xml {
 		}
 		throw new IllegalStateException("Cannot convert node (" + node + ") to an element, source=" + object);
 	}
-	
-	private static final Element toElementExtraSerialized(final Document doc,
+
+	private static final Element toElementExtraSerialized(//
+			final Document doc,
 			final Element target,
 			final String namePrefix,
 			final String name,
 			final Object object,
 			final ExternalHandler handler,
 			final Object attachment,
-			final int maxFieldLength) {
+			final int maxFieldLength//
+	) {
 
 		try {
 			final StringBuilder contentTypeBuffer = new StringBuilder(32);
@@ -792,8 +842,14 @@ public final class Xml {
 			throw new RuntimeException(e);
 		}
 	}
-	
-	private static final BaseList<Object> toList(final Element e, final String namespace, final BaseList<Object> target, final ExternalHandler handler, final Object attachment) {
+
+	private static final BaseList<Object> toList(//
+			final Element e,
+			final String namespace,
+			final BaseList<Object> target,
+			final ExternalHandler handler,
+			final Object attachment//
+	) {
 
 		assert target != null : "Target object must not be NULL";
 		if (e == null) {
@@ -866,8 +922,14 @@ public final class Xml {
 		}
 		return target;
 	}
-	
-	private static final <T extends BaseObject> T toMap(final Element e, final String namespace, final T target, final ExternalHandler handler, final Object attachment) {
+
+	private static final <T extends BaseObject> T toMap(//
+			final Element e,
+			final String namespace,
+			final T target,
+			final ExternalHandler handler,
+			final Object attachment//
+	) {
 
 		assert target != null : "Target object must not be NULL";
 		if (e == null) {
@@ -931,7 +993,7 @@ public final class Xml {
 		}
 		return target;
 	}
-	
+
 	/** @param <T>
 	 * @param identity
 	 * @param xml
@@ -940,9 +1002,14 @@ public final class Xml {
 	 * @param handler
 	 * @param attachment
 	 * @return map */
-	public static final <T extends BaseObject>
-			T
-			toMap(final String identity, final CharSequence xml, final String uri, final T target, final ExternalHandler handler, final Object attachment) {
+	public static final <T extends BaseObject> T toMap(//
+			final String identity,
+			final CharSequence xml,
+			final String uri,
+			final T target,
+			final ExternalHandler handler,
+			final Object attachment//
+	) {
 
 		assert target != null : "Target object must not be NULL";
 		if (xml == null || xml.length() == 0) {
@@ -968,13 +1035,13 @@ public final class Xml {
 			}
 			reader.reuse(identity, new StringReader(xmlString), uri, target, handler, attachment);
 			reader.parse();
-			
+
 			/** oops - there's no way to reset parser (internal sax parser) at the moment */
 			synchronized (parserQueue) {
 				parserQueue.offerLast(reader);
 			}
 			/** end of oops. */
-			
+
 		} catch (final SAXException e) {
 			/** TODO: replace with one used in exception stack - can just limit lengths of strings
 			 * (even better: based on report levels and java assertions) */
@@ -991,7 +1058,7 @@ public final class Xml {
 		}
 		return target;
 	}
-	
+
 	/** @param <T>
 	 * @param identity
 	 * @param xml
@@ -1001,13 +1068,15 @@ public final class Xml {
 	 * @param handler
 	 * @param attachment
 	 * @return map */
-	public static final <T extends BaseObject> T toMap(final String identity,
+	public static final <T extends BaseObject> T toMap(//
+			final String identity,
 			final TransferCopier xml,
 			final Charset charsetOverride,
 			final String uri,
 			final T target,
 			final ExternalHandler handler,
-			final Object attachment) {
+			final Object attachment//
+	) {
 
 		assert target != null : "Target object must not be NULL";
 		if (xml == null || xml.length() == 0) {
@@ -1040,13 +1109,13 @@ public final class Xml {
 				reader.reuse(identity, new InputStreamReader(xml.nextInputStream(), charsetOverride), uri, target, handler, attachment);
 			}
 			reader.parse();
-			
+
 			/** oops - there's no way to reset parser (internal sax parser) at the moment */
 			synchronized (parserQueue) {
 				parserQueue.offerLast(reader);
 			}
 			/** end of oops. */
-			
+
 		} catch (ParserConfigurationException | SAXException | IOException e) {
 			throw new RuntimeException("Identity: " + identity, e);
 		} finally {
@@ -1055,7 +1124,7 @@ public final class Xml {
 		}
 		return target;
 	}
-	
+
 	// //////////////////////////////////////////////////////////////////////////////////////////
 	// //////////////////////////////////////////////////////////////////////////////////////////
 	// //////////////////////////////////////////////////////////////////////////////////////////
@@ -1069,7 +1138,8 @@ public final class Xml {
 	// //////////////////////////////////////////////////////////////////////////////////////////
 	// //////////////////////////////////////////////////////////////////////////////////////////
 	// //////////////////////////////////////////////////////////////////////////////////////////
-	private static final Element toNode(final Document doc,
+	private static final Element toNode(//
+			final Document doc,
 			final Element target,
 			final String namePrefix,
 			final String name,
@@ -1078,7 +1148,8 @@ public final class Xml {
 			final ExternalHandler handler,
 			final Object attachment,
 			final int maxFieldLength,
-			final Map<Object, String> lookup) {
+			final Map<Object, String> lookup//
+	) {
 
 		assert o != null : "NULL java value";
 		if (o.baseIsPrimitive()) {
@@ -1363,7 +1434,7 @@ public final class Xml {
 			return target;
 		}
 	}
-	
+
 	// //////////////////////////////////////////////////////////////////////////////////////////
 	// //////////////////////////////////////////////////////////////////////////////////////////
 	// //////////////////////////////////////////////////////////////////////////////////////////
@@ -1377,7 +1448,8 @@ public final class Xml {
 	// //////////////////////////////////////////////////////////////////////////////////////////
 	// //////////////////////////////////////////////////////////////////////////////////////////
 	// //////////////////////////////////////////////////////////////////////////////////////////
-	private static final Element toNode(final Document doc,
+	private static final Element toNode(//
+			final Document doc,
 			final Element target,
 			final String namePrefix,
 			final String name,
@@ -1386,7 +1458,8 @@ public final class Xml {
 			final ExternalHandler handler,
 			final Object attachment,
 			final int maxFieldLength,
-			final Map<Object, String> lookup) {
+			final Map<Object, String> lookup//
+	) {
 
 		if (o == null || o == BaseObject.NULL) {
 			target.setAttribute("class", "null");
@@ -1765,7 +1838,7 @@ public final class Xml {
 			return target;
 		}
 	}
-	
+
 	/** @param rootName
 	 * @param object
 	 * @param readable
@@ -1773,8 +1846,14 @@ public final class Xml {
 	 * @param attachment
 	 * @param maxFieldLength
 	 * @return string */
-	public static final TransferCopier
-			toXmlBinary(final String rootName, final BaseObject object, final boolean readable, final ExternalHandler handler, final Object attachment, final int maxFieldLength) {
+	public static final TransferCopier toXmlBinary(//
+			final String rootName,
+			final BaseObject object,
+			final boolean readable,
+			final ExternalHandler handler,
+			final Object attachment,
+			final int maxFieldLength//
+	) {
 
 		final Document doc = Dom.createDocument();
 		final Element element = Dom.createElement(doc, rootName);
@@ -1784,9 +1863,15 @@ public final class Xml {
 			? Dom.toXmlReadableBinary(element)
 			: Dom.toXmlCompactBinary(element);
 	}
-	
-	private static final TransferCopier
-			toXmlBinary(final String name, final Map<?, ?> map, final boolean readable, final ExternalHandler handler, final Object attachment, final int maxFieldLength) {
+
+	private static final TransferCopier toXmlBinary(//
+			final String name,
+			final Map<?, ?> map,
+			final boolean readable,
+			final ExternalHandler handler,
+			final Object attachment,
+			final int maxFieldLength//
+	) {
 
 		if (map == null || map.isEmpty()) {
 			final int length = name.length();
@@ -1809,12 +1894,16 @@ public final class Xml {
 				: Dom.toXmlCompactBinary(root);
 		}
 	}
-	
+
 	/** @param rootName
 	 * @param object
 	 * @param readable
 	 * @return string */
-	public static final String toXmlString(final String rootName, final BaseObject object, final boolean readable) {
+	public static final String toXmlString(//
+			final String rootName,
+			final BaseObject object,
+			final boolean readable//
+	) {
 
 		assert object != null : "NULL java value";
 		final Document doc = Dom.createDocument();
@@ -1825,7 +1914,7 @@ public final class Xml {
 			? Dom.toXmlReadable(element)
 			: Dom.toXmlCompact(element);
 	}
-	
+
 	/** @param rootName
 	 * @param map
 	 * @param readable
@@ -1833,8 +1922,14 @@ public final class Xml {
 	 * @param attachment
 	 * @param maxFieldLength
 	 * @return string */
-	public static final String
-			toXmlString(final String rootName, final BaseObject map, final boolean readable, final ExternalHandler handler, final Object attachment, final int maxFieldLength) {
+	public static final String toXmlString(//
+			final String rootName,
+			final BaseObject map,
+			final boolean readable,
+			final ExternalHandler handler,
+			final Object attachment,
+			final int maxFieldLength//
+	) {
 
 		final Document doc = Dom.createDocument();
 		final Element element = Dom.createElement(doc, rootName);
@@ -1845,9 +1940,9 @@ public final class Xml {
 			? Dom.toXmlReadable(element)
 			: Dom.toXmlCompact(element);
 	}
-	
+
 	private Xml() {
-		
+
 		// empty
 	}
 }

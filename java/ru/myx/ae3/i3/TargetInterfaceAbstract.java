@@ -17,59 +17,56 @@ import ru.myx.ae3.skinner.Skinner;
 import ru.myx.ae3.vfs.Entry;
 import ru.myx.ae3.vfs.Storage;
 
-/**
- * @author myx
- * 
- */
+/** @author myx */
 public abstract class TargetInterfaceAbstract extends BaseHostEmpty implements TargetInterface {
-
+	
 	private final Entry root;
-
+	
 	private final Entry base;
-
-	/**
-	 * @param root
-	 *            (same as base)
-	 */
+	
+	/** @param root
+	 *            (same as base) */
 	public TargetInterfaceAbstract(final Entry root) {
-
+		
 		this.root = root;
 		this.base = root;
 	}
-
-	/**
-	 * @param root
-	 * @param base
-	 */
+	
+	/** @param root
+	 * @param base */
 	public TargetInterfaceAbstract(final Entry root, final Entry base) {
-
+		
 		this.root = root;
 		this.base = base;
 	}
-
+	
 	@Override
 	public BaseObject basePrototype() {
-
+		
 		return Reflect.classToBasePrototype(TargetInterface.class);
 	}
-
+	
 	@Override
 	public Entry getBase() {
-
+		
 		return this.base;
 	}
-
+	
 	@Override
 	public Entry getRoot() {
-
+		
 		return this.root;
 	}
-
+	
 	@Override
 	public ReplyAnswer onQuery(final ServeRequest request) {
-
+		
 		final String resourceIdentifier = request.getResourceIdentifier();
-		if (resourceIdentifier.length() <= 3 || resourceIdentifier.charAt(0) != '/' || resourceIdentifier.charAt(1) != '!' || resourceIdentifier.charAt(2) != '/') {
+		if (resourceIdentifier.length() <= 3 || //
+				resourceIdentifier.charAt(0) != '/' || //
+				resourceIdentifier.charAt(1) != '!' || //
+				resourceIdentifier.charAt(2) != '/'//
+		) {
 			return null;
 		}
 		if (resourceIdentifier.regionMatches(false, 3, "skin/", 0, 5)) {
@@ -82,17 +79,21 @@ public abstract class TargetInterfaceAbstract extends BaseHostEmpty implements T
 				{
 					final Skinner skinner = SkinScanner.getSystemSkinner(skin);
 					if (skinner != null) {
-						/**
-						 * FIXME: SkinNewAbstract contains similar code!
-						 */
+						/** FIXME: SkinNewAbstract contains similar code! */
 						request.shiftRequested(queryPosition, true);
+						// System.out.println(" >>> >>>>> 8: " + this + ", skinner: " + skinner + ",
+						// query:" + request);
 						try {
 							final ReplyAnswer answer = skinner.onQuery(request);
+							// System.out.println(" >>> >>>>> A: " + this + ", skinner: " + skinner
+							// + ", answer:" + answer);
 							if (answer != null && answer != request) {
 								return skinner.handleReply(answer);
 							}
 						} catch (final AbstractReplyException e) {
 							final ReplyAnswer answer = e.getReply();
+							// System.out.println(" >>> >>>>> B: " + this + ", skinner: " + skinner
+							// + ", answer:" + answer);
 							if (answer != null && answer != request) {
 								return skinner.handleReply(answer);
 							}
@@ -103,10 +104,7 @@ public abstract class TargetInterfaceAbstract extends BaseHostEmpty implements T
 			return null;
 		}
 		if (resourceIdentifier.regionMatches(false, 3, "class/", 0, 6)) {
-			final String className = resourceIdentifier
-					.substring( /*
-								 * "/!/class/". length()
-								 */9);
+			final String className = resourceIdentifier.substring( /* "/!/class/". length() */9);
 			final InputStream resource = this.getClass().getClassLoader().getResourceAsStream(className);
 			return resource == null
 				? Reply.string("WSM-QD", request, className)//
@@ -118,14 +116,11 @@ public abstract class TargetInterfaceAbstract extends BaseHostEmpty implements T
 		}
 		final Entry entry;
 		if (resourceIdentifier.regionMatches(false, 3, "public/", 0, 7)) {
-			entry = Storage.PUBLIC.relative(
-					resourceIdentifier.substring( /* "/!/public/".length() */10),
-					null);
+			entry = Storage.PUBLIC
+					.relative(resourceIdentifier.substring( /* "/!/public/".length() */10), null);
 		} else //
 		if (resourceIdentifier.regionMatches(false, 3, "base/", 0, 5)) {
-			entry = this.base.relative(
-					resourceIdentifier.substring( /* "/!/base/".length() */8),
-					null);
+			entry = this.base.relative(resourceIdentifier.substring( /* "/!/base/".length() */8), null);
 		} else {
 			return null;
 		}
@@ -149,10 +144,10 @@ public abstract class TargetInterfaceAbstract extends BaseHostEmpty implements T
 					"Not found: " + resourceIdentifier)//
 					.setCode(Reply.CD_UNKNOWN);
 	}
-
+	
 	@Override
 	public final URI resolveEntry(final Entry entry) {
-
+		
 		try {
 			for (Entry current = entry; current != null; current = current.getParent()) {
 				if (current == Storage.PUBLIC) {
@@ -173,10 +168,10 @@ public abstract class TargetInterfaceAbstract extends BaseHostEmpty implements T
 		}
 		return null;
 	}
-
+	
 	@Override
 	public final Entry resolveEntry(final String path) {
-
+		
 		if (path.startsWith("/!/public/")) {
 			return Storage.PUBLIC.relative(path.substring("/!/public/".length()), null);
 		}
@@ -185,10 +180,10 @@ public abstract class TargetInterfaceAbstract extends BaseHostEmpty implements T
 		}
 		return null;
 	}
-
+	
 	@Override
 	public final Entry resolveEntry(final URI uri) {
-
+		
 		final String string = uri.getPath();
 		return this.resolveEntry(string);
 	}
