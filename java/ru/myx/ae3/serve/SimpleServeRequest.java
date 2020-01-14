@@ -1,6 +1,7 @@
 package ru.myx.ae3.serve;
 
 import java.util.function.Function;
+
 import ru.myx.ae3.answer.ReplyAnswer;
 import ru.myx.ae3.base.BaseObject;
 import ru.myx.ae3.binary.Transfer;
@@ -9,35 +10,26 @@ import ru.myx.ae3.reflect.Reflect;
 import ru.myx.ae3.reflect.ReflectionExplicit;
 import ru.myx.ae3.reflect.ReflectionManual;
 
-/**
- * @author myx
- * 
- *         It just collects the reply which you can then access by .getResult()
- *         method.
+/** @author myx
  *
- */
+ *         It just collects the reply which you can then access by .getResult() method. */
 @ReflectionManual
 public class SimpleServeRequest extends AbstractServeRequestMutable<SimpleServeRequest> implements Function<ReplyAnswer, Boolean> {
+
+	private static BaseObject PROTOTYPE = Reflect.classToBasePrototype(SimpleServeRequest.class);
 
 	private final TransferCollector collector = Transfer.createCollector();
 
 	private ReplyAnswer result = null;
-
-	private static BaseObject PROTOTYPE = Reflect.classToBasePrototype(SimpleServeRequest.class);
 
 	/**
 	 *
 	 */
 	@ReflectionExplicit
 	public SimpleServeRequest() {
-		super("SIMPLE", "GET", null);
+
+		super("SIMPLE-SRV-RQ", "GET", null);
 		this.setResponseTarget(this);
-	}
-
-	@Override
-	public BaseObject basePrototype() {
-
-		return SimpleServeRequest.PROTOTYPE;
 	}
 
 	@Override
@@ -48,10 +40,13 @@ public class SimpleServeRequest extends AbstractServeRequestMutable<SimpleServeR
 		return Boolean.TRUE;
 	}
 
-	/**
-	 *
-	 * @return
-	 */
+	@Override
+	public BaseObject basePrototype() {
+
+		return SimpleServeRequest.PROTOTYPE;
+	}
+
+	/** @return */
 	@ReflectionExplicit
 	public ReplyAnswer getResult() {
 
