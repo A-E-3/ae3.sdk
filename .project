@@ -14,4 +14,11 @@
 	<natures>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>clean-java.crypto</name>
+			<type>2</type>
+			<location>/Volumes/ws-2017/myx-work/source/myx/clean-java.crypto/java</location>
+		</link>
+	</linkedResources>
 </projectDescription>

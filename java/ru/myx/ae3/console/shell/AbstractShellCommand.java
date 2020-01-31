@@ -5,10 +5,7 @@ import ru.myx.ae3.exec.ExecCallableFull;
 import ru.myx.ae3.exec.ExecProcess;
 import ru.myx.ae3.exec.ExecStateCode;
 
-/**
- * @author myx
- *
- */
+/** @author myx */
 public abstract class AbstractShellCommand //
 		extends
 			BaseFunctionAbstract //
@@ -18,15 +15,15 @@ public abstract class AbstractShellCommand //
 {
 
 	@Override
-	public String toString() {
-
-		return "[Function ShellCommand('" + this.getName() + "')]";
-	}
-
-	@Override
 	public abstract AbstractShellCommand clone();
 
 	@Override
 	public abstract ExecStateCode execCallImpl(final ExecProcess ctx);
+
+	@Override
+	public String toString() {
+
+		return "[Function ShellCommand('" + this.getName() + "')]";
+	}
 
 }
