@@ -1792,6 +1792,16 @@ public final class ExpressionParser {
 										continue main;
 									}
 									break;
+								case 5 :
+									if ("await".equals(identifier)) {
+										identifier = null;
+										precompiled.add(ParseConstants.TKO_AWAIT_A_S_S);
+										current.append('(');
+										levelBrace++;
+										state = ExpressionParser.ST_CODE;
+										continue main;
+									}
+									break;
 								case 6 :
 									if ("typeof".equals(identifier)) {
 										identifier = null;
@@ -1871,6 +1881,14 @@ public final class ExpressionParser {
 									if ("new".equals(identifier)) {
 										identifier = null;
 										state = ExpressionParser.ST_IDENTIFIER_NEW;
+										continue main;
+									}
+									break;
+								case 5 :
+									if ("await".equals(identifier)) {
+										identifier = null;
+										precompiled.add(ParseConstants.TKO_AWAIT_A_S_S);
+										state = ExpressionParser.ST_WHITESPACE;
 										continue main;
 									}
 									break;

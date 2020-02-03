@@ -3,7 +3,6 @@
  */
 package ru.myx.ae3.exec;
 
-
 import ru.myx.ae3.base.Base;
 import ru.myx.ae3.base.BaseObject;
 import ru.myx.ae3.base.BaseString;
@@ -16,11 +15,6 @@ public final class ModifierArgumentA30IMM implements ModifierArgument {
 	 *
 	 */
 	public static final ModifierArgument EMPTY_STRING = new ModifierArgumentA30IMM(BaseString.EMPTY);
-
-	/**
-	 *
-	 */
-	public static final ModifierArgument TYPEOF = new ModifierArgumentA30IMM("typeof");
 
 	/**
 	 *

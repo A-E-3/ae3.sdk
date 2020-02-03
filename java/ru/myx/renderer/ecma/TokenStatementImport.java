@@ -6,19 +6,20 @@ package ru.myx.renderer.ecma;
 import ru.myx.ae3.base.Base;
 import ru.myx.ae3.base.BaseNativeObject;
 import ru.myx.ae3.base.BaseObject;
+import ru.myx.ae3.exec.ModifierArgument;
 import ru.myx.ae3.exec.ModifierArgumentA30IMM;
-import ru.myx.ae3.exec.ModifierArguments;
-import ru.myx.ae3.exec.OperationsA3X;
+import ru.myx.ae3.exec.OperationsA2X;
 import ru.myx.ae3.exec.ProgramAssembly;
 import ru.myx.ae3.exec.ResultHandler;
 
 final class TokenStatementImport extends TokenStatementAbstract {
 
-	private static final ModifierArgumentA30IMM MA_IMPORT = new ModifierArgumentA30IMM("import");
+	private static final ModifierArgument MA_IMPORT = ModifierArgumentFunctionImport.INSTANCE;
 
 	private String className;
 
 	TokenStatementImport(final String identity, final int line) {
+
 		super(identity, line);
 	}
 
@@ -121,14 +122,14 @@ final class TokenStatementImport extends TokenStatementAbstract {
 			final String identifier = expression.substring(expression.lastIndexOf('.') + 1);
 			this.parent.setLocals(new BaseNativeObject(identifier, BaseObject.FALSE));
 			this.addDebug(assembly, "import " + expression);
-			assembly.addInstruction(OperationsA3X.XACALLO.instruction(
-					ModifierArguments.AB7FV, //
-					TokenStatementImport.MA_IMPORT,
-					new ModifierArgumentA30IMM(
-							/** 'null' callee is allowed here - java call */
-							Base.forString(expression)),
-					0,
-					ResultHandler.FA_BNN_NXT));
+			assembly.addInstruction(
+					OperationsA2X.XFCALLO.instruction(
+							TokenStatementImport.MA_IMPORT,
+							new ModifierArgumentA30IMM(
+									/** 'null' callee is allowed here - java call */
+									Base.forString(expression)),
+							0,
+							ResultHandler.FA_BNN_NXT));
 		}
 	}
 
