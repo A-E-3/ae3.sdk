@@ -21,23 +21,22 @@ import ru.myx.ae3.help.Format;
 
 final class CopierFromFileSmart implements BaseObjectNoOwnProperties, TransferCopier, Describable {
 	
-	
 	private static final long SMART_LOAD_DELAY_DENSITY = 5L * 1000L * 60L;
-	
+
 	private final File file;
-	
+
 	private byte[] loaded = null;
-	
+
 	private final long skip;
-	
+
 	private final long limit;
-	
+
 	private byte loadLeft;
-	
+
 	private long loadDate;
-	
+
 	CopierFromFileSmart(final File file, final long skip, final long limit, final byte left) throws IllegalArgumentException {
-		
+
 		assert file != null : "File is null";
 		if (!file.isFile()) {
 			throw new IllegalArgumentException("file '" + file.getAbsolutePath() + "' doesn't exist or not a file!");
@@ -48,24 +47,21 @@ final class CopierFromFileSmart implements BaseObjectNoOwnProperties, TransferCo
 		this.loadLeft = left;
 		this.loadDate = -1L;
 	}
-	
+
 	@Override
 	public String baseDescribe() {
 		
-		
 		return "[" + this.getClass().getSimpleName() + " size=" + Format.Compact.toBytes(this.limit - this.skip) + "]";
 	}
-	
+
 	@Override
 	public final CopierFromFileSmart baseValue() {
 		
-		
 		return this;
 	}
-	
+
 	@Override
 	public int compareTo(final TransferCopier o) {
-		
 		
 		if (o == null) {
 			return 1;
@@ -81,10 +77,9 @@ final class CopierFromFileSmart implements BaseObjectNoOwnProperties, TransferCo
 			throw new RuntimeException(e);
 		}
 	}
-	
+
 	@Override
 	public int copy(final long start, final byte[] target, final int offset, final int count) throws ConcurrentModificationException {
-		
 		
 		final long position = this.skip + start;
 		if (position >= this.limit) {
@@ -106,24 +101,21 @@ final class CopierFromFileSmart implements BaseObjectNoOwnProperties, TransferCo
 			throw new RuntimeException("Error reading file contents", e);
 		}
 	}
-	
+
 	@Override
 	public final MessageDigest getMessageDigest() {
 		
-		
 		return this.updateMessageDigest(Engine.getMessageDigestInstance());
 	}
-	
+
 	@Override
 	public final long length() {
 		
-		
 		return this.limit - this.skip;
 	}
-	
+
 	@Override
 	public final TransferBuffer nextCopy() throws ConcurrentModificationException {
-		
 		
 		if (this.loaded == null) {
 			if (!this.file.isFile()) {
@@ -158,31 +150,27 @@ final class CopierFromFileSmart implements BaseObjectNoOwnProperties, TransferCo
 		}
 		return new WrapBuffer(this.loaded);
 	}
-	
+
 	@Override
 	public byte[] nextDirectArray() {
 		
-		
 		return this.nextCopy().toDirectArray();
 	}
-	
+
 	@Override
 	public InputStream nextInputStream() {
 		
-		
 		return this.nextCopy().toInputStream();
 	}
-	
+
 	@Override
 	public final Reader nextReaderUtf8() throws IOException {
 		
-		
 		return this.nextCopy().toReaderUtf8();
 	}
-	
+
 	@Override
 	public TransferCopier slice(final long start, final long count) throws ConcurrentModificationException {
-		
 		
 		final long avail = this.limit - this.skip;
 		if (start == 0 && avail == count) {
@@ -210,38 +198,33 @@ final class CopierFromFileSmart implements BaseObjectNoOwnProperties, TransferCo
 		}
 		return new CopierFilePart(this.file, skip, skip + length);
 	}
-	
+
 	@Override
 	public String toString() {
 		
-		
 		return this.toString(Engine.CHARSET_DEFAULT);
 	}
-	
+
 	@Override
 	public final String toString(final Charset charset) {
 		
-		
 		return this.nextCopy().toString(charset);
 	}
-	
+
 	@Override
 	public final String toString(final String encoding) throws UnsupportedEncodingException {
 		
-		
 		return this.nextCopy().toString(encoding);
 	}
-	
+
 	@Override
 	public String toStringUtf8() {
 		
-		
 		return this.nextCopy().toString(Engine.CHARSET_UTF8);
 	}
-	
+
 	@Override
 	public MessageDigest updateMessageDigest(final MessageDigest digest) {
-		
 		
 		return this.nextCopy().updateMessageDigest(digest);
 	}

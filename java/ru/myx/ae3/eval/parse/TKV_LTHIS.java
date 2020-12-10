@@ -19,78 +19,72 @@ import ru.myx.ae3.exec.ResultHandlerBasic;
 import ru.myx.ae3.exec.parse.expression.TokenValue;
 
 final class TKV_LTHIS extends TokenValue {
-
+	
 	@Override
 	public final String getNotation() {
-
+		
 		return "this";
 	}
-	
+
 	@Override
 	public final String getNotationValue() {
-
+		
 		return this.getNotation();
 	}
-	
+
 	@Override
 	public final InstructionResult getResultType() {
-
+		
 		return InstructionResult.OBJECT;
 	}
-	
+
 	@Override
 	public void toAssembly(final ProgramAssembly assembly, final ModifierArgument argumentA, final ModifierArgument argumentB, final ResultHandlerBasic store) {
-
+		
 		if (store == ResultHandler.FB_BSN_NXT) {
 			assembly.addInstruction(Instructions.INSTR_LOAD_1_T_SN_NEXT);
 			return;
 		}
-		
-		/**
-		 * zero operands
-		 */
+
+		/** zero operands */
 		assert argumentA == null;
 		assert argumentB == null;
-		
-		/**
-		 * valid store
-		 */
+
+		/** valid store */
 		assert store != null;
-		
+
 		assembly.addInstruction(OperationsA10.XFLOAD_P.instruction(ModifierArguments.AB4CT, 0, store));
 	}
-	
-	@Override
-	public final String toCode() {
 
-		return "LOAD\t1\tT  ->S;";
-	}
-	
-	@Override
-	public ModifierArgument toDirectModifier() {
-
-		return ModifierArguments.AB4CT;
-	}
-	
 	@Override
 	public void toBooleanConditionalSkip(final ProgramAssembly assembly, final boolean compare, final int constant, final ResultHandler store) {
-
-		assembly.addInstruction((compare
-			? OperationsA11.XESKIP1A_P
-			: OperationsA11.XESKIP0A_P).instruction(ModifierArguments.AB4CT, constant, store));
+		
+		assembly.addInstruction(
+				(compare
+					? OperationsA11.XESKIP1A_P
+					: OperationsA11.XESKIP0A_P).instruction(ModifierArguments.AB4CT, constant, store));
 	}
-	
-	@Override
-	public InstructionEditable toBooleanConditionalSkip(final ProgramAssembly assembly,
-			final int start,
-			final boolean compare,
-			final boolean statement,
-			final ResultHandler store) {
 
+	@Override
+	public InstructionEditable
+			toBooleanConditionalSkip(final ProgramAssembly assembly, final int start, final boolean compare, final ResultHandler store) {
+		
 		final InstructionEditable editable = (compare
 			? OperationsA11.XESKIP1A_P
 			: OperationsA11.XESKIP0A_P).instructionCreate(ModifierArguments.AB4CT, 0, store);
 		assembly.addInstruction(editable);
 		return editable;
+	}
+
+	@Override
+	public final String toCode() {
+		
+		return "LOAD\t1\tT  ->S;";
+	}
+
+	@Override
+	public ModifierArgument toDirectModifier() {
+		
+		return ModifierArguments.AB4CT;
 	}
 }

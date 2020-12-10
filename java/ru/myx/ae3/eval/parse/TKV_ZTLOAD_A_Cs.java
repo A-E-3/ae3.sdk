@@ -24,117 +24,116 @@ import ru.myx.ae3.exec.parse.expression.TokenValue;
 
 /** @author myx */
 public final class TKV_ZTLOAD_A_Cs extends TokenValue implements ModifierArgument {
-
+	
 	private final BasePrimitiveString argumentB;
-
+	
 	/** @param name */
 	public TKV_ZTLOAD_A_Cs(final BasePrimitiveString name) {
+		
 		this.argumentB = name;
 	}
-
+	
 	@Override
 	public boolean argumentHasSideEffects() {
-		
+
 		return true;
 	}
-
+	
 	@Override
 	public final String argumentNotation() {
-		
+
 		return "RT['" + this.argumentB + "']";
 	}
-
+	
 	@Override
 	public final BaseObject argumentRead(final ExecProcess process) {
-		
+
 		assert process.rb4CT != null : "'this' is not available in current context";
 		return process.rb4CT.baseGet(this.argumentB, BaseObject.UNDEFINED);
 	}
-
+	
 	@Override
 	public final String getNotation() {
-		
+
 		return "this." + this.argumentB;
 	}
-
+	
 	@Override
 	public final String getNotationValue() {
-		
+
 		return this.getNotation();
 	}
-
+	
 	@Override
 	public final InstructionResult getResultType() {
-		
+
 		return InstructionResult.OBJECT;
 	}
-
+	
 	@Override
 	public final boolean isAccessReference() {
-		
+
 		return true;
 	}
-
+	
 	@Override
 	public void toAssembly(final ProgramAssembly assembly, final ModifierArgument argumentA, final ModifierArgument argumentB, final ResultHandlerBasic store) {
-		
+
 		/** zero operands */
 		assert argumentA == null;
 		assert argumentB == null;
-
+		
 		/** valid store */
 		assert store != null;
-
+		
 		assembly.addInstruction(OperationsA10.XFLOAD_P.instruction(this, 0, store));
 	}
-
+	
 	@Override
 	public void toBooleanConditionalSkip(final ProgramAssembly assembly, final boolean compare, final int constant, final ResultHandler store) {
-		
-		assembly.addInstruction((compare
-			? OperationsA11.XESKIP1A_P
-			: OperationsA11.XESKIP0A_P).instruction(this, constant, store));
-	}
 
+		assembly.addInstruction(
+				(compare
+					? OperationsA11.XESKIP1A_P
+					: OperationsA11.XESKIP0A_P).instruction(this, constant, store));
+	}
+	
 	@Override
-	public InstructionEditable toBooleanConditionalSkip(final ProgramAssembly assembly,
-			final int start,
-			final boolean compare,
-			final boolean statement,
-			final ResultHandler store) {
-		
+	public InstructionEditable
+			toBooleanConditionalSkip(final ProgramAssembly assembly, final int start, final boolean compare, final ResultHandler store) {
+
 		final InstructionEditable editable = (compare
 			? OperationsA11.XESKIP1A_P
 			: OperationsA11.XESKIP0A_P).instructionCreate(this, 0, store);
 		assembly.addInstruction(editable);
 		return editable;
 	}
-
+	
 	@Override
 	public final String toCode() {
-		
+
 		return "ACCESS\t2\tTC ->S\tCONST('" + this.argumentB + "');";
 	}
-
+	
 	@Override
 	public ModifierArgument toDirectModifier() {
-		
+
 		return this;
 	}
-
+	
 	@Override
 	public TokenInstruction toReferenceDelete() {
-		
+
 		return new TKV_ZTDELETE_A_Cs(this.argumentB);
 	}
-
+	
 	@Override
 	public ModifierArgument toReferenceReadBeforeWrite(final ProgramAssembly assembly,
 			final ModifierArgument argumentA,
 			final ModifierArgument argumentB,
 			final boolean needRead,
 			final boolean directAllowed) {
-		
+
 		/** inlined<code>
 		assembly.addInstruction( start, new InstructionA10( OperationsA10.LOAD,
 				null,
@@ -149,21 +148,22 @@ public final class TKV_ZTLOAD_A_Cs extends TokenValue implements ModifierArgumen
 			? this
 			: null;
 	}
-
+	
 	@Override
 	public void toReferenceWriteAfterRead(final ProgramAssembly assembly,
 			final ModifierArgument argumentA,
 			final ModifierArgument argumentB,
 			final ModifierArgument modifierValue,
 			final ResultHandler store) {
-		
+
 		assert argumentA == null;
 		assert argumentB == null;
 		assert modifierValue != null;
-		assembly.addInstruction(OperationsS2X.VTSTORE_S.instruction(
-				new ModifierArgumentA30IMM(this.argumentB), //
-				modifierValue,
-				0,
-				store));
+		assembly.addInstruction(
+				OperationsS2X.VTSTORE_S.instruction(
+						new ModifierArgumentA30IMM(this.argumentB), //
+						modifierValue,
+						0,
+						store));
 	}
 }

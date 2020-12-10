@@ -19,16 +19,12 @@ import ru.myx.ae3.exec.ResultHandler;
 import ru.myx.ae3.exec.ResultHandlerBasic;
 import ru.myx.ae3.exec.parse.expression.TokenValue;
 
-/**
- * @author myx
- *
- */
+/** @author myx */
 final class TKV_LFALSE extends TokenValue {
 
-	/**
-	 * @param value
-	 */
+	/** @param value */
 	TKV_LFALSE() {
+
 		//
 	}
 	
@@ -62,18 +58,34 @@ final class TKV_LFALSE extends TokenValue {
 			return;
 		}
 		
-		/**
-		 * zero operands
-		 */
+		/** zero operands */
 		assert argumentA == null;
 		assert argumentB == null;
 		
-		/**
-		 * valid store
-		 */
+		/** valid store */
 		assert store != null;
 		
 		assembly.addInstruction(OperationsA10.XFLOAD_P.instruction(BaseObject.FALSE, ModifierArgumentA30IMM.FALSE, 0, store));
+	}
+	
+	@Override
+	public void toBooleanConditionalSkip(final ProgramAssembly assembly, final boolean compare, final int constant, final ResultHandler store) {
+
+		if (!compare) {
+			assembly.addInstruction(OperationsA01.XESKIP_P.instruction(constant, store));
+		}
+	}
+	
+	@Override
+	public InstructionEditable
+			toBooleanConditionalSkip(final ProgramAssembly assembly, final int start, final boolean compare, final ResultHandler store) {
+
+		if (!compare) {
+			final InstructionEditable editable = OperationsA01.XESKIP_P.instructionCreate(0, store);
+			assembly.addInstruction(editable);
+			return editable;
+		}
+		return null;
 	}
 	
 	@Override
@@ -98,28 +110,5 @@ final class TKV_LFALSE extends TokenValue {
 	public ModifierArgument toDirectModifier() {
 
 		return ModifierArgumentA30IMM.FALSE;
-	}
-	
-	@Override
-	public void toBooleanConditionalSkip(final ProgramAssembly assembly, final boolean compare, final int constant, final ResultHandler store) {
-
-		if (!compare) {
-			assembly.addInstruction(OperationsA01.XESKIP_P.instruction(constant, store));
-		}
-	}
-	
-	@Override
-	public InstructionEditable toBooleanConditionalSkip(final ProgramAssembly assembly,
-			final int start,
-			final boolean compare,
-			final boolean statement,
-			final ResultHandler store) {
-
-		if (!compare) {
-			final InstructionEditable editable = OperationsA01.XESKIP_P.instructionCreate(0, store);
-			assembly.addInstruction(editable);
-			return editable;
-		}
-		return null;
 	}
 }

@@ -10,13 +10,13 @@ import ru.myx.vm_vliw32_2010.OperationA11;
 import ru.myx.vm_vliw32_2010.VIFmtA11;
 
 /** @author myx */
-final class IA11_XESKIP1A_A_C_NN_NXT extends InstructionIA1I {
+final class IA11_XESKIP1A_A_C_FA_NN_NXT extends InstructionIA1I {
 	
 	private final ModifierArgument modifierA;
 
 	private final int constant;
 
-	IA11_XESKIP1A_A_C_NN_NXT(final ModifierArgument modifierA, final int constant) {
+	IA11_XESKIP1A_A_C_FA_NN_NXT(final ModifierArgument modifierA, final int constant) {
 		
 		if (constant > VIFmtA11.CNST_MAX || constant < VIFmtA11.CNST_MIN) {
 			throw new IllegalArgumentException("Constant out of range, value=" + constant + ", max=" + VIFmtA11.CNST_MAX + ", min=" + VIFmtA11.CNST_MIN);

@@ -21,30 +21,31 @@ import ru.myx.ae3.exec.ResultHandler;
 import ru.myx.ae3.exec.parse.expression.TokenInstruction;
 
 final class TokenStatementFor extends TokenStatementAbstract {
-	
+
 	private String expression;
-	
+
 	private boolean v677;
-	
+
 	private boolean each;
-	
+
 	private boolean keys;
-	
+
 	private TokenStatement token;
-	
+
 	private BaseMap locals;
-	
+
 	private boolean hasBreak;
-	
+
 	private boolean hasContinue;
-	
+
 	TokenStatementFor(final String identity, final int line) {
+		
 		super(identity, line);
 	}
-	
+
 	@Override
 	public final boolean addStatement(final TokenStatement statement) {
-		
+
 		if (this.token == null) {
 			this.token = statement;
 			statement.setLocalsTarget(this);
@@ -52,16 +53,16 @@ final class TokenStatementFor extends TokenStatementAbstract {
 		}
 		return false;
 	}
-	
+
 	@Override
 	public final TokenStatement createStatement(final String identity, final int line) {
-		
+
 		return new TokenStatementFor(identity, line);
 	}
-	
+
 	@Override
 	public final void dump(final int level, final StringBuilder buffer) {
-		
+
 		for (int i = level; i > 0; --i) {
 			buffer.append('\t');
 		}
@@ -83,76 +84,76 @@ final class TokenStatementFor extends TokenStatementAbstract {
 			this.token.dump(level + 1, buffer);
 		}
 	}
-	
+
 	@Override
 	public final String getKeyword() {
-		
+
 		return "for";
 	}
-	
+
 	@Override
 	public final boolean isIdentifierPossible() {
-		
+
 		return !this.v677 && !this.each && !this.keys;
 	}
-	
+
 	@Override
 	public final boolean isIdentifierRequired() {
-		
+
 		return false;
 	}
-	
+
 	@Override
 	public final boolean isKeywordExpectStatement() {
-		
+
 		return true;
 	}
-	
+
 	@Override
 	public final boolean isLabelStatement() {
-		
+
 		return false;
 	}
-	
+
 	@Override
 	public boolean isNextStatementFromScratch() {
-		
+
 		return this.expression != null;
 	}
-	
+
 	@Override
 	public boolean isTotallyComplete() {
-		
+
 		return this.token != null && this.expression != null;
 	}
-	
+
 	@Override
 	public final boolean setArguments(final String expression) {
-		
+
 		if (this.expression == null) {
 			this.expression = expression;
 			return true;
 		}
 		return false;
 	}
-	
+
 	@Override
 	public boolean setControlBreakUsed() {
-		
+
 		this.hasBreak = true;
 		return true;
 	}
-	
+
 	@Override
 	public boolean setControlContinueUsed() {
-		
+
 		this.hasContinue = true;
 		return true;
 	}
-	
+
 	@Override
 	public final boolean setIdentifier(final String identifier) {
-		
+
 		if (this.v677 || this.each || this.keys) {
 			return false;
 		}
@@ -172,10 +173,10 @@ final class TokenStatementFor extends TokenStatementAbstract {
 		}
 		return false;
 	}
-	
+
 	@Override
 	public final boolean setLocals(final BaseObject locals) {
-		
+
 		if (locals == null || !locals.baseHasKeysOwn()) {
 			return true;
 		}
@@ -185,17 +186,19 @@ final class TokenStatementFor extends TokenStatementAbstract {
 		this.locals.baseDefineImportOwnEnumerable(locals);
 		return true;
 	}
-	
+
 	@Override
 	public final void toAssembly(final ProgramAssembly assembly, final int startOffset) throws Exception {
-		
-		this.addDebug(assembly, this.each
-			? "for each( " + this.expression + " )"
-			: this.keys
-				? "for keys( " + this.expression + " )"
-				: this.v677
-					? "for v677( " + this.expression + " )"
-					: "for( " + this.expression + " )");
+
+		this.addDebug(
+				assembly,
+				this.each
+					? "for each( " + this.expression + " )"
+					: this.keys
+						? "for keys( " + this.expression + " )"
+						: this.v677
+							? "for v677( " + this.expression + " )"
+							: "for( " + this.expression + " )");
 		if (this.expression == null) {
 			assembly.addError("no loop expression!");
 			return;
@@ -242,7 +245,7 @@ final class TokenStatementFor extends TokenStatementAbstract {
 				}
 				assembly.addInstruction(frameEntry);
 				final int frameStart = assembly.size();
-				
+
 				if (this.locals != null) {
 					final BaseObject locals = TokenStatementAbstract.toLocalsObjectOrArray(this.locals);
 					if (locals != null) {
@@ -250,8 +253,10 @@ final class TokenStatementFor extends TokenStatementAbstract {
 					}
 				}
 				{
-					final String right = this.expression.substring(position //
-							+ 4 /* " in ".length() */).trim();
+					final String right = this.expression.substring(
+							position //
+									+ 4 /* " in ".length() */)
+							.trim();
 					final TokenInstruction token = Evaluate.compileToken(assembly, right, BalanceType.EXPRESSION);
 					final ModifierArgument modifier = token.toDirectModifier();
 					{
@@ -264,30 +269,33 @@ final class TokenStatementFor extends TokenStatementAbstract {
 					}
 					if (modifier == ModifierArguments.AA0RB) {
 						token.toAssembly(assembly, null, null, ResultHandler.FA_BNN_NXT);
-						assembly.addInstruction(this.each
-							? Instructions.INSTR_ITRPREPV_1_R_NN_NEXT
-							: this.keys
-								? Instructions.INSTR_ITRPREPK_1_R_NN_NEXT
-								: this.v677
-									? Instructions.INSTR_ITRPREP7_1_R_NN_NEXT
-									: Instructions.INSTR_ITRPREP7_1_R_NN_NEXT);
+						assembly.addInstruction(
+								this.each
+									? Instructions.INSTR_ITRPREPV_1_R_NN_NEXT
+									: this.keys
+										? Instructions.INSTR_ITRPREPK_1_R_NN_NEXT
+										: this.v677
+											? Instructions.INSTR_ITRPREP7_1_R_NN_NEXT
+											: Instructions.INSTR_ITRPREP7_1_R_NN_NEXT);
 					} else {
-						assembly.addInstruction((this.each
-						? OperationsA10.XITRPREPV
-						: this.keys
-							? OperationsA10.XITRPREPK
-							: this.v677
-								? OperationsA10.ZITRPREP7
-								: OperationsA10.ZITRPREP7).instruction(modifier, 0, ResultHandler.FA_BNN_NXT));
+						assembly.addInstruction(
+								(this.each
+									? OperationsA10.XITRPREPV
+									: this.keys
+										? OperationsA10.XITRPREPK
+										: this.v677
+											? OperationsA10.ZITRPREP7
+											: OperationsA10.ZITRPREP7).instruction(modifier, 0, ResultHandler.FA_BNN_NXT));
 					}
 				}
 				if (this.hasBreak) {
-					assembly.addInstruction(OperationsA01.XFBTGT_P.instruction(//
-							(this.hasContinue
-								? 4
-								: 3) + body.length(),
-							ResultHandler.FA_BNN_NXT //
-					));
+					assembly.addInstruction(
+							OperationsA01.XFBTGT_P.instruction(//
+									(this.hasContinue
+										? 4
+										: 3) + body.length(),
+									ResultHandler.FA_BNN_NXT //
+							));
 				}
 				if (this.hasContinue) {
 					assembly.addInstruction(OperationsA01.XFCTGT_P.instruction(0, ResultHandler.FA_BNN_NXT));
@@ -354,7 +362,7 @@ final class TokenStatementFor extends TokenStatementAbstract {
 				}
 				assembly.addInstruction(frameEntry);
 				final int frameStart = assembly.size();
-				
+
 				if (this.locals != null) {
 					final BaseObject locals = TokenStatementAbstract.toLocalsObjectOrArray(this.locals);
 					if (locals != null) {
@@ -362,8 +370,10 @@ final class TokenStatementFor extends TokenStatementAbstract {
 					}
 				}
 				{
-					final String right = this.expression.substring(position //
-							+ 4 /* " in ".length() */).trim();
+					final String right = this.expression.substring(
+							position //
+									+ 4 /* " in ".length() */)
+							.trim();
 					final TokenInstruction token = Evaluate.compileToken(assembly, right, BalanceType.EXPRESSION);
 					final ModifierArgument modifier = token.toDirectModifier();
 					{
@@ -382,12 +392,13 @@ final class TokenStatementFor extends TokenStatementAbstract {
 					}
 				}
 				if (this.hasBreak) {
-					assembly.addInstruction(OperationsA01.XFBTGT_P.instruction(//
-							(this.hasContinue
-								? 4
-								: 3) + body.length(),
-							ResultHandler.FA_BNN_NXT//
-					));
+					assembly.addInstruction(
+							OperationsA01.XFBTGT_P.instruction(//
+									(this.hasContinue
+										? 4
+										: 3) + body.length(),
+									ResultHandler.FA_BNN_NXT//
+							));
 				}
 				if (this.hasContinue) {
 					assembly.addInstruction(OperationsA01.XFCTGT_P.instruction(0, ResultHandler.FA_BNN_NXT));
@@ -559,7 +570,7 @@ final class TokenStatementFor extends TokenStatementAbstract {
 						? 0
 						: calcOperation.length());
 					final int size = assembly.size();
-					calcCondition.toBooleanConditionalSkip(assembly, false, skipSize, ResultHandler.FA_BNN_NXT);
+					calcCondition.toBooleanConditionalSkip(assembly, false, skipSize, ResultHandler.FU_BNN_NXT);
 					loopSize += assembly.getInstructionCount(size);
 					if (calcOperation != null) {
 						assembly.addInstruction(calcOperation);
@@ -580,13 +591,15 @@ final class TokenStatementFor extends TokenStatementAbstract {
 			if (this.locals != null) {
 				final BaseObject locals = TokenStatementAbstract.toLocalsObjectOrArray(this.locals);
 				if (locals == null) {
-					assembly.addInstruction((this.hasBreak || this.hasContinue
-						? OperationsA01.XEENTRLOOP_P
-						: OperationsA01.XEENTRVARS_P).instruction(result.length(), ResultHandler.FA_BNN_NXT));
+					assembly.addInstruction(
+							(this.hasBreak || this.hasContinue
+								? OperationsA01.XEENTRLOOP_P
+								: OperationsA01.XEENTRVARS_P).instruction(result.length(), ResultHandler.FA_BNN_NXT));
 				} else {
-					assembly.addInstruction((this.hasBreak || this.hasContinue
-						? OperationsA01.XEENTRLOOP_P
-						: OperationsA01.XEENTRVARS_P).instruction(result.length() + 1, ResultHandler.FA_BNN_NXT));
+					assembly.addInstruction(
+							(this.hasBreak || this.hasContinue
+								? OperationsA01.XEENTRLOOP_P
+								: OperationsA01.XEENTRVARS_P).instruction(result.length() + 1, ResultHandler.FA_BNN_NXT));
 					assembly.addInstruction(OperationsA10.XFDECLARE_N.instruction(new ModifierArgumentA30IMM(locals), 0, ResultHandler.FA_BNN_NXT));
 				}
 			} else {
@@ -597,7 +610,7 @@ final class TokenStatementFor extends TokenStatementAbstract {
 			assembly.addInstruction(Instructions.INSTR_ELEAVE_0_NN_NEXT);
 			return;
 		}
-		
+
 		final ProgramPart result;
 		{
 			final int bodySize = body.length();
@@ -615,7 +628,7 @@ final class TokenStatementFor extends TokenStatementAbstract {
 				final int skipSize = 1 + bodySize + operationSize;
 				// if (calcModifier == ModifierArguments.A07RR) {
 				final int size = assembly.size();
-				calcCondition.toBooleanConditionalSkip(assembly, false, skipSize, ResultHandler.FA_BNN_NXT);
+				calcCondition.toBooleanConditionalSkip(assembly, false, skipSize, ResultHandler.FU_BNN_NXT);
 				loopSize += assembly.getInstructionCount(size);
 			}
 			assembly.addInstruction(body);
@@ -630,7 +643,7 @@ final class TokenStatementFor extends TokenStatementAbstract {
 			assembly.addInstruction(OperationsA01.XESKIP_P.instruction(-loopSize - 1, ResultHandler.FA_BNN_NXT));
 			result = assembly.toProgram(initialOffset);
 		}
-		
+
 		if (calcInitialize != null) {
 			assembly.addInstruction(calcInitialize);
 		}

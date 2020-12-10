@@ -14,22 +14,23 @@ import ru.myx.ae3.exec.ResultHandler;
 import ru.myx.ae3.exec.parse.expression.TokenInstruction;
 
 final class TokenStatementIf extends TokenStatementAbstract {
-	
+
 	private String calc;
-
+	
 	private int statementCount = 0;
-
+	
 	private TokenStatement tokenThen;
-
+	
 	private TokenStatement tokenElse;
-
+	
 	TokenStatementIf(final String identity, final int line) {
+		
 		super(identity, line);
 	}
-
+	
 	@Override
 	public final boolean addStatement(final TokenStatement statement) {
-		
+
 		if (this.statementCount == 0) {
 			this.statementCount++;
 			this.tokenThen = statement;
@@ -49,16 +50,16 @@ final class TokenStatementIf extends TokenStatementAbstract {
 		}
 		return false;
 	}
-
+	
 	@Override
 	public final TokenStatement createStatement(final String identity, final int line) {
-		
+
 		return new TokenStatementIf(identity, line);
 	}
-
+	
 	@Override
 	public final void dump(final int level, final StringBuilder buffer) {
-		
+
 		for (int i = level; i > 0; --i) {
 			buffer.append('\t');
 		}
@@ -76,79 +77,79 @@ final class TokenStatementIf extends TokenStatementAbstract {
 			}
 		}
 	}
-
+	
 	@Override
 	public final String getKeyword() {
-		
+
 		return "if";
 	}
-
+	
 	@Override
 	public final boolean isIdentifierPossible() {
-		
+
 		return false;
 	}
-
+	
 	@Override
 	public final boolean isIdentifierRequired() {
-		
+
 		return false;
 	}
-
+	
 	@Override
 	public final boolean isKeywordExpectStatement() {
-		
+
 		return true;
 	}
-
+	
 	@Override
 	public final boolean isLabelStatement() {
-		
+
 		return false;
 	}
-
+	
 	@Override
 	public boolean isNextStatementFromScratch() {
-		
+
 		/** in any position, count == 0 || count == 1 || count == 3 */
 		return true;
 	}
-
+	
 	@Override
 	public boolean isTotallyComplete() {
-		
+
 		// return this.calc != null && (this.statementCount == 1 ||
 		// this.statementCount == 3);
 		return this.calc != null && this.statementCount == 3;
 	}
-
+	
 	@Override
 	public final boolean setArguments(final String expression) {
-		
+
 		if (this.calc == null) {
 			this.calc = expression;
 			return true;
 		}
 		return false;
 	}
-
+	
 	@Override
 	public final boolean setIdentifier(final String identifier) {
-		
+
 		return false;
 	}
-
+	
 	@Override
 	public final boolean setLocals(final BaseObject locals) {
-		
+
 		return this.parent == null
 			? false
 			: this.parent.setLocals(locals);
 	}
-
+	
 	@Override
 	public final void toAssembly(final ProgramAssembly assembly, final int startOffset) throws Exception {
-		
+
 		this.addDebug(assembly, "if( " + this.calc + " )");
 		if (this.calc == null) {
 			assembly.addError("no conditional expression!");
@@ -158,9 +159,9 @@ final class TokenStatementIf extends TokenStatementAbstract {
 			assembly.addError("illegal if statement!");
 			return;
 		}
-
+		
 		final int initialOffset = assembly.size();
-
+		
 		/** ESKIP1 / ESKIP0 - doesn't require 'boolean' */
 		final TokenInstruction condition = Evaluate.compileToken(assembly, this.calc, BalanceType.EXPRESSION);
 		{
@@ -176,7 +177,7 @@ final class TokenStatementIf extends TokenStatementAbstract {
 				return;
 			}
 		}
-
+		
 		final ProgramPart instructionThen;
 		{
 			this.tokenThen.toAssembly(assembly, initialOffset);
@@ -197,24 +198,24 @@ final class TokenStatementIf extends TokenStatementAbstract {
 				instructionElse = assembly.toProgram(initialOffset);
 			}
 		}
-
+		
 		if (instructionElse == null) {
 			if (instructionThen == null) {
 				condition.toAssembly(assembly, null, null, ResultHandler.FA_BNN_NXT);
 				return;
 			}
-
-			condition.toBooleanConditionalSkip(assembly, false, instructionThen.length(), ResultHandler.FA_BNN_NXT);
+			
+			condition.toBooleanConditionalSkip(assembly, false, instructionThen.length(), ResultHandler.FU_BNN_NXT);
 			assembly.addInstruction(instructionThen);
 			return;
 		}
 		if (instructionThen == null) {
-			condition.toBooleanConditionalSkip(assembly, true, instructionElse.length(), ResultHandler.FA_BNN_NXT);
+			condition.toBooleanConditionalSkip(assembly, true, instructionElse.length(), ResultHandler.FU_BNN_NXT);
 			assembly.addInstruction(instructionElse);
 			return;
 		}
 		{
-			condition.toBooleanConditionalSkip(assembly, false, 1 + instructionThen.length(), ResultHandler.FA_BNN_NXT);
+			condition.toBooleanConditionalSkip(assembly, false, 1 + instructionThen.length(), ResultHandler.FU_BNN_NXT);
 			assembly.addInstruction(instructionThen);
 			assembly.addInstruction(XESKIP_P.instruction(instructionElse.length(), ResultHandler.FA_BNN_NXT));
 			assembly.addInstruction(instructionElse);

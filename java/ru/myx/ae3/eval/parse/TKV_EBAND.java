@@ -21,23 +21,20 @@ import ru.myx.ae3.exec.ResultHandlerDirect;
 import ru.myx.ae3.exec.parse.expression.TokenInstruction;
 import ru.myx.ae3.exec.parse.expression.TokenValue;
 
-/**
- * @author myx
+/** @author myx
  *
  *         To change the template for this generated type comment go to
- *         Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
- */
+ *         Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments */
 public final class TKV_EBAND extends TokenValue {
 	
 	private TokenInstruction tokenLeft;
 	
 	private TokenInstruction tokenRight;
 	
-	/**
-	 * @param tokenLeft
-	 * @param tokenRight
-	 */
+	/** @param tokenLeft
+	 * @param tokenRight */
 	public TKV_EBAND(final TokenInstruction tokenLeft, final TokenInstruction tokenRight) {
+
 		assert tokenLeft.assertStackValue();
 		assert tokenRight.assertStackValue();
 		this.tokenLeft = tokenLeft;
@@ -59,21 +56,15 @@ public final class TKV_EBAND extends TokenValue {
 	@Override
 	public void toAssembly(final ProgramAssembly assembly, final ModifierArgument argumentA, final ModifierArgument argumentB, final ResultHandlerBasic store) {
 		
-		/**
-		 * zero operands
-		 */
+		/** zero operands */
 		assert argumentA == null;
 		assert argumentB == null;
 		
-		/**
-		 * valid store
-		 */
+		/** valid store */
 		assert store != null;
 		
 		if (this.tokenRight == ParseConstants.TKV_BOOLEAN_TRUE) {
-			/**
-			 * x && true -> BCVT
-			 */
+			/** x && true -> BCVT */
 			final ModifierArgument modifierLeft = this.tokenLeft.toDirectModifier();
 			if (modifierLeft == ModifierArguments.AA0RB) {
 				this.tokenLeft.toAssembly(assembly, null, null, ResultHandler.FA_BNN_NXT);
@@ -90,8 +81,8 @@ public final class TKV_EBAND extends TokenValue {
 			return;
 		}
 		
-		if (store == ResultHandler.FA_BNN_NXT) {
-			final InstructionEditable skip = this.tokenLeft.toBooleanConditionalSkip(assembly, -1, false, false, store);
+		if (store == ResultHandler.FA_BNN_NXT || store == ResultHandler.FU_BNN_NXT) {
+			final InstructionEditable skip = this.tokenLeft.toBooleanConditionalSkip(assembly, -1, false, store);
 			// never skips
 			if (skip == null) {
 				this.tokenRight.toAssembly(assembly, null, null, store);
@@ -110,9 +101,10 @@ public final class TKV_EBAND extends TokenValue {
 			
 			final ResultHandlerBasic onlyEffects = ((ResultHandlerBasic.ExecutionContinue) store).replaceEffectsOnly();
 			if (onlyEffects != null) {
-				assembly.addInstruction(direct == ResultHandler.FA_BNN_NXT
-					? OperationsA01.XESKIPRB1_P.instruction(0, onlyEffects)
-					: OperationsA11.XESKIP1A_P.instruction(ModifierArgument.forStore(direct), 0, onlyEffects));
+				assembly.addInstruction(
+						direct == ResultHandler.FA_BNN_NXT
+							? OperationsA01.XESKIPRB1_P.instruction(0, onlyEffects)
+							: OperationsA11.XESKIP1A_P.instruction(ModifierArgument.forStore(direct), 0, onlyEffects));
 			}
 			
 			final InstructionEditable skip = direct == ResultHandler.FA_BNN_NXT

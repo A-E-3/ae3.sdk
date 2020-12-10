@@ -25,37 +25,45 @@ public final class FunctionWrapBuffered extends BaseFunctionAbstract implements 
 	static class BufferedArguments extends ExecArgumentsLinkedList {
 
 		private static final long serialVersionUID = -6368502895839729589L;
-		
-		public BufferedArguments(final BaseFunction callee) {
+
+		/** @param callee */
+		BufferedArguments(final BaseFunction callee) {
+
 			//
 		}
-		
+
 	}
-	
+
 	private final ControlFieldset<?> argumentsFieldset;
-	
+
 	private final BufferedArguments[] buffers;
-	
+
 	private final BaseFunction function;
-	
+
 	private final ExecProcess ctx;
-	
+
 	private volatile int counter = 0;
-	
+
 	private final long delay;
-	
+
 	private final long period;
-	
-	private volatile boolean started = false;
-	
-	private boolean stopped = false;
-	
+
+	private volatile int remaining;
+
+	private final int capacity;
+
+	private final boolean overflowDrop;
+
+	private volatile byte started = (byte) 0;
+
+	private volatile boolean stopped = false;
+
 	/** @param parent
 	 * @param function
 	 * @param options */
 	@ReflectionExplicit
 	public FunctionWrapBuffered(final ExecProcess parent, final BaseFunction function, final BaseObject options) {
-		
+
 		if (function == null) {
 			throw new IllegalArgumentException("Function is NULL!");
 		}
@@ -67,44 +75,47 @@ public final class FunctionWrapBuffered extends BaseFunctionAbstract implements 
 				new BufferedArguments(function), new BufferedArguments(function),
 				//
 		};
-		
+
 		this.delay = Base.getInt(options, "delay", 0);
 		this.period = Base.getInt(options, "period", 0);
-		
+		this.capacity = Base.getInt(options, "buffer", -1);
+		this.remaining = this.capacity;
+		this.overflowDrop = Base.getString(options, "overflow", "block").equals("drop");
+
 		this.ctx = Exec.createProcess(parent, "Buffered method, fn=" + function);
 		this.function = function;
 	}
-	
+
 	@Override
 	public BaseArray baseArray() {
 
 		return this.function.baseArray();
 	}
-	
+
 	@Override
 	public String baseClass() {
 
 		return this.function.baseClass();
 	}
-	
+
 	@Override
 	public void baseClear() {
 
 		this.function.baseClear();
 	}
-	
+
 	@Override
 	public BaseFunction baseConstruct() {
 
 		return this.function;
 	}
-	
+
 	@Override
 	public BaseObject baseConstructPrototype() {
 
 		return this.function.baseConstructPrototype();
 	}
-	
+
 	/**
 	 *
 	 */
@@ -113,7 +124,7 @@ public final class FunctionWrapBuffered extends BaseFunctionAbstract implements 
 
 		this.stopped = true;
 	}
-	
+
 	@Override
 	public int execArgumentsAcceptable() {
 
@@ -121,7 +132,7 @@ public final class FunctionWrapBuffered extends BaseFunctionAbstract implements 
 			? this.function.execArgumentsAcceptable()
 			: this.argumentsFieldset.size();
 	}
-	
+
 	@Override
 	public final int execArgumentsDeclared() {
 
@@ -129,7 +140,7 @@ public final class FunctionWrapBuffered extends BaseFunctionAbstract implements 
 			? this.function.execArgumentsDeclared()
 			: this.argumentsFieldset.size();
 	}
-	
+
 	@Override
 	public int execArgumentsMinimal() {
 
@@ -137,7 +148,7 @@ public final class FunctionWrapBuffered extends BaseFunctionAbstract implements 
 			? this.function.execArgumentsMinimal()
 			: 0;
 	}
-	
+
 	@Override
 	public ExecStateCode execCallPrepare(final ExecProcess ctx, final BaseObject instance, final ResultHandler store, final boolean inline, final BaseArray arguments) {
 
@@ -155,70 +166,109 @@ public final class FunctionWrapBuffered extends BaseFunctionAbstract implements 
 						+ ": enqueued: "
 						+ Format.Describe.toEcmaSource( record, "" ) );
 						 * </code> */
-		synchronized (this.buffers) {
-			if (this.stopped) {
-				return ctx.vmRaise("Subsystem is stopped!");
-			}
-			this.buffers[this.counter & 0x01].add(record);
-			if (!this.started) {
-				if (this.delay > 0L) {
-					Act.later(this.ctx, (Runnable) this, this.delay);
-				} else {
-					Act.whenIdle(this.ctx, this);
+		drop : {
+			retry : for (;;) {
+				synchronized (this.buffers) {
+					if (this.stopped) {
+						return ctx.vmRaise("Subsystem is stopped!");
+					}
+					if (this.capacity != -1) {
+						if (this.remaining == 0 || --this.remaining == 0) {
+							switch (this.started) {
+								case 0 :
+								case 1 :
+									this.buffers[this.counter & 0x01].add(record);
+									Act.launch(this.ctx, this);
+									this.started = 2;
+									break retry;
+								default :
+									if (this.overflowDrop) {
+										break drop;
+									}
+									try {
+										this.buffers.wait(1000L);
+										continue retry;
+									} catch (final InterruptedException e) {
+										return store.execReturnFalse(ctx);
+									}
+							}
+						}
+					}
+					this.buffers[this.counter & 0x01].add(record);
+					if (this.started == 0) {
+						if (this.delay > 0L) {
+							Act.later(this.ctx, (Runnable) this, this.delay);
+							this.started = 1;
+						} else {
+							Act.whenIdle(this.ctx, this);
+							this.started = 2;
+						}
+					}
+					break retry;
 				}
-				this.started = true;
 			}
+			return store.execReturnTrue(ctx);
 		}
-		return store.execReturnTrue(ctx);
-		
+		return store.execReturnFalse(ctx);
 	}
-	
+
 	@Override
 	public String[] execFormalParameters() {
 
 		return this.function.execFormalParameters();
 	}
-	
+
 	@Override
 	public boolean execHasNamedArguments() {
 
 		return this.function.execHasNamedArguments();
 	}
-	
+
 	@Override
 	public boolean execIsConstant() {
 
 		return this.function.execIsConstant();
 	}
-	
+
 	@Override
 	public Class<? extends Object> execResultClassJava() {
 
 		return Void.class;
 	}
-	
+
 	@Override
 	public BaseObject execScope() {
 
 		return ExecProcess.GLOBAL;
 	}
-	
+
 	@Override
 	public final void run() {
 
+		synchronized (this.buffers) {
+			if (this.started > 2) {
+				return;
+			}
+			this.started = 3;
+		}
 		for (;;) {
 			final ExecArgumentsLinkedList buffer;
 			synchronized (this.buffers) {
 				buffer = this.buffers[this.counter & 0x01];
 				this.counter++;
+				/** assignment in condition */
+				if ((this.remaining = this.capacity) != -1) {
+					this.buffers.notifyAll();
+				}
 				if (buffer.isEmpty()) {
 					if (this.period > 0L) {
 						if (!this.stopped) {
 							Act.later(this.ctx, (Runnable) this, this.period);
+							this.started = 1;
 							return;
 						}
 					}
-					this.started = false;
+					this.started = 0;
 					return;
 				}
 			}
@@ -240,7 +290,7 @@ public final class FunctionWrapBuffered extends BaseFunctionAbstract implements 
 			buffer.clear();
 		}
 	}
-	
+
 	@Override
 	public String toString() {
 

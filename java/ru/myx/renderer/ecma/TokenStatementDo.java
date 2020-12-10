@@ -18,26 +18,27 @@ import ru.myx.ae3.exec.ResultHandler;
 import ru.myx.ae3.exec.parse.expression.TokenInstruction;
 
 final class TokenStatementDo extends TokenStatementAbstract {
-	
+
 	private static final TokenStatement DUMMY_STATEMENT = new TokenStatementEmpty(null, 0);
-	
+
 	private BaseMap locals;
-	
+
 	private TokenStatement tokenBlock;
-	
+
 	private TokenStatementWhile tokenWhile;
-	
+
 	private boolean hasBreak;
-	
+
 	private boolean hasContinue;
-	
+
 	TokenStatementDo(final String identity, final int line) {
+		
 		super(identity, line);
 	}
-	
+
 	@Override
 	public final boolean addStatement(final TokenStatement statement) {
-		
+
 		if (this.tokenBlock == null) {
 			this.tokenBlock = statement;
 			statement.setLocalsTarget(this);
@@ -50,16 +51,16 @@ final class TokenStatementDo extends TokenStatementAbstract {
 		}
 		return false;
 	}
-	
+
 	@Override
 	public final TokenStatement createStatement(final String identity, final int line) {
-		
+
 		return new TokenStatementDo(identity, line);
 	}
-	
+
 	@Override
 	public final void dump(final int level, final StringBuilder buffer) {
-		
+
 		for (int i = level; i > 0; --i) {
 			buffer.append('\t');
 		}
@@ -72,84 +73,84 @@ final class TokenStatementDo extends TokenStatementAbstract {
 			this.tokenWhile.dump(level + 1, buffer);
 		}
 	}
-	
+
 	@Override
 	public final String getKeyword() {
-		
+
 		return "do";
 	}
-	
+
 	@Override
 	public final boolean isIdentifierPossible() {
-		
+
 		return false;
 	}
-	
+
 	@Override
 	public final boolean isIdentifierRequired() {
-		
+
 		return false;
 	}
-	
+
 	@Override
 	public final boolean isKeywordExpectStatement() {
-		
+
 		return true;
 	}
-	
+
 	@Override
 	public final boolean isLabelStatement() {
-		
+
 		return false;
 	}
-	
+
 	@Override
 	public final boolean isNewLineSemicolon() {
-		
+
 		return this.tokenBlock == null;
 	}
-	
+
 	@Override
 	public boolean isNextStatementFromScratch() {
-		
+
 		return this.isTotallyComplete();
 	}
-	
+
 	@Override
 	public boolean isTotallyComplete() {
-		
+
 		return this.tokenBlock != null && this.tokenWhile != null;
 	}
-	
+
 	@Override
 	public final boolean setArguments(final String expression) {
-		
+
 		return false;
 	}
-	
+
 	@Override
 	public boolean setControlBreakUsed() {
-		
+
 		this.hasBreak = true;
 		return true;
 	}
-	
+
 	@Override
 	public boolean setControlContinueUsed() {
-		
+
 		this.hasContinue = true;
 		return true;
 	}
-	
+
 	@Override
 	public final boolean setIdentifier(final String identifier) {
-		
+
 		return false;
 	}
-	
+
 	@Override
 	public final boolean setLocals(final BaseObject locals) {
-		
+
 		if (locals == null || !locals.baseHasKeysOwn()) {
 			return true;
 		}
@@ -159,10 +160,10 @@ final class TokenStatementDo extends TokenStatementAbstract {
 		this.locals.baseDefineImportOwnEnumerable(locals);
 		return true;
 	}
-	
+
 	@Override
 	public final void toAssembly(final ProgramAssembly assembly, final int startOffset) throws Exception {
-		
+
 		if (this.tokenBlock == null) {
 			this.addDebug(assembly, "do{");
 			assembly.addError("do statement requires body!");
@@ -197,7 +198,7 @@ final class TokenStatementDo extends TokenStatementAbstract {
 					loop = assembly.toProgram(size);
 				}
 			} else {
-				final InstructionEditable loopInstruction = token.toBooleanConditionalSkip(assembly, startOffset, true, true, ResultHandler.FA_BNN_NXT);
+				final InstructionEditable loopInstruction = token.toBooleanConditionalSkip(assembly, startOffset, true, ResultHandler.FU_BNN_NXT);
 				loop = assembly.toProgram(size);
 				loopInstruction.setConstant(-loop.length()).setFinished();
 			}
@@ -210,9 +211,11 @@ final class TokenStatementDo extends TokenStatementAbstract {
 				: 0);
 		if (this.locals == null) {
 			if (breakAndContinue > 0) {
-				frameEntry = OperationsA01.XEENTRCTRL_P.instructionCreate(0//
-				+ breakAndContinue //
-				+ loop.length(), ResultHandler.FA_BNN_NXT);
+				frameEntry = OperationsA01.XEENTRCTRL_P.instructionCreate(
+						0//
+								+ breakAndContinue //
+								+ loop.length(),
+						ResultHandler.FA_BNN_NXT);
 			} else {
 				assembly.addInstruction(loop);
 				return;
@@ -220,9 +223,11 @@ final class TokenStatementDo extends TokenStatementAbstract {
 			assembly.addInstruction(frameEntry);
 		} else {
 			if (breakAndContinue > 0) {
-				frameEntry = OperationsA01.XEENTRLOOP_P.instructionCreate(0//
-				+ breakAndContinue //
-				+ loop.length(), ResultHandler.FA_BNN_NXT);
+				frameEntry = OperationsA01.XEENTRLOOP_P.instructionCreate(
+						0//
+								+ breakAndContinue //
+								+ loop.length(),
+						ResultHandler.FA_BNN_NXT);
 			} else {
 				frameEntry = OperationsA01.XEENTRVARS_P.instructionCreate(loop.length(), ResultHandler.FA_BNN_NXT);
 			}
@@ -234,12 +239,13 @@ final class TokenStatementDo extends TokenStatementAbstract {
 			}
 		}
 		if (this.hasBreak) {
-			assembly.addInstruction(OperationsA01.XFBTGT_P.instruction(//
-					(this.hasContinue
-						? 1
-						: 0) + loop.length(),
-					ResultHandler.FA_BNN_NXT//
-			));
+			assembly.addInstruction(
+					OperationsA01.XFBTGT_P.instruction(//
+							(this.hasContinue
+								? 1
+								: 0) + loop.length(),
+							ResultHandler.FA_BNN_NXT//
+					));
 		}
 		if (this.hasContinue) {
 			assembly.addInstruction(OperationsA01.XFCTGT_P.instruction(0, ResultHandler.FA_BNN_NXT));
