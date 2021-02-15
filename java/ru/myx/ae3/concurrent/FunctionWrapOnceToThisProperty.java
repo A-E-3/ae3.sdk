@@ -27,13 +27,20 @@ public final class FunctionWrapOnceToThisProperty extends BaseFunctionAbstract i
 	private final BaseObject checkEquals;
 	private final BaseObject checkNotEquals;
 	
+	private final short cacheAttributes;
+	
 	/** @param propertyName
 	 * @param function
 	 * @param checkEquals
 	 * @param checkNotEquals
-	 */
+	 * @param cacheAttributes */
 	@ReflectionExplicit
-	public FunctionWrapOnceToThisProperty(final BasePrimitiveString propertyName, final BaseFunction function, final BaseObject checkEquals, final BaseObject checkNotEquals) {
+	public FunctionWrapOnceToThisProperty(
+			final BasePrimitiveString propertyName,
+			final BaseFunction function,
+			final BaseObject checkEquals,
+			final BaseObject checkNotEquals,
+			final short cacheAttributes) {
 		
 		if (function == null) {
 			throw new IllegalArgumentException("Function is NULL!");
@@ -45,6 +52,7 @@ public final class FunctionWrapOnceToThisProperty extends BaseFunctionAbstract i
 		this.function = function;
 		this.checkEquals = checkEquals;
 		this.checkNotEquals = checkNotEquals;
+		this.cacheAttributes = (short) (cacheAttributes | BaseProperty.ATTR_DYNAMIC);
 	}
 	
 	@Override
@@ -86,9 +94,9 @@ public final class FunctionWrapOnceToThisProperty extends BaseFunctionAbstract i
 		if (this.checkEquals == null || this.checkEquals == instance) {
 			if (this.checkNotEquals == null || this.checkNotEquals != instance) {
 				if (instance instanceof BaseEditable) {
-					((BaseEditable) instance).setOwnPropertyValue(this.propertyName, result, BaseProperty.ATTRS_MASK_NNN);
+					((BaseEditable) instance).setOwnPropertyValue(this.propertyName, result, this.cacheAttributes);
 				} else {
-					instance.baseDefine(this.propertyName, result, BaseProperty.ATTRS_MASK_NND);
+					instance.baseDefine(this.propertyName, result, this.cacheAttributes);
 				}
 			}
 		}
@@ -102,9 +110,9 @@ public final class FunctionWrapOnceToThisProperty extends BaseFunctionAbstract i
 		if (this.checkEquals == null || this.checkEquals == instance) {
 			if (this.checkNotEquals == null || this.checkNotEquals != instance) {
 				if (instance instanceof BaseEditable) {
-					((BaseEditable) instance).setOwnPropertyValue(this.propertyName, result, BaseProperty.ATTRS_MASK_NNN);
+					((BaseEditable) instance).setOwnPropertyValue(this.propertyName, result, this.cacheAttributes);
 				} else {
-					instance.baseDefine(this.propertyName, result, BaseProperty.ATTRS_MASK_NND);
+					instance.baseDefine(this.propertyName, result, this.cacheAttributes);
 				}
 			}
 		}
@@ -119,9 +127,9 @@ public final class FunctionWrapOnceToThisProperty extends BaseFunctionAbstract i
 			if (this.checkEquals == null || this.checkEquals == instance) {
 				if (this.checkNotEquals == null || this.checkNotEquals != instance) {
 					if (instance instanceof BaseEditable) {
-						((BaseEditable) instance).setOwnPropertyValue(this.propertyName, ctx.ra0RB, BaseProperty.ATTRS_MASK_NNN);
+						((BaseEditable) instance).setOwnPropertyValue(this.propertyName, ctx.ra0RB, this.cacheAttributes);
 					} else {
-						instance.baseDefine(this.propertyName, ctx.ra0RB, BaseProperty.ATTRS_MASK_NND);
+						instance.baseDefine(this.propertyName, ctx.ra0RB, this.cacheAttributes);
 					}
 				}
 			}
