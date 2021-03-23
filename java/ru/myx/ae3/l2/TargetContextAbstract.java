@@ -28,16 +28,16 @@ import ru.myx.ae3.skinner.Skinner;
  *            target */
 @ReflectionIgnore
 public abstract class TargetContextAbstract<T extends TargetContextAbstract<?>> extends BaseHostObject implements TargetContext<BaseObject>, ContextHandler<T, BaseObject> {
-	
+
 	static {
 		LayoutEngine.getDocumentation();
 	}
-	
+
 	/** @param cssClassOld
 	 * @param cssClass
 	 * @return */
 	private static String injectCssClass(final String cssClassOld, final String cssClass) {
-		
+
 		if (cssClassOld.length() == 0) {
 			return cssClass;
 		}
@@ -49,73 +49,73 @@ public abstract class TargetContextAbstract<T extends TargetContextAbstract<?>> 
 		}
 		return cssClassOld + " " + cssClass;
 	}
-	
+
 	ExecProcess context;
-	
+
 	private int countSteps = 0;
-	
+
 	BaseArray currentArray;
-	
+
 	ContextHandler<T, BaseObject> currentHandler;
-	
+
 	int currentIndex;
-	
+
 	BaseObject currentObject;
-	
+
 	Skin currentSkin;
-	
+
 	Skinner currentSkinner;
-	
+
 	ContextState currentState;
-	
+
 	private final long dateStarted;
-	
+
 	final TargetInterface iface;
-	
+
 	ContextData<T, BaseObject> stack;
-	
+
 	/** current zoom */
 	ZoomType zoom;
-	
+
 	/** @param iface */
 	protected TargetContextAbstract(final TargetInterface iface) {
-		
+
 		this.iface = iface;
 		this.dateStarted = System.currentTimeMillis();
 		this.context = Exec.createProcess(Exec.currentProcess(), "L2TGT: " + this.getClass().getName());
 	}
-	
+
 	/**
 	 *
 	 */
 	protected void doFinish() {
-		
+
 		// empty
 	}
-	
+
 	/** @param skin */
 	public void doSetSkin(final Skin skin) {
-		
+
 		this.currentSkin = skin;
 	}
-	
+
 	/** @param skinner */
 	public void doSetSkinner(final Skinner skinner) {
-		
+
 		this.currentSkinner = skinner;
 	}
-	
+
 	/**
 	 *
 	 */
 	protected void doStart() {
-		
+
 		//
 	}
-	
+
 	@Override
 	public boolean dump(final String s) {
-		
+
 		if (!Report.MODE_DEBUG && !Report.MODE_ASSERT) {
 			return true;
 		}
@@ -126,7 +126,7 @@ public abstract class TargetContextAbstract<T extends TargetContextAbstract<?>> 
 		System.out.println(System.identityHashCode(this) + " > " + level + " > " + this.currentState + " > " + this.currentIndex + " > " + s);
 		return true;
 	}
-	
+
 	/** you should return from loop after call this method
 	 *
 	 * @param handler
@@ -134,7 +134,7 @@ public abstract class TargetContextAbstract<T extends TargetContextAbstract<?>> 
 	 * @param layout
 	 * @return */
 	protected BaseObject enterContent(final ContextHandler<T, BaseObject> handler, final BaseObject layout) {
-		
+
 		this.dump("enter content, handler=" + handler + ", layout=" + Ecma.toEcmaSourceCompact(layout));
 		this.currentObject = handler.onEnter(this.toTarget(), this.currentObject);
 		assert this.currentObject == null : "nulls only yet";
@@ -154,7 +154,7 @@ public abstract class TargetContextAbstract<T extends TargetContextAbstract<?>> 
 		this.currentState = ContextState.CONTENT;
 		return null;
 	}
-	
+
 	/** you should return from loop after call this method
 	 *
 	 * @param handler
@@ -162,7 +162,7 @@ public abstract class TargetContextAbstract<T extends TargetContextAbstract<?>> 
 	 * @param array
 	 * @return */
 	protected BaseObject enterSequence(final ContextHandler<T, BaseObject> handler, final BaseArray array) {
-		
+
 		this.dump("enter sequence, handler=" + handler + ", size=" + array.length());
 		this.currentObject = handler.onEnter(this.toTarget(), this.currentObject);
 		assert this.currentObject == null : "nulls only yet";
@@ -182,48 +182,48 @@ public abstract class TargetContextAbstract<T extends TargetContextAbstract<?>> 
 		this.currentState = ContextState.SEQUENCE;
 		return null;
 	}
-	
+
 	@Override
 	public ExecProcess getContext() {
-		
+
 		return this.context;
 	}
-	
+
 	/** @return current context handler */
 	protected ContextHandler<T, BaseObject> getContextHandler() {
-		
+
 		return this.currentHandler;
 	}
-	
+
 	/** replace
 	 *
 	 * @return */
 	protected TargetContextAbstract<?> getContextLayoutSource() {
-		
+
 		return this;
 	}
-	
+
 	/** @return number of steps taken to render this context up to date */
 	public int getCountSteps() {
-		
+
 		return this.countSteps;
 	}
-	
+
 	/** @return date when context was created */
 	public long getDateStarted() {
-		
+
 		return this.dateStarted;
 	}
-	
+
 	@Override
 	public TargetInterface getInterface() {
-		
+
 		return this.iface;
 	}
-	
+
 	/** @return */
 	public BaseObject getLayoutAbout() {
-		
+
 		try {
 			return LayoutEngine.parseJSLD(this.getClass().getResourceAsStream("about.jsld"));
 		} catch (final Throwable e) {
@@ -233,59 +233,59 @@ public abstract class TargetContextAbstract<T extends TargetContextAbstract<?>> 
 					.putAppend("value", Format.Throwable.toText(e));
 		}
 	}
-	
+
 	/** @param name
 	 * @return null or interface/context layout for given name */
 	protected abstract LayoutDefinition<T> getLayoutForContext(final String name);
-	
+
 	/** @return */
 	public BaseObject getResultLayout() {
-		
+
 		return this.currentObject;
 	}
-	
+
 	@Override
 	public Skin getSkin() {
-		
+
 		return this.currentSkin;
 	}
-	
+
 	@Override
 	public Skinner getSkinner() {
-		
+
 		return this.currentSkinner;
 	}
-	
+
 	@Override
 	public BaseObject onEnter(final T target, final BaseObject layout) {
-		
+
 		return null;
 	}
-	
+
 	@Override
 	public void onLeave(final T target) {
-		
+
 		if (Report.MODE_DEVEL && Report.MODE_ASSERT) {
 			this.dump("default onLeave, ignored");
 		}
 	}
-	
+
 	@Override
 	public BaseObject onNest(final T target, final BaseObject layout) {
-		
+
 		// ignore before-nest by default
 		return layout;
 	}
-	
+
 	private final boolean step() {
-		
+
 		if (Report.MODE_DEVEL) {
 			this.dump(
 					"step: " + (this.currentObject == null
 						? null
 						: Ecma.toEcmaSourceCompact(this.currentObject)));
 		}
-		
+
 		/** check undefined */
 		if (this.currentObject == null || this.currentObject == BaseObject.UNDEFINED) {
 			switch (this.currentState) {
@@ -365,7 +365,7 @@ public abstract class TargetContextAbstract<T extends TargetContextAbstract<?>> 
 					{
 						final LayoutDefinition<TargetContext<?>> definition = skin.getLayoutDefinition(name);
 						if (definition != null) {
-							if (Report.MODE_DEBUG) {
+							if (Report.MODE_DEVEL) {
 								System.out.println(">>>>>> layout: " + Format.Describe.toEcmaSource(this.currentObject, "") + ", def: " + definition);
 							}
 							this.currentObject = definition.onExecute(this, this.currentObject);
@@ -415,13 +415,13 @@ public abstract class TargetContextAbstract<T extends TargetContextAbstract<?>> 
 				return false;
 			}
 		}
-		
+
 		if ("string".equals(name)) {
 			/** layout string is not found, however it is required for this loop to work */
 			this.currentObject = this.currentObject.baseGet("value", BaseString.EMPTY);
 			return false;
 		}
-		
+
 		/** Check super-defaults */
 		{
 			{
@@ -429,7 +429,7 @@ public abstract class TargetContextAbstract<T extends TargetContextAbstract<?>> 
 				if (content != BaseObject.UNDEFINED) {
 					final String cssClassOld = Base.getString(this.currentObject, "cssClass", "").trim();
 					final String cssClassNew = TargetContextAbstract.injectCssClass(cssClassOld, "ui-" + name);
-					
+
 					if (content.baseIsPrimitive()) {
 						/** Convert primitive object to layouts */
 						if (content.baseIsPrimitiveNumber()) {
@@ -459,10 +459,10 @@ public abstract class TargetContextAbstract<T extends TargetContextAbstract<?>> 
 							this.currentObject = replacement;
 							return true;
 						}
-						
+
 						assert false //
 								: "content: " + content + ", currentObject: " + Format.Describe.toEcmaSource(this.currentObject, "");
-						
+
 						this.currentObject = content;
 						return true;
 					}
@@ -498,7 +498,7 @@ public abstract class TargetContextAbstract<T extends TargetContextAbstract<?>> 
 					final String cssClassOld = Base.getString(this.currentObject, "cssClass", "").trim();
 					final String cssClassNew = TargetContextAbstract.injectCssClass(cssClassOld, "ui-" + name);
 					final BaseObject prototype = this.currentObject;
-					
+
 					final BaseObject replacement = BaseObject.createObject(prototype);
 					replacement.baseDefine("layout", "sequence");
 					// Basedefine( replacement, "elements", elements );
@@ -521,17 +521,17 @@ public abstract class TargetContextAbstract<T extends TargetContextAbstract<?>> 
 			this.currentObject = replacement;
 			return true;
 		}
-		
+
 		this.currentObject = Base.forString(
 				Report.MODE_ASSERT || Report.MODE_DEBUG
 					? "[Layout '" + name + "' is not known, " + this.toString() + "]"
 					: "[Layout '" + name + "' is not known!]");
 		return true;
 	}
-	
+
 	@Override
 	public String toString() {
-		
+
 		final BaseObject layout = this.currentObject;
 		return "[object " //
 				+ this.getClass().getSimpleName() + "(iface=" + this.iface + (layout == null
@@ -539,19 +539,19 @@ public abstract class TargetContextAbstract<T extends TargetContextAbstract<?>> 
 					: " layout=" + Format.Describe.toEcmaSource(layout, "\t"))
 				+ ")]";
 	}
-	
+
 	/** @return this object casted to target type */
 	@SuppressWarnings("unchecked")
 	protected T toTarget() {
-		
+
 		return (T) this;
 	}
-	
+
 	/** @param layout
 	 * @return */
 	@Override
 	public final Value<Void> transform(final BaseObject layout) {
-		
+
 		if (layout == null || layout.baseIsPrimitive()) {
 			/** TODO: move to some general place, idea is to wrap single text string layout into a
 			 * document. */
@@ -589,10 +589,10 @@ public abstract class TargetContextAbstract<T extends TargetContextAbstract<?>> 
 		this.doFinish();
 		return new HolderSimple<>(null);
 	}
-	
+
 	@Override
 	public final BaseObject transformLayout(final BaseObject layout) {
-		
+
 		try {
 			this.transform(layout).baseValue();
 			return this.getResultLayout();
