@@ -20,7 +20,7 @@ import ru.myx.ae3.report.Report;
 /** @author myx */
 @ReflectionManual
 public class CoarseDelayCache implements BaseHost, BaseObjectNoOwnProperties {
-
+	
 	private static final BaseObject PROTOTYPE = Reflect.classToBasePrototype(CoarseDelayCache.class);
 	
 	private static final ExecProcess ROOT = Exec.createProcess(Exec.getRootProcess(), "CoarseDelayCache cleaner loop");
@@ -48,7 +48,7 @@ public class CoarseDelayCache implements BaseHost, BaseObjectNoOwnProperties {
 	private boolean stopped = true;
 	
 	private final ExecProcess ctx;
-
+	
 	/** @param interval
 	 * @param steps
 	 * @param onDrop */
@@ -75,20 +75,20 @@ public class CoarseDelayCache implements BaseHost, BaseObjectNoOwnProperties {
 	
 	@Override
 	public BaseObject basePrototype() {
-
+		
 		return CoarseDelayCache.PROTOTYPE;
 	}
 	
 	@Override
 	public CoarseDelayCache baseValue() {
-
+		
 		return this;
 	}
 	
 	/** @return */
 	@ReflectionExplicit
 	public boolean clear() {
-
+		
 		// index updater keeps it in range, the mask is for the case of race
 		// update corruption
 		int index = this.index & 0x7FFFFFFF;
@@ -104,14 +104,13 @@ public class CoarseDelayCache implements BaseHost, BaseObjectNoOwnProperties {
 	 * @return */
 	@ReflectionExplicit
 	public BaseObject dropRecord(final BaseObject key) {
-
+		
 		// index updater keeps it in range, the mask is for the case of race
 		// update corruption
 		int index = this.index & 0x7FFFFFFF;
-		int left = this.steps; //
-		for (; left > 0; --left, index = (1 + index) % this.steps) {
+		for (int left = this.steps; left > 0; --left) {
 			
-			final BaseObject value = this.store[index].remove(key);
+			final BaseObject value = this.store[index++ % this.steps].remove(key);
 			if (value != null) {
 				return value;
 			}
@@ -122,12 +121,11 @@ public class CoarseDelayCache implements BaseHost, BaseObjectNoOwnProperties {
 	/** @return */
 	@ReflectionExplicit
 	public boolean isEmpty() {
-
+		
 		// index updater keeps it in range, the mask is for the case of race
 		// update corruption
 		int index = this.index & 0x7FFFFFFF;
-		int left = this.steps; //
-		for (; left > 0; --left) {
+		for (int left = this.steps; left > 0; --left) {
 			
 			if (!this.store[index++ % this.steps].isEmpty()) {
 				return false;
@@ -137,12 +135,12 @@ public class CoarseDelayCache implements BaseHost, BaseObjectNoOwnProperties {
 	}
 	
 	final void loop() {
-
+		
 		if (this.stopped == true) {
 			return;
 		}
 		
-		final int index = (this.index - 1 & 0x7FFFFFFF) % this.steps;
+		final int index = (this.index + this.steps - 1 & 0x7FFFFFFF) % this.steps;
 		
 		// keep purged
 		final Map<BaseObject, BaseObject> stale = this.store[index];
@@ -195,15 +193,13 @@ public class CoarseDelayCache implements BaseHost, BaseObjectNoOwnProperties {
 	 * @return */
 	@ReflectionExplicit
 	public BaseObject put(final BaseObject key, final BaseObject value) {
-
+		
 		// index updater keeps it in range, the mask is for the case of race
 		// update corruption
 		int index = this.index & 0x7FFFFFFF;
-		int left = this.steps - 1; //
-		final BaseObject previous = this.store[index++].put(key, value);
-		for (; left > 0; --left) {
-			
-			this.store[index++ % this.steps].remove(key);
+		BaseObject previous = this.store[index++ % this.steps].put(key, value);
+		for (int left = this.steps; previous == null && --left > 0;) {
+			previous = this.store[index++ % this.steps].remove(key);
 		}
 		
 		if (this.stopped) {
@@ -223,12 +219,12 @@ public class CoarseDelayCache implements BaseHost, BaseObjectNoOwnProperties {
 	 * @return */
 	@ReflectionExplicit
 	public BaseObject readCheck(final BaseObject key) {
-
+		
 		// index updater keeps it in range, the mask is for the case of race
 		// update corruption
 		int index = this.index & 0x7FFFFFFF;
-		for (int left = this.steps; left > 0; --left, index = (1 + index) % this.steps) {
-			final BaseObject value = this.store[index].get(key);
+		for (int left = this.steps; left > 0; --left) {
+			final BaseObject value = this.store[index++ % this.steps].get(key);
 			if (value != null) {
 				return value;
 			}
@@ -240,18 +236,17 @@ public class CoarseDelayCache implements BaseHost, BaseObjectNoOwnProperties {
 	 * @return */
 	@ReflectionExplicit
 	public BaseObject readUpdate(final BaseObject key) {
-
+		
 		// index updater keeps it in range, the mask is for the case of race
 		// update corruption
 		int index = this.index & 0x7FFFFFFF;
-		int left = this.steps; //
-		for (; left > 0; --left, index = (1 + index) % this.steps) {
+		for (int left = this.steps; left > 0; --left) {
 			
-			final Map<BaseObject, BaseObject> store = this.store[index];
+			final Map<BaseObject, BaseObject> store = this.store[index++ % this.steps];
 			final BaseObject value = store.get(key);
 			if (value != null) {
 				if (left != this.steps) {
-					this.store[this.index].put(key, value);
+					this.store[(this.index & 0x7FFFFFFF) % this.steps].put(key, value);
 					store.remove(key);
 				}
 				return value;
@@ -264,20 +259,19 @@ public class CoarseDelayCache implements BaseHost, BaseObjectNoOwnProperties {
 	 * @return */
 	@ReflectionExplicit
 	public BaseObject remove(final BaseObject key) {
-
+		
 		return this.dropRecord(key);
 	}
 	
 	/** @return */
 	@ReflectionExplicit
 	public int size() {
-
+		
 		int size = 0;
 		// index updater keeps it in range, the mask is for the case of race
 		// update corruption
 		int index = this.index & 0x7FFFFFFF;
-		int left = this.steps; //
-		for (; left > 0; --left) {
+		for (int left = this.steps; left > 0; --left) {
 			
 			size += this.store[index++ % this.steps].size();
 		}
@@ -286,7 +280,7 @@ public class CoarseDelayCache implements BaseHost, BaseObjectNoOwnProperties {
 	
 	@Override
 	public String toString() {
-
+		
 		return "[" + this.getClass().getSimpleName() + " (size=" + this.size() + ")]";
 	}
 }
