@@ -21,17 +21,17 @@ final class CollBufTemp extends CollBuf {
 
 		x.destroy();
 	}
-	
+
 	private long position;
-	
+
 	private final File file;
-	
+
 	private long length = -1;
-	
+
 	private RandomAccessFile input;
-	
+
 	private RandomAccessFile output;
-	
+
 	private final Collector collector;
 
 	// ////////////////////////////////////////////////////////////////////////
@@ -41,7 +41,7 @@ final class CollBufTemp extends CollBuf {
 	{
 		WeakFinalizer.register(this, CollBufTemp::finalizeStatic);
 	}
-	
+
 	CollBufTemp(final Collector collector, final byte[] data) throws IOException {
 
 		this.collector = collector;
@@ -49,7 +49,7 @@ final class CollBufTemp extends CollBuf {
 		this.output = new RandomAccessFile(this.file, "rw");
 		this.output.write(data);
 	}
-	
+
 	CollBufTemp(final Collector collector, final byte[] data, final int off, final int len) throws IOException {
 
 		this.collector = collector;
@@ -57,7 +57,7 @@ final class CollBufTemp extends CollBuf {
 		this.output = new RandomAccessFile(this.file, "rw");
 		this.output.write(data, off, len);
 	}
-	
+
 	CollBufTemp(final Collector collector, final ByteBuffer data) throws IOException {
 
 		this.collector = collector;
@@ -65,7 +65,7 @@ final class CollBufTemp extends CollBuf {
 		this.output = new RandomAccessFile(this.file, "rw");
 		this.output.getChannel().write(data);
 	}
-	
+
 	private final void checkInput() {
 
 		if (this.input == null && this.readyInput) {
@@ -80,87 +80,96 @@ final class CollBufTemp extends CollBuf {
 			}
 		}
 	}
-	
+
 	@Override
 	public final void close() {
 
 		try {
-			if (this.output != null) {
-				this.output.setLength(this.output.getFilePointer());
-				this.output.close();
+			final RandomAccessFile output = this.output;
+			if (output != null) {
 				this.output = null;
+				output.setLength(output.getFilePointer());
+				output.close();
 			}
 		} catch (final IOException e) {
 			Report.exception("COLLECTOR-BUFFER-TEMP", "Error while closing output", e);
 		}
 	}
-	
-	private final void closeSilently() {
 
+	private final void closeSilently() {
+		
 		try {
-			if (this.input != null) {
-				this.input.close();
+			final RandomAccessFile input = this.input;
+			if (input != null) {
 				this.input = null;
+				input.close();
 			}
-			if (this.output != null) {
-				this.output.close();
+		} catch (final IOException e) {
+			Report.exception("COLLECTOR-BUFFER-TEMP", "Error while closing input silently", e);
+		}
+		try {
+			final RandomAccessFile output = this.output;
+			if (output != null) {
 				this.output = null;
+				output.close();
 			}
 			this.file.delete();
 		} catch (final IOException e) {
 			Report.exception("COLLECTOR-BUFFER-TEMP", "Error while closing output silently", e);
 		}
 	}
-	
+
 	@Override
 	public final void destroy() {
 
-		try {
-			if (this.input != null) {
-				try {
-					this.input.close();
-				} catch (final Throwable t) {
-					// ignore
-				}
+		{
+			final RandomAccessFile input = this.input;
+			if (input != null) {
 				this.input = null;
-			}
-			if (this.output != null) {
 				try {
-					this.output.close();
-				} catch (final Throwable t) {
+					input.close();
+				} catch (final Throwable ignore) {
 					// ignore
 				}
-				this.output = null;
 			}
-		} catch (final Throwable t) {
-			// ignore
+		}
+		{
+			final RandomAccessFile output = this.output;
+			if (output != null) {
+				this.output = null;
+				try {
+					output.close();
+				} catch (final Throwable ignore) {
+					// ignore
+				}
+			}
 		}
 	}
-	
+
 	@Override
 	public MessageDigest getMessageDigest() {
 
 		return this.updateMessageDigest(Engine.getMessageDigestInstance());
 	}
-	
+
 	@Override
 	public final boolean hasRemaining() {
 
 		return this.remaining() > 0;
 	}
-	
+
 	@Override
 	public final boolean isDirectAbsolutely() {
 
 		return false;
 	}
-	
+
 	@Override
 	public final boolean isSequence() {
 
 		return false;
 	}
-	
+
 	@Override
 	public final int next() {
 
@@ -180,7 +189,7 @@ final class CollBufTemp extends CollBuf {
 			return -1;
 		}
 	}
-	
+
 	@Override
 	public final int next(final byte[] buffer, final int offset, final int length) {
 
@@ -200,21 +209,22 @@ final class CollBufTemp extends CollBuf {
 		}
 		return amount;
 	}
-	
+
 	@Override
 	public final TransferBuffer nextSequenceBuffer() {
 
 		throw new UnsupportedOperationException("Not a sequence!");
 	}
-	
+
 	@Override
 	public final void queued() {
 
 		try {
-			if (this.output != null) {
-				this.output.setLength(this.output.getFilePointer());
-				this.output.close();
+			final RandomAccessFile output = this.output;
+			if (output != null) {
 				this.output = null;
+				output.setLength(output.getFilePointer());
+				output.close();
 			}
 			this.length = (int) this.file.length();
 			this.input = null;
@@ -223,7 +233,7 @@ final class CollBufTemp extends CollBuf {
 			Report.exception("COLLECTOR-BUFFER-TEMP", "Error while queueing output", e);
 		}
 	}
-	
+
 	@Override
 	public final long remaining() {
 
@@ -242,14 +252,14 @@ final class CollBufTemp extends CollBuf {
 		}
 		return this.length - this.position;
 	}
-	
+
 	@Override
 	public final void reset() {
 
 		this.collector.binary = new CollBufBinary(this.collector);
 		this.closeSilently();
 	}
-	
+
 	@Override
 	public final TransferCopier toBinary() {
 
@@ -261,7 +271,7 @@ final class CollBufTemp extends CollBuf {
 		}
 		return new CopierFilePart(this.file, this.position, this.length);
 	}
-	
+
 	@Override
 	public final byte[] toDirectArray() {
 
@@ -289,7 +299,7 @@ final class CollBufTemp extends CollBuf {
 			throw new RuntimeException(e.getMessage());
 		}
 	}
-	
+
 	@Override
 	public final FileInputStream toInputStream() {
 
@@ -304,7 +314,7 @@ final class CollBufTemp extends CollBuf {
 			return null;
 		}
 	}
-	
+
 	@Override
 	public final TransferBuffer toNioBuffer(final ByteBuffer target) throws IOException {
 
@@ -344,13 +354,13 @@ final class CollBufTemp extends CollBuf {
 		}
 		return this;
 	}
-	
+
 	@Override
 	public final InputStreamReader toReaderUtf8() {
 
 		return new InputStreamReader(this.toInputStream(), Engine.CHARSET_UTF8);
 	}
-	
+
 	@Override
 	public final TransferBuffer toSubBuffer(final long start, final long end) {
 
@@ -381,7 +391,7 @@ final class CollBufTemp extends CollBuf {
 		}
 		return this;
 	}
-	
+
 	@Override
 	public MessageDigest updateMessageDigest(final MessageDigest digest) {
 
@@ -409,19 +419,19 @@ final class CollBufTemp extends CollBuf {
 		}
 		return digest;
 	}
-	
+
 	@Override
 	public final void write(final byte[] buff, final int off, final int len) throws IOException {
 
 		this.output.write(buff, off, len);
 	}
-	
+
 	@Override
 	public final void write(final ByteBuffer buffer) throws IOException {
 
 		this.output.getChannel().write(buffer);
 	}
-	
+
 	@Override
 	public final void write(final int i) throws IOException {
 

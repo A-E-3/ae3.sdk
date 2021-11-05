@@ -26,7 +26,6 @@ import ru.myx.ae3.binary.TransferBuffer;
 import ru.myx.ae3.binary.TransferCopier;
 import ru.myx.ae3.ecma.Ecma;
 import ru.myx.ae3.exec.ExecThrown;
-import ru.myx.ae3.help.Base58;
 import ru.myx.ae3.help.Convert;
 import ru.myx.ae3.help.Format;
 import ru.myx.ae3.help.Html;
@@ -35,6 +34,7 @@ import ru.myx.ae3.help.Text;
 import ru.myx.ae3.indexing.ExtractorPlainVariant;
 import ru.myx.ae3.reflect.ReflectionHidden;
 import ru.myx.plist.Plist;
+import ru.myx.util.Base58;
 
 /** @author myx
  *

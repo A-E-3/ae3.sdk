@@ -4,9 +4,9 @@ import ru.myx.ae3.Engine;
 import ru.myx.ae3.base.Base;
 import ru.myx.ae3.base.BaseNativeObject;
 import ru.myx.ae3.base.BaseObject;
-import ru.myx.ae3.help.Base64;
 import ru.myx.ae3.know.WhirlpoolDigest;
 import ru.myx.ae3.serve.ServeRequest;
+import ru.myx.util.Base64;
 
 /**
  * 
