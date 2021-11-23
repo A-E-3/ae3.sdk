@@ -17,85 +17,77 @@ import ru.myx.ae3.vfs.TreeLinkType;
 import ru.myx.ae3.vfs.TreeReadType;
 import ru.myx.ae3.vfs.ars.ArsStorageImpl;
 
-/**
- * 
- * @author myx
- * 		
- */
+/** @author myx */
 public class StorageImplUnion implements ArsStorageImpl<RecordReferenceUnion, RecordReferenceUnion, ArrayUnion> {
-	
+
 	private final RecordReferenceUnion rootReference;
-	
+
 	private final Entry[] entries;
-	
-	/**
-	 * first checked first
-	 * 
+
+	/** first checked first
+	 *
 	 * changes are written to first
-	 * 
-	 * 
-	 * @param entries
-	 */
+	 *
+	 *
+	 * @param entries */
 	public StorageImplUnion(final Entry[] entries) {
-		
+
 		assert entries != null : "NULL";
 		assert entries.length > 1 : "Should have more than one element!";
 		this.entries = entries;
 		this.rootReference = new RecordReferenceUnion(null, entries);
 	}
-	
+
 	@Override
 	public RecordReferenceUnion createBinaryTemplate(final TransferCopier copier) {
-		
+
 		return new RecordUnionBinaryTemplate(copier);
 	}
-	
+
 	@Override
 	public RecordReferenceUnion createContainerTemplate() {
-		
+
 		return new RecordUnionCollectionTemplate();
 	}
-	
+
 	@Override
 	public RecordReferenceUnion createKeyForString(final String key) {
-		
+
 		return new RecordUnionKey(key);
 	}
-	
+
 	@Override
 	public RecordReferenceUnion createPrimitiveTemplate(final Guid guid) {
-		
+
 		return new RecordUnionPrimitiveTemplate(guid);
 	}
-	
+
 	@Override
 	public RecordReferenceUnion createReferenceTemplate(final RecordReferenceUnion key, final TreeLinkType mode, final RecordReferenceUnion original) {
-		
+
 		return new RecordUnionReferenceTemplate(key, mode, original);
 	}
-	
+
 	@Override
 	public RecordReferenceUnion createTextTemplate(final CharSequence text) {
-		
+
 		return new RecordUnionTextTemplate(text);
 	}
-	
+
 	@Override
 	public TransactionUnion createTransaction() throws Exception {
-		
+
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
+
 	@Override
-	public Value<RecordReferenceUnion> doLinkDelete(final RecordReferenceUnion template,
-			final RecordReferenceUnion object,
-			final RecordReferenceUnion key,
-			final TreeLinkType mode) {
-			
+	public Value<RecordReferenceUnion>
+			doLinkDelete(final RecordReferenceUnion template, final RecordReferenceUnion object, final RecordReferenceUnion key, final TreeLinkType mode) {
+
 		throw new IllegalAccessError("Read only!");
 	}
-	
+
 	@Override
 	public Value<RecordReferenceUnion> doLinkMoveRename(final RecordReferenceUnion template,
 			final RecordReferenceUnion object,
@@ -105,10 +97,10 @@ public class StorageImplUnion implements ArsStorageImpl<RecordReferenceUnion, Re
 			final TreeLinkType mode,
 			final long modified,
 			final RecordReferenceUnion target) {
-			
+
 		throw new IllegalAccessError("Read only!");
 	}
-	
+
 	@Override
 	public Value<RecordReferenceUnion> doLinkRename(final RecordReferenceUnion template,
 			final RecordReferenceUnion object,
@@ -117,10 +109,10 @@ public class StorageImplUnion implements ArsStorageImpl<RecordReferenceUnion, Re
 			final TreeLinkType mode,
 			final long modified,
 			final RecordReferenceUnion target) {
-			
+
 		throw new IllegalAccessError("Read only!");
 	}
-	
+
 	@Override
 	public Value<RecordReferenceUnion> doLinkSet(final RecordReferenceUnion template,
 			final RecordReferenceUnion object,
@@ -128,23 +120,21 @@ public class StorageImplUnion implements ArsStorageImpl<RecordReferenceUnion, Re
 			final TreeLinkType mode,
 			final long modified,
 			final RecordReferenceUnion target) {
-			
+
 		assert mode != null : "Mode shouldn't be NULL";
 		throw new IllegalAccessError("Read only!");
 	}
-	
+
 	@Override
 	public Value<? extends TransferCopier> getBinary(final RecordReferenceUnion object) {
-		
+
 		return object.getBinaryContent();
 	}
-	
+
 	@Override
 	public Value<RecordReferenceUnion> getLink(final RecordReferenceUnion object, final RecordReferenceUnion key, final TreeLinkType mode) {
-		
-		/**
-		 * TODO: optional? asynchronous call
-		 */
+
+		/** TODO: optional? asynchronous call */
 		final Entry[] sourceEntries = object.entries;
 		final int length = sourceEntries.length;
 		final Entry[] targetEntries = new Entry[length];
@@ -162,19 +152,19 @@ public class StorageImplUnion implements ArsStorageImpl<RecordReferenceUnion, Re
 			}
 		}
 		if (mode != null || targetIndex > 0) {
-			return new RecordReferenceUnion(object, targetIndex < length
-				? Arrays.copyOf(targetEntries, targetIndex)
-				: targetEntries);
+			return new RecordReferenceUnion(
+					object,
+					targetIndex < length
+						? Arrays.copyOf(targetEntries, targetIndex)
+						: targetEntries);
 		}
 		return null;
 	}
-	
+
 	@Override
 	public Value<ArrayUnion> getLinks(final RecordReferenceUnion object, final TreeReadType mode) {
-		
-		/**
-		 * TODO: optional? asynchronous call
-		 */
+
+		/** TODO: optional? asynchronous call */
 		final ArrayUnion result = new ArrayUnion();
 		final Map<String, Entry[]> check = Create.tempMap();
 		final Entry[] sourceEntries = object.entries;
@@ -209,7 +199,7 @@ public class StorageImplUnion implements ArsStorageImpl<RecordReferenceUnion, Re
 		}
 		return result;
 	}
-	
+
 	@Override
 	public Value<ArrayUnion> getLinksRange(final RecordReferenceUnion object,
 			final RecordReferenceUnion keyStart,
@@ -217,12 +207,10 @@ public class StorageImplUnion implements ArsStorageImpl<RecordReferenceUnion, Re
 			final int limit,
 			final boolean backwards,
 			final TreeReadType mode) {
-			
+
 		final Entry[] sourceEntries = object.entries;
 		final int length = sourceEntries.length;
-		/**
-		 * No string needed
-		 */
+		/** No string needed */
 		if (limit == 0) {
 			final ArrayUnion result = new ArrayUnion();
 			final Map<String, Entry[]> check = Create.tempMap();
@@ -236,16 +224,16 @@ public class StorageImplUnion implements ArsStorageImpl<RecordReferenceUnion, Re
 					continue;
 				}
 				final Value<? extends BaseList<Entry>> arrayValue //
-				= container.getContentRange(
-						keyStart == null
-							? null
-							: keyStart.getKeyString(), //
-						keyStop == null
-							? null
-							: keyStop.getKeyString(),
-						limit,
-						backwards,
-						mode);
+						= container.getContentRange(
+								keyStart == null
+									? null
+									: keyStart.getKeyString(), //
+								keyStop == null
+									? null
+									: keyStop.getKeyString(),
+								limit,
+								backwards,
+								mode);
 				if (arrayValue == null) {
 					continue;
 				}
@@ -266,7 +254,7 @@ public class StorageImplUnion implements ArsStorageImpl<RecordReferenceUnion, Re
 			}
 			return result;
 		}
-		
+
 		{
 			final NavigableMap<String, Entry[]> map = new TreeMap<>();
 			int left = limit;
@@ -280,16 +268,16 @@ public class StorageImplUnion implements ArsStorageImpl<RecordReferenceUnion, Re
 					continue;
 				}
 				final Value<? extends BaseList<Entry>> arrayValue //
-				= container.getContentRange(
-						keyStart == null
-							? null
-							: keyStart.getKeyString(), //
-						keyStop == null
-							? null
-							: keyStop.getKeyString(),
-						limit,
-						backwards,
-						mode);
+						= container.getContentRange(
+								keyStart == null
+									? null
+									: keyStart.getKeyString(), //
+								keyStop == null
+									? null
+									: keyStop.getKeyString(),
+								limit,
+								backwards,
+								mode);
 				if (arrayValue == null) {
 					continue;
 				}
@@ -326,7 +314,7 @@ public class StorageImplUnion implements ArsStorageImpl<RecordReferenceUnion, Re
 					existing[i] = item;
 				}
 			}
-			
+
 			final ArrayUnion result = new ArrayUnion();
 			final Iterator<Entry[]> iterator = backwards
 				? map.descendingMap().values().iterator()
@@ -337,41 +325,41 @@ public class StorageImplUnion implements ArsStorageImpl<RecordReferenceUnion, Re
 			return result;
 		}
 	}
-	
+
 	@Override
 	public RecordReferenceUnion getRootReference() {
-		
+
 		return this.rootReference;
 	}
-	
+
 	@Override
 	public Value<? extends CharSequence> getText(final RecordReferenceUnion object) {
-		
+
 		return object.getTextContent();
 	}
-	
+
 	@Override
 	public boolean isHistorySupported() {
-		
+
 		return false;
 	}
-	
+
 	@Override
 	public boolean isReadOnly() {
-		
+
 		return true;
 	}
-	
+
 	@Override
 	public void shutdown() throws Exception {
-		
+
 		// do nothing
 	}
-	
+
 	@Override
 	public String toString() {
-		
+
 		return "[object " + this.getClass().getSimpleName() + "{" + Arrays.asList(this.entries) + "}]";
 	}
-	
+
 }
