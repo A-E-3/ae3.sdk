@@ -20,42 +20,47 @@ import ru.myx.io.DataInputByteArrayReusable;
 import ru.myx.io.OutputStreamCounter;
 
 final class RecordResources implements Value<RecordResources>, ArsRecord {
-	Class<?>		anchor;
-	
-	TransferCopier	content;
-	
-	String			key;
-	
-	URL				url;
-	
+
+	Class<?> anchor;
+
+	TransferCopier content;
+
+	String key;
+
+	URL url;
+
 	RecordResources(final Class<?> anchor, final String key) {
+
 		assert anchor != null : "NULL value";
 		this.anchor = anchor;
 		this.key = key;
 		this.url = key == null || key.length() == 0
-				? null
-				: anchor.getResource( key );
+			? null
+			: anchor.getResource(key);
 	}
-	
+
 	@Override
 	public RecordResources baseValue() {
+
 		return this;
 	}
-	
+
 	Value<TransferCopier> getBinaryContent() {
+
 		try {
 			return this.url == null
-					? null
-					: this.content == null
-							? this.content = Transfer.createCopier( this.url.openStream() )
-							: this.content;
+				? null
+				: this.content == null
+					? this.content = Transfer.createCopier(this.url.openStream())
+					: this.content;
 		} catch (final IOException e) {
-			throw new RuntimeException( e );
+			throw new RuntimeException(e);
 		}
 	}
-	
+
 	@Override
 	public long getBinaryContentLength() {
+
 		if (this.url == null) {
 			return 0;
 		}
@@ -63,14 +68,10 @@ final class RecordResources implements Value<RecordResources>, ArsRecord {
 			return this.content.length();
 		}
 		try {
-			/**
-			 * Try check for known types of streams not to read contents.
-			 */
+			/** Try check for known types of streams not to read contents. */
 			@SuppressWarnings("resource")
 			final InputStream input = this.url.openStream();
-			if (input instanceof ByteArrayInputStream
-					|| input instanceof DataInputByteArrayFast
-					|| input instanceof DataInputByteArrayReusable) {
+			if (input instanceof ByteArrayInputStream || input instanceof DataInputByteArrayFast || input instanceof DataInputByteArrayReusable) {
 				try {
 					return input.available();
 				} finally {
@@ -78,45 +79,52 @@ final class RecordResources implements Value<RecordResources>, ArsRecord {
 				}
 			}
 			final OutputStreamCounter counter = new OutputStreamCounter();
-			Transfer.toStream( input, counter, true );
+			Transfer.toStream(input, counter, true);
 			return counter.getTotal();
 		} catch (final IOException e) {
-			throw new RuntimeException( e );
+			throw new RuntimeException(e);
 		}
 	}
-	
+
 	@Override
 	public String getKeyString() {
+
 		return this.key;
 	}
-	
+
 	@Override
 	public BaseObject getPrimitiveBaseValue() {
+
 		return BaseObject.UNDEFINED;
 	}
-	
+
 	@Override
 	public Guid getPrimitiveGuid() {
+
 		return null;
 	}
-	
+
 	@Override
 	public Object getPrimitiveValue() {
+
 		return null;
 	}
-	
+
 	@Override
 	public boolean isBinary() {
+
 		return this.url != null && !this.isContainer();
 	}
-	
+
 	@Override
 	public boolean isCharacter() {
+
 		return false;
 	}
-	
+
 	@Override
 	public boolean isContainer() {
+
 		if (this.url == null) {
 			return true;
 		}
@@ -127,11 +135,10 @@ final class RecordResources implements Value<RecordResources>, ArsRecord {
 			}
 			final TransferBuffer buffer;
 			try {
-				buffer = Transfer.createBuffer( stream );
+				buffer = Transfer.createBuffer(stream);
 			} catch (final NullPointerException e) {
-				/**
-				 * this happens with JarURLConnection, folder listings are not
-				 * supported and produce unchecked error:
+				/** this happens with JarURLConnection, folder listings are not supported and
+				 * produce unchecked error:
 				 * <p>
 				 * <code>
 					Caused by: java.lang.NullPointerException
@@ -140,11 +147,11 @@ final class RecordResources implements Value<RecordResources>, ArsRecord {
 						at ru.myx.ae3.binary.Transfer.createBuffer(Transfer.java:226)
 						at ru.myx.ae3.vfs.resources.RecordResources.isContainer(RecordResources.java:100)
 						... 25 more
-				 * </code>
-				 */
-				final URL url = this.anchor.getResource( this.key + (this.key.endsWith( "/" )
-						? "!file-list.txt"
-						: "/!file-list.txt") );
+				 * </code> */
+				final URL url = this.anchor.getResource(
+						this.key + (this.key.endsWith("/")
+							? "!file-list.txt"
+							: "/!file-list.txt"));
 				if (url == null) {
 					return false;
 				}
@@ -157,17 +164,17 @@ final class RecordResources implements Value<RecordResources>, ArsRecord {
 				}
 			}
 			final String check = (buffer.remaining() > 1024
-					? buffer.toSubBuffer( 0, 1024 )
-					: buffer).toString( Engine.ENCODING_UTF8 );
-			final int pos = check.indexOf( '\n' );
+				? buffer.toSubBuffer(0, 1024)
+				: buffer).toString(Engine.ENCODING_UTF8);
+			final int pos = check.indexOf('\n');
 			if (pos == -1) {
 				return false;
 			}
-			final String key = check.substring( 0, pos );
-			if (key.length() == 0 || key.indexOf( '/' ) != -1) {
+			final String key = check.substring(0, pos);
+			if (key.length() == 0 || key.indexOf('/') != -1) {
 				return false;
 			}
-			final URL url = this.anchor.getResource( this.key + '/' + key );
+			final URL url = this.anchor.getResource(this.key + '/' + key);
 			if (url == null) {
 				return false;
 			}
@@ -179,24 +186,24 @@ final class RecordResources implements Value<RecordResources>, ArsRecord {
 				return false;
 			}
 		} catch (final NullPointerException e) {
-			throw new RuntimeException( "Null pointer exception: url=" + this.url, e );
+			throw new RuntimeException("Null pointer exception: url=" + this.url, e);
 		} catch (final IOException e) {
-			Report.exception( "RESFS-RECORD",
-					"IO exception accessing data while checking for container, will return true",
-					e );
+			Report.exception("RESFS-RECORD", "IO exception accessing data while checking for container, will return true", e);
 			this.url = null;
 		}
 		return this.url == null;
 	}
-	
+
 	@Override
 	public boolean isPrimitive() {
+
 		// TODO Auto-generated method stub
 		return false;
 	}
-	
+
 	@Override
 	public String toString() {
+
 		return "RESFSREC{" + this.key + "}";
 	}
 }
