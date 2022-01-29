@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 
 import ru.myx.ae3.Engine;
@@ -15,106 +16,87 @@ import ru.myx.ae3.common.Describable;
 import ru.myx.ae3.help.Format;
 import ru.myx.io.WrapInputStream;
 
-/**
- * @author myx
- * 
- */
+/** @author myx */
 public final class WrapBuffer implements BaseObjectNoOwnProperties, BaseTransferBuffer, Describable {
-	
-	
-	/**
-	 * Wraps bytes - no copy!
-	 */
+
+	/** Wraps bytes - no copy! */
 	private final byte[] buffer;
-	
+
 	private int position;
-	
+
 	private int length;
-	
-	/**
-	 * @param buffer
-	 */
+
+	/** @param buffer */
 	public WrapBuffer(final byte[] buffer) {
-		
+
 		this.buffer = buffer;
 		this.length = buffer.length;
 		this.position = 0;
 	}
-	
-	/**
-	 * @param buffer
+
+	/** @param buffer
 	 * @param offset
-	 * @param length
-	 */
+	 * @param length */
 	public WrapBuffer(final byte[] buffer, final int offset, final int length) {
-		
+
 		this.buffer = buffer;
 		this.length = offset + length;
 		this.position = offset;
 	}
-	
+
 	@Override
 	public String baseDescribe() {
-		
-		
+
 		return "[WrapBuffer size=" + Format.Compact.toBytes(this.length) + "]";
 	}
-	
+
 	@Override
 	public WrapBuffer baseValue() {
-		
-		
+
 		return this;
 	}
-	
+
 	@Override
 	public final void destroy() {
-		
-		
+
 		// ignore
 	}
-	
+
 	@Override
 	public MessageDigest getMessageDigest() {
-		
-		
+
 		final MessageDigest digest = Engine.getMessageDigestInstance();
 		digest.update(this.buffer, this.position, this.length);
 		return digest;
 	}
-	
+
 	@Override
 	public final boolean hasRemaining() {
-		
-		
+
 		return this.length - this.position > 0;
 	}
-	
+
 	@Override
 	public final boolean isDirectAbsolutely() {
-		
-		
+
 		return this.position == 0 && this.length == this.buffer.length;
 	}
-	
+
 	@Override
 	public final boolean isSequence() {
-		
-		
+
 		return false;
 	}
-	
+
 	@Override
 	public final int next() {
-		
-		
+
 		return this.buffer[this.position++] & 0xFF;
 	}
-	
+
 	@Override
 	public final int next(final byte[] buffer, final int offset, final int length) {
-		
-		
+
 		final int amount = Math.min(this.length - this.position, length);
 		if (amount > 0) {
 			System.arraycopy(this.buffer, this.position, buffer, offset, amount);
@@ -122,32 +104,28 @@ public final class WrapBuffer implements BaseObjectNoOwnProperties, BaseTransfer
 		}
 		return amount;
 	}
-	
+
 	@Override
 	public final TransferBuffer nextSequenceBuffer() {
-		
-		
+
 		throw new UnsupportedOperationException("Not a sequence!");
 	}
-	
+
 	@Override
 	public final long remaining() {
-		
-		
+
 		return this.length - this.position;
 	}
-	
+
 	@Override
 	public final TransferCopier toBinary() {
-		
-		
+
 		return new WrapCopier(this.buffer, this.position, this.length - this.position);
 	}
-	
+
 	@Override
 	public final byte[] toDirectArray() {
-		
-		
+
 		if (this.position == 0 && this.length == this.buffer.length) {
 			this.position = this.length;
 			return this.buffer;
@@ -158,18 +136,16 @@ public final class WrapBuffer implements BaseObjectNoOwnProperties, BaseTransfer
 		this.position = this.length;
 		return result;
 	}
-	
+
 	@Override
 	public final WrapInputStream toInputStream() {
-		
-		
+
 		return new WrapInputStream(this.buffer, this.position, this.length);
 	}
-	
+
 	@Override
 	public final TransferBuffer toNioBuffer(final ByteBuffer target) {
-		
-		
+
 		final int remaining = this.length - this.position;
 		if (remaining <= 0) {
 			return null;
@@ -187,25 +163,22 @@ public final class WrapBuffer implements BaseObjectNoOwnProperties, BaseTransfer
 		this.position += writable;
 		return this;
 	}
-	
+
 	@Override
 	public final InputStreamReader toReaderUtf8() {
-		
-		
-		return new InputStreamReader(this.toInputStream(), Engine.CHARSET_UTF8);
+
+		return new InputStreamReader(this.toInputStream(), StandardCharsets.UTF_8);
 	}
-	
+
 	@Override
 	public final String toString() {
-		
-		
-		return this.toString(Engine.CHARSET_DEFAULT);
+
+		return this.toString(Charset.defaultCharset());
 	}
-	
+
 	@Override
 	public final String toString(final Charset charset) {
-		
-		
+
 		try {
 			return this.position == this.length
 				? ""
@@ -214,11 +187,10 @@ public final class WrapBuffer implements BaseObjectNoOwnProperties, BaseTransfer
 			this.position = this.length;
 		}
 	}
-	
+
 	@Override
 	public final String toString(final String encoding) throws UnsupportedEncodingException {
-		
-		
+
 		try {
 			return this.position == this.length
 				? ""
@@ -227,11 +199,10 @@ public final class WrapBuffer implements BaseObjectNoOwnProperties, BaseTransfer
 			this.position = this.length;
 		}
 	}
-	
+
 	@Override
 	public final TransferBuffer toSubBuffer(final long start, final long end) {
-		
-		
+
 		final int remaining = this.length - this.position;
 		if (start < 0 || start > end || end > remaining) {
 			throw new IllegalArgumentException("Indexes are out of bounds: start=" + start + ", end=" + end + ", length=" + remaining);
@@ -240,11 +211,10 @@ public final class WrapBuffer implements BaseObjectNoOwnProperties, BaseTransfer
 		this.position += start;
 		return this;
 	}
-	
+
 	@Override
 	public MessageDigest updateMessageDigest(final MessageDigest digest) {
-		
-		
+
 		digest.update(this.buffer, this.position, this.length);
 		return digest;
 	}

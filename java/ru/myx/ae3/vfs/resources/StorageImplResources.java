@@ -1,10 +1,10 @@
 package ru.myx.ae3.vfs.resources;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.StringTokenizer;
 
-import ru.myx.ae3.Engine;
 import ru.myx.ae3.base.Base;
 import ru.myx.ae3.binary.Transfer;
 import ru.myx.ae3.binary.TransferCopier;
@@ -14,30 +14,23 @@ import ru.myx.ae3.vfs.TreeReadType;
 import ru.myx.ae3.vfs.VfsDefaultLimitSortMatcher;
 import ru.myx.ae3.vfs.ars.AbstractStorageImplReadOnly;
 
-/**
- * @author myx
- *
- */
+/** @author myx */
 public final class StorageImplResources extends AbstractStorageImplReadOnly<RecordResources, ReferenceResources, ArrayResources> {
 
 	private final Class<?> anchor;
 
 	private final RecordResources root;
 
-	/**
-	 * @param anchor
-	 */
+	/** @param anchor */
 	public StorageImplResources(final Class<?> anchor) {
 
 		this.anchor = anchor;
 		this.root = new RecordResources(anchor, "");
 	}
 
-	/**
-	 * @param name
+	/** @param name
 	 *            relative to anchor, will root of the storage
-	 * @param anchor
-	 */
+	 * @param anchor */
 	public StorageImplResources(final String name, final Class<?> anchor) {
 
 		this.anchor = anchor;
@@ -60,9 +53,13 @@ public final class StorageImplResources extends AbstractStorageImplReadOnly<Reco
 	@Override
 	public Value<ReferenceResources> getLink(final RecordResources object, final RecordResources key, final TreeLinkType mode) {
 
-		final ReferenceResources reference = new ReferenceResources(object, new RecordResources(this.anchor, object.key.length() > 0
-			? object.key + '/' + key.key
-			: key.key));
+		final ReferenceResources reference = new ReferenceResources(
+				object,
+				new RecordResources(
+						this.anchor,
+						object.key.length() > 0
+							? object.key + '/' + key.key
+							: key.key));
 		return reference;
 	}
 
@@ -89,11 +86,10 @@ public final class StorageImplResources extends AbstractStorageImplReadOnly<Reco
 			if (input != null) {
 				final String text;
 				try {
-					text = Transfer.createBuffer(input).toString(Engine.CHARSET_UTF8);
+					text = Transfer.createBuffer(input).toString(StandardCharsets.UTF_8);
 				} catch (final NullPointerException e) {
-					/**
-					 * this happens with JarURLConnection, folder listings are
-					 * not supported and produce unchecked error:
+					/** this happens with JarURLConnection, folder listings are not supported and
+					 * produce unchecked error:
 					 * <p>
 					 * <code>
 						Caused by: java.lang.NullPointerException
@@ -102,8 +98,7 @@ public final class StorageImplResources extends AbstractStorageImplReadOnly<Reco
 							at ru.myx.ae3.binary.Transfer.createBuffer(Transfer.java:226)
 							at ru.myx.ae3.vfs.resources.RecordResources.isContainer(RecordResources.java:100)
 							... 25 more
-					 * </code>
-					 */
+					 * </code> */
 					continue;
 				}
 				for (final StringTokenizer st = new StringTokenizer(text, "\r\n"); st.hasMoreTokens();) {
@@ -124,15 +119,18 @@ public final class StorageImplResources extends AbstractStorageImplReadOnly<Reco
 							continue;
 						}
 					}
-					/**
-					 * TODO: INVALID: must be sorted
-					 */
+					/** TODO: INVALID: must be sorted */
 					if (--left == 0) {
 						break;
 					}
-					result.add(new ReferenceResources(object, new RecordResources(this.anchor, key.length() > 0
-						? object.key + '/' + child
-						: child)));
+					result.add(
+							new ReferenceResources(
+									object,
+									new RecordResources(
+											this.anchor,
+											key.length() > 0
+												? object.key + '/' + child
+												: child)));
 				}
 				break;
 			}
@@ -140,11 +138,9 @@ public final class StorageImplResources extends AbstractStorageImplReadOnly<Reco
 		if (limit == 0) {
 			return result;
 		}
-		/**
-		 * TODO: there should be simpler way to sort them!
+		/** TODO: there should be simpler way to sort them!
 		 *
-		 * no need for keys, already filtered
-		 */
+		 * no need for keys, already filtered */
 		final VfsDefaultLimitSortMatcher<String, ReferenceResources> sorter = new VfsDefaultLimitSortMatcher<>(null, null, limit, backwards);
 		for (final ReferenceResources r : result) {
 			sorter.put(r.getKeyString(), r);

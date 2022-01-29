@@ -4,44 +4,34 @@
 package ru.myx.ae3.help;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.StringTokenizer;
 
-import ru.myx.ae3.Engine;
 import ru.myx.ae3.base.Base;
 import ru.myx.ae3.base.BaseArray;
 import ru.myx.ae3.base.BaseMap;
 import ru.myx.ae3.base.BaseObject;
 
-/**
- * @author myx
- *
- */
+/** @author myx */
 public class QueryString {
-	
-	
-	/**
-	 * Charset is UTF-8
+
+	/** Charset is UTF-8
 	 *
 	 * @param queryString
-	 * @return
-	 */
+	 * @return */
 	public static final BaseMap parse(final String queryString) {
-		
-		
-		return QueryString.parseQueryString(queryString, Engine.CHARSET_UTF8);
+
+		return QueryString.parseQueryString(queryString, StandardCharsets.UTF_8);
 	}
 
-	/**
-	 * New object. Writable.
+	/** New object. Writable.
 	 *
 	 * @param queryString
 	 * @param charset
-	 * @return map
-	 */
+	 * @return map */
 	public static final BaseMap parseQueryString(final String queryString, final Charset charset) {
-		
-		
+
 		final BaseMap map = BaseObject.createObject();
 		if (queryString == null) {
 			return map;
@@ -73,37 +63,28 @@ public class QueryString {
 		return map;
 	}
 
-	/**
-	 * @param queryString
+	/** @param queryString
 	 * @param encoding
-	 * @return map
-	 */
+	 * @return map */
 	public static final BaseMap parseQueryString(final String queryString, final String encoding) {
-		
-		
+
 		return QueryString.parseQueryString(queryString, Charset.forName(encoding));
 	}
 
-	/**
-	 * Charset is UTF-8
+	/** Charset is UTF-8
 	 *
 	 * @param params
-	 * @return
-	 */
+	 * @return */
 	public static final String stringify(final BaseObject params) {
-		
-		
-		return QueryString.toQueryString(params, Engine.CHARSET_UTF8);
+
+		return QueryString.toQueryString(params, StandardCharsets.UTF_8);
 	}
 
-	/**
-	 * @param params
+	/** @param params
 	 * @param charset
-	 * @return string
-	 */
+	 * @return string */
 	public static final String toQueryString(final BaseObject params, final Charset charset) {
-		
-		
+
 		boolean first = true;
 		final StringBuilder result = new StringBuilder(64);
 		for (final Iterator<String> keys = Base.keys(params, BaseObject.PROTOTYPE); keys.hasNext();) {
@@ -134,18 +115,16 @@ public class QueryString {
 		return result.toString();
 	}
 
-	/**
-	 * @param params
+	/** @param params
 	 * @param encoding
-	 * @return string
-	 */
+	 * @return string */
 	public static final String toQueryString(final BaseObject params, final String encoding) {
-		
-		
+
 		return QueryString.toQueryString(params, Charset.forName(encoding));
 	}
 
 	private QueryString() {
+
 		// empty
 	}
 }

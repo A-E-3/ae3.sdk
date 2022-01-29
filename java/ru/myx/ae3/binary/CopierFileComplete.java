@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.ConcurrentModificationException;
 
@@ -22,35 +23,31 @@ import ru.myx.ae3.help.Format;
 
 final class CopierFileComplete implements BaseObjectNoOwnProperties, TransferCopier {
 	
-	
 	private final File file;
-	
+
 	CopierFileComplete(final File file) throws IllegalArgumentException {
-		
+
 		assert file != null : "file is null";
 		if (!file.isFile()) {
 			throw new IllegalArgumentException("file '" + file.getAbsolutePath() + "' doesn't exist or not a file!");
 		}
 		this.file = file;
 	}
-	
+
 	@Override
 	public BasePrimitiveString baseToString() {
 		
-		
 		return Base.forString("[" + this.getClass().getSimpleName() + " size=" + Format.Compact.toBytes(this.file.length()) + "]");
 	}
-	
+
 	@Override
 	public final CopierFileComplete baseValue() {
 		
-		
 		return this;
 	}
-	
+
 	@Override
 	public int compareTo(final TransferCopier o) {
-		
 		
 		if (o == null) {
 			return 1;
@@ -66,10 +63,9 @@ final class CopierFileComplete implements BaseObjectNoOwnProperties, TransferCop
 			throw new RuntimeException(e);
 		}
 	}
-	
+
 	@Override
 	public int copy(final long start, final byte[] target, final int offset, final int count) throws ConcurrentModificationException {
-		
 		
 		final long available = this.file.length();
 		if (start >= available) {
@@ -86,31 +82,27 @@ final class CopierFileComplete implements BaseObjectNoOwnProperties, TransferCop
 			throw new RuntimeException("Error reading file contents", e);
 		}
 	}
-	
+
 	@Override
 	public final MessageDigest getMessageDigest() {
 		
-		
 		return this.updateMessageDigest(Engine.getMessageDigestInstance());
 	}
-	
+
 	@Override
 	public final long length() {
 		
-		
 		return this.file.length();
 	}
-	
+
 	@Override
 	public final TransferBuffer nextCopy() {
 		
-		
 		return new BufferFileComplete(this.file);
 	}
-	
+
 	@Override
 	public byte[] nextDirectArray() throws ConcurrentModificationException {
-		
 		
 		try (final RandomAccessFile in = new RandomAccessFile(this.file, "r")) {
 			final long remaining = in.length();
@@ -124,24 +116,21 @@ final class CopierFileComplete implements BaseObjectNoOwnProperties, TransferCop
 			throw new RuntimeException("Error reading file contents", e);
 		}
 	}
-	
+
 	@Override
 	public final FileInputStream nextInputStream() throws FileNotFoundException {
 		
-		
 		return new FileInputStream(this.file);
 	}
-	
+
 	@Override
 	public final InputStreamReader nextReaderUtf8() throws FileNotFoundException {
 		
-		
-		return new InputStreamReader(new FileInputStream(this.file), Engine.CHARSET_UTF8);
+		return new InputStreamReader(new FileInputStream(this.file), StandardCharsets.UTF_8);
 	}
-	
+
 	@Override
 	public TransferCopier slice(final long start, final long count) throws ConcurrentModificationException {
-		
 		
 		final long length = this.file.length();
 		if (start >= length) {
@@ -149,38 +138,33 @@ final class CopierFileComplete implements BaseObjectNoOwnProperties, TransferCop
 		}
 		return new CopierFilePart(this.file, start, Math.min(start + count, length));
 	}
-	
+
 	@Override
 	public final String toString() {
 		
-		
-		return this.toString(Engine.CHARSET_DEFAULT);
+		return this.toString(Charset.defaultCharset());
 	}
-	
+
 	@Override
 	public final String toString(final Charset charset) {
 		
-		
 		return this.nextCopy().toString(charset);
 	}
-	
+
 	@Override
 	public final String toString(final String encoding) throws UnsupportedEncodingException {
 		
-		
 		return this.nextCopy().toString(encoding);
 	}
-	
+
 	@Override
 	public String toStringUtf8() {
 		
-		
-		return this.nextCopy().toString(Engine.CHARSET_UTF8);
+		return this.nextCopy().toString(StandardCharsets.UTF_8);
 	}
-	
+
 	@Override
 	public final MessageDigest updateMessageDigest(final MessageDigest digest) {
-		
 		
 		return this.nextCopy().updateMessageDigest(digest);
 	}

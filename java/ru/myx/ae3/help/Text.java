@@ -6,6 +6,7 @@ package ru.myx.ae3.help;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -14,14 +15,13 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
-import ru.myx.ae3.Engine;
 import ru.myx.ae3.base.Base;
 import ru.myx.ae3.base.BaseArray;
 import ru.myx.sapi.FormatSAPI;
 
 /** @author myx */
 public final class Text {
-	
+
 	private static final Map<Character, String> TRANSLIT_XLAT = new HashMap<>(128);
 	static {
 		Text.TRANSLIT_XLAT.put(Character.valueOf('а'), "a");
@@ -96,7 +96,7 @@ public final class Text {
 	/** @param s
 	 * @return string */
 	public static final String capitalize(final String s) {
-		
+
 		final StringBuilder result = new StringBuilder(s.toLowerCase());
 		final int length = s.length();
 		boolean capThis = true;
@@ -123,7 +123,7 @@ public final class Text {
 	 * @param charset
 	 * @return string */
 	public static final String decodeUri(final Object string, final Charset charset) {
-		
+
 		if (string == null) {
 			return null;
 		}
@@ -137,7 +137,7 @@ public final class Text {
 	 * @param encoding
 	 * @return string */
 	public static final String decodeUri(final Object string, final String encoding) {
-		
+
 		if (string == null) {
 			return null;
 		}
@@ -157,11 +157,11 @@ public final class Text {
 	 * @param string
 	 * @return byte array */
 	public static final byte[] decodeUriAsBytes(final Object string) {
-		
+
 		if (string == null) {
 			return null;
 		}
-		final byte[] s = string.toString().getBytes(Engine.CHARSET_UTF8);
+		final byte[] s = string.toString().getBytes(StandardCharsets.UTF_8);
 		final int length = s.length;
 		final char[] current = new char[2];
 		try (final ByteArrayOutputStream bos = new ByteArrayOutputStream(length)) {
@@ -195,7 +195,7 @@ public final class Text {
 	/** @param source
 	 * @return string */
 	public static final String decodeXmlNodeValue(final Object source) {
-		
+
 		if (source == null) {
 			return null;
 		}
@@ -206,7 +206,7 @@ public final class Text {
 		String entity = "";
 
 		final class CharTokenizer {
-			
+
 			private int index;
 
 			private final int length;
@@ -214,7 +214,7 @@ public final class Text {
 			private final String str;
 
 			CharTokenizer(final String str, final String delim, final boolean returnDelims) {
-				
+
 				assert "&;".equals(delim);
 				assert returnDelims;
 				this.index = 0;
@@ -229,7 +229,7 @@ public final class Text {
 			 * @return <code>true</code> if and only if there is at least one token in the string
 			 *         after the current position; <code>false</code> otherwise. */
 			public final boolean hasMoreTokens() {
-				
+
 				return this.index < this.length;
 			}
 
@@ -239,7 +239,7 @@ public final class Text {
 			 * @exception NoSuchElementException
 			 *                if there are no more tokens in this tokenizer's string. */
 			public final String nextToken() {
-				
+
 				if (this.index >= this.length) {
 					throw new NoSuchElementException();
 				}
@@ -254,7 +254,7 @@ public final class Text {
 			 * @param startPos
 			 * @return int */
 			private final int scanToken(final int startPos) {
-				
+
 				int position = startPos;
 				while (position < this.length) {
 					final char c = this.str.charAt(position);
@@ -332,7 +332,7 @@ public final class Text {
 	 * @param charset
 	 * @return string */
 	public static final String encodeUri(final Object string, final Charset charset) {
-		
+
 		if (string == null) {
 			return null;
 		}
@@ -384,7 +384,7 @@ public final class Text {
 	 * @param encoding
 	 * @return string */
 	public static final String encodeUri(final Object string, final String encoding) {
-		
+
 		if (string == null) {
 			return null;
 		}
@@ -440,7 +440,7 @@ public final class Text {
 	 * @param charset
 	 * @return string */
 	public static final String encodeUriComponent(final Object string, final Charset charset) {
-		
+
 		if (string == null) {
 			return null;
 		}
@@ -461,7 +461,7 @@ public final class Text {
 				case '$' :
 				case '#' :
 				case ',' :
-				
+
 				case ' ' :
 				case '"' :
 				case '<' :
@@ -506,7 +506,7 @@ public final class Text {
 	 * @param encoding
 	 * @return string */
 	public static final String encodeUriComponent(final Object string, final String encoding) {
-		
+
 		if (string == null) {
 			return null;
 		}
@@ -528,7 +528,7 @@ public final class Text {
 					case '$' :
 					case '#' :
 					case ',' :
-					
+
 					case ' ' :
 					case '"' :
 					case '<' :
@@ -577,7 +577,7 @@ public final class Text {
 	 * @param string
 	 * @return string */
 	public static final String encodeXmlNodeValue(final Object string) {
-		
+
 		return FormatSAPI.xmlNodeValue(string);
 	}
 
@@ -585,7 +585,7 @@ public final class Text {
 	 * @param token
 	 * @return string */
 	public static final String join(final BaseArray strs, final String token) {
-		
+
 		final int length = strs.length();
 		if (length == 0) {
 			return "";
@@ -605,7 +605,7 @@ public final class Text {
 	 * @param token
 	 * @return string */
 	public static final String join(final Collection<?> strs, final String token) {
-		
+
 		final StringBuilder result = new StringBuilder(128);
 		for (final Object object : strs) {
 			if (result.length() > 0) {
@@ -622,7 +622,7 @@ public final class Text {
 	 * @param token
 	 * @return string */
 	public static final String join(final Object[] array, final char token) {
-		
+
 		final StringBuilder result = new StringBuilder(128);
 		for (final Object element : array) {
 			if (element != null) {
@@ -639,7 +639,7 @@ public final class Text {
 	 * @param token
 	 * @return string */
 	public static final String join(final Object[] objects, final String token) {
-		
+
 		if (objects == null) {
 			return "";
 		}
@@ -659,7 +659,7 @@ public final class Text {
 	 * @param maxLength
 	 * @return string */
 	public static final String limitString(final String source, final int maxLength) {
-		
+
 		if (source.length() > maxLength) {
 			final String signature = '_' + Integer.toString(source.length() % 36, 36) + Integer.toString(source.hashCode() % (36 * 36), 36);
 			final int partLength = maxLength - signature.length();
@@ -681,7 +681,7 @@ public final class Text {
 	 * @param cutSuffix
 	 * @return string */
 	public static final String limitString(final String string, final int maxLength, final String cutSuffix) {
-		
+
 		if (string.length() > maxLength) {
 			return string.substring(0, maxLength) + cutSuffix;
 		}
@@ -695,7 +695,7 @@ public final class Text {
 	 * @param length
 	 * @return string */
 	public static final String padString(final String string, final char padder, final int length) {
-		
+
 		final int diff = length - string.length();
 		switch (diff) {
 			case 1 : {
@@ -730,14 +730,14 @@ public final class Text {
 	/** @param source
 	 * @return string */
 	public static final String stringCode(final CharSequence source) {
-		
+
 		return Integer.toString(source.length(), 36) + '.' + Integer.toString(source.hashCode(), 36);
 	}
 
 	/** @param source
 	 * @return string */
 	public static final String stringCode(final String source) {
-		
+
 		return Integer.toString(source.length(), 36) + '.' + Integer.toString(source.hashCode(), 36);
 	}
 
@@ -750,7 +750,7 @@ public final class Text {
 	 * @param lastCount
 	 * @return string array */
 	public static final String[] toStringArray(final String str, final String divider, final int lastCount) {
-		
+
 		final List<String> l = new ArrayList<>();
 		final int t_length = divider.length();
 		if (t_length == 1) {
@@ -781,7 +781,7 @@ public final class Text {
 	/** @param message
 	 * @return string */
 	public static final String transliterate(final String message) {
-		
+
 		final int length = message.length();
 		final StringBuilder result = new StringBuilder(length * 2);
 		for (int i = 0; i < length; ++i) {
@@ -807,7 +807,7 @@ public final class Text {
 	 * @param message
 	 * @return string builder */
 	public static final StringBuilder transliterate(final StringBuilder result, final String message) {
-		
+
 		final int length = message.length();
 		for (int i = 0; i < length; ++i) {
 			final char c = message.charAt(i);
@@ -829,7 +829,7 @@ public final class Text {
 	}
 
 	private Text() {
-		
+
 		// empty
 	}
 }

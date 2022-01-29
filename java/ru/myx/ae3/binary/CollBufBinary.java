@@ -6,37 +6,38 @@ package ru.myx.ae3.binary;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 
 import ru.myx.ae3.Engine;
 import ru.myx.io.DataInputByteArrayFast;
 
 final class CollBufBinary extends CollBuf {
-	
+
 	private static final byte[] EMPTY_ARRAY = TransferCopier.NUL_COPIER.nextDirectArray();
-
+	
 	private Collector collector;
-
+	
 	private byte[] buffer;
-
+	
 	private int bufferCapacity;
-
+	
 	private int bufferTail;
-
+	
 	private int bufferHead;
-
+	
 	private int bufferSize;
-
+	
 	CollBufBinary(final Collector collector) {
-		
+
 		this.collector = collector;
 		final int capacity = Transfer.BUFFER_MEDIUM;
 		this.buffer = new byte[capacity];
 		this.bufferCapacity = capacity;
 	}
-
+	
 	CollBufBinary(final Collector collector, final byte[] data) {
-		
+
 		this.collector = collector;
 		final int length = data.length;
 		final int capacity = length > Transfer.BUFFER_MEDIUM
@@ -46,9 +47,9 @@ final class CollBufBinary extends CollBuf {
 		this.bufferCapacity = capacity;
 		System.arraycopy(data, 0, this.buffer, 0, this.bufferSize = this.bufferHead = length);
 	}
-
+	
 	CollBufBinary(final Collector collector, final byte[] data, final int off, final int length) {
-		
+
 		this.collector = collector;
 		final int capacity = length > Transfer.BUFFER_MEDIUM
 			? length
@@ -57,9 +58,9 @@ final class CollBufBinary extends CollBuf {
 		this.bufferCapacity = capacity;
 		System.arraycopy(data, off, this.buffer, 0, this.bufferSize = this.bufferHead = length);
 	}
-
+	
 	CollBufBinary(final Collector collector, final ByteBuffer data) {
-		
+
 		this.collector = collector;
 		final int length = data.remaining();
 		final int capacity = length > Transfer.BUFFER_MEDIUM
@@ -70,64 +71,64 @@ final class CollBufBinary extends CollBuf {
 		data.get(this.buffer, 0, length);
 		this.bufferSize = this.bufferHead = length;
 	}
-
+	
 	@Override
 	public void close() {
-		
+
 		// empty
 	}
-
+	
 	private String describe() {
-		
+
 		return this.getClass() + ": bufferCapacity=" + this.bufferCapacity + ", bufferHead=" + this.bufferHead + ", bufferTail=" + this.bufferTail + ", bufferSize="
 				+ this.bufferSize;
 	}
-
+	
 	@Override
 	public final void destroy() {
-		
+
 		this.collector = null;
 		this.buffer = null;
 	}
-
+	
 	@Override
 	public MessageDigest getMessageDigest() {
-		
+
 		return this.updateMessageDigest(Engine.getMessageDigestInstance());
 	}
-
+	
 	// /////////////////////////////////////////////////////////////////////
 	@Override
 	public final boolean hasRemaining() {
-		
+
 		return this.bufferSize > 0;
 	}
-
+	
 	@Override
 	public final boolean isDirectAbsolutely() {
-		
+
 		return this.bufferSize == this.bufferCapacity && this.bufferTail % this.bufferCapacity == 0;
 	}
-
+	
 	@Override
 	public boolean isSequence() {
-		
+
 		return false;
 	}
-
+	
 	@Override
 	public int next() {
-		
+
 		if (this.bufferSize == 0) {
 			return -1;
 		}
 		--this.bufferSize;
 		return this.buffer[this.bufferTail++ % this.bufferCapacity] & 0xFF;
 	}
-
+	
 	@Override
 	public final int next(final byte[] buffer, final int offset, final int length) {
-		
+
 		final int amount = Math.min(this.bufferSize, length);
 		if (amount > 0) {
 			final int head = this.bufferHead % this.bufferCapacity;
@@ -159,28 +160,28 @@ final class CollBufBinary extends CollBuf {
 		}
 		return amount;
 	}
-
+	
 	@Override
 	public final TransferBuffer nextSequenceBuffer() {
-		
+
 		throw new UnsupportedOperationException("Not a sequence!");
 	}
-
+	
 	@Override
 	public final void queued() {
-		
+
 		// empty
 	}
-
+	
 	@Override
 	public final long remaining() {
-		
+
 		return this.bufferSize;
 	}
-
+	
 	@Override
 	public final void reset() {
-		
+
 		this.bufferHead = this.bufferTail = this.bufferSize = 0;
 		/** reduce the buffer if it is stretched quite a bit */
 		if (this.bufferCapacity > Transfer.BUFFER_LARGE) {
@@ -190,18 +191,18 @@ final class CollBufBinary extends CollBuf {
 			this.bufferCapacity = capacity;
 		}
 	}
-
+	
 	@Override
 	public TransferCopier toBinary() {
-		
+
 		return this.bufferSize == 0
 			? TransferCopier.NUL_COPIER
 			: new WrapCopier(this.toDirectArray());
 	}
-
+	
 	@Override
 	public final byte[] toDirectArray() {
-		
+
 		final byte[] result;
 		if (this.bufferSize == 0) {
 			result = CollBufBinary.EMPTY_ARRAY;
@@ -232,16 +233,16 @@ final class CollBufBinary extends CollBuf {
 		}
 		return result;
 	}
-
+	
 	@Override
 	public DataInputByteArrayFast toInputStream() {
-		
+
 		return new DataInputByteArrayFast(this.toDirectArray());
 	}
-
+	
 	@Override
 	public final TransferBuffer toNioBuffer(final ByteBuffer target) {
-		
+
 		final int bufferSize = this.bufferSize;
 		if (bufferSize <= 0) {
 			this.collector = null;
@@ -264,16 +265,16 @@ final class CollBufBinary extends CollBuf {
 		}
 		return this;
 	}
-
+	
 	@Override
 	public final InputStreamReader toReaderUtf8() {
-		
-		return new InputStreamReader(this.toInputStream(), Engine.CHARSET_UTF8);
-	}
 
+		return new InputStreamReader(this.toInputStream(), StandardCharsets.UTF_8);
+	}
+	
 	@Override
 	public final TransferBuffer toSubBuffer(final long start, final long end) {
-		
+
 		final int remaining = this.bufferSize;
 		if (start < 0 || start > end || end > remaining) {
 			throw new IllegalArgumentException("Indexes are out of bounds: start=" + start + ", end=" + end + ", length=" + remaining);
@@ -282,10 +283,10 @@ final class CollBufBinary extends CollBuf {
 		this.bufferTail += start;
 		return this;
 	}
-
+	
 	@Override
 	public MessageDigest updateMessageDigest(final MessageDigest digest) {
-		
+
 		if (this.bufferSize == 0) {
 			return digest;
 		}
@@ -305,10 +306,10 @@ final class CollBufBinary extends CollBuf {
 		}
 		return digest;
 	}
-
+	
 	@Override
 	public final void write(final byte[] buff, final int off, final int len) throws IOException {
-		
+
 		final int targetSize = this.bufferSize + len;
 		final int head = this.bufferHead % this.bufferCapacity;
 		/** fits in current buffer */
@@ -373,10 +374,10 @@ final class CollBufBinary extends CollBuf {
 			this.bufferCapacity = targetCapacity;
 		}
 	}
-
+	
 	@Override
 	public final void write(final ByteBuffer buff) throws IOException {
-		
+
 		final int len = buff.remaining();
 		final int targetSize = this.bufferSize + len;
 		final int head = this.bufferHead % this.bufferCapacity;
@@ -442,11 +443,11 @@ final class CollBufBinary extends CollBuf {
 			this.bufferCapacity = targetCapacity;
 		}
 	}
-
+	
 	// /////////////////////////////////////////////////////////////////////
 	@Override
 	public final void write(final int i) throws IOException {
-		
+
 		final int head = this.bufferHead % this.bufferCapacity;
 		/** fits in current buffer */
 		if (this.bufferSize < this.bufferCapacity) {

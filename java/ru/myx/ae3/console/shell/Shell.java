@@ -1,5 +1,6 @@
 package ru.myx.ae3.console.shell;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
@@ -416,7 +417,7 @@ public class Shell extends AbstractShellCommand {
 		{
 			final Entry e = Storage.UNION.relative("settings/shell/" + name + ".json", null);
 			if (e != null /* && e.isExist() */) {
-				final String source = e.toBinary().getBinaryContent().baseValue().toString(Engine.CHARSET_UTF8);
+				final String source = e.toBinary().getBinaryContent().baseValue().toString(StandardCharsets.UTF_8);
 				final BaseObject o = LayoutEngine.parseJSLD(source);
 				final String type = Base.getString(o, "type", "");
 				if (!"ae3/Executable".equals(type)) {

@@ -1,8 +1,8 @@
 package ru.myx.ae3.vfs.signals;
 
+import java.nio.charset.StandardCharsets;
 import java.util.function.Function;
 
-import ru.myx.ae3.Engine;
 import ru.myx.ae3.base.Base;
 import ru.myx.ae3.base.BaseObject;
 import ru.myx.ae3.binary.Transfer;
@@ -35,7 +35,9 @@ class RecordSignals implements ArsRecord, Value<RecordSignals> {
 		if (this.handler == null) {
 			return Base.forNull();
 		}
-		return Transfer.createCopier((this.handler.toString() + "\r\nDelete or modify this file to execute.").getBytes(Engine.CHARSET_UTF8));
+		return Transfer.createCopier( //
+				(this.handler.toString() + "\r\nDelete or modify this file to execute.").getBytes(StandardCharsets.UTF_8)//
+		);
 	}
 
 	@Override
@@ -43,7 +45,7 @@ class RecordSignals implements ArsRecord, Value<RecordSignals> {
 
 		return this.handler == null
 			? 0
-			: (this.handler.toString() + "\r\nDelete or modify this file to execute.").getBytes(Engine.CHARSET_UTF8).length;
+			: (this.handler.toString() + "\r\nDelete or modify this file to execute.").getBytes(StandardCharsets.UTF_8).length;
 	}
 
 	@Override

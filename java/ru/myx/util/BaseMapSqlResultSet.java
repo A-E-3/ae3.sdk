@@ -33,34 +33,26 @@ import ru.myx.ae3.exec.ExecProcess;
 import ru.myx.ae3.exec.ExecStateCode;
 import ru.myx.ae3.exec.ResultHandler;
 
-/**
- * @author myx
- * 
- */
+/** @author myx */
 public final class BaseMapSqlResultSet implements BaseHost, BaseMap, BaseArray, BaseProperty {
-	
-	
+
 	final class EntrySet extends AbstractSet<Map.Entry<String, Object>> {
-		
-		
+
 		final class EntrySetIterator implements Iterator<Map.Entry<String, Object>> {
-			
-			
+
 			private int counter = 0;
 			
 			private final int size = BaseMapSqlResultSet.this.size();
 			
 			@Override
 			public boolean hasNext() {
-				
-				
+
 				return this.counter < this.size;
 			}
 			
 			@Override
 			public Map.Entry<String, Object> next() {
-				
-				
+
 				final int index = this.counter++;
 				final String key;
 				try {
@@ -74,48 +66,41 @@ public final class BaseMapSqlResultSet implements BaseHost, BaseMap, BaseArray, 
 			
 			@Override
 			public void remove() {
-				
-				
+
 				// empty
 			}
 		}
 		
 		@Override
 		public Iterator<Map.Entry<String, Object>> iterator() {
-			
-			
+
 			return new EntrySetIterator();
 		}
 		
 		@Override
 		public int size() {
-			
-			
+
 			return BaseMapSqlResultSet.this.size();
 		}
 	}
 	
 	final class KeySet extends AbstractSet<String> {
-		
-		
+
 		final class KeySetIterator implements Iterator<String> {
-			
-			
+
 			private int counter = 0;
 			
 			private final int size = BaseMapSqlResultSet.this.size();
 			
 			@Override
 			public boolean hasNext() {
-				
-				
+
 				return this.counter < this.size;
 			}
 			
 			@Override
 			public String next() {
-				
-				
+
 				try {
 					return BaseMapSqlResultSet.this.record.getMetaData().getColumnName(++this.counter);
 				} catch (final SQLException e) {
@@ -125,80 +110,67 @@ public final class BaseMapSqlResultSet implements BaseHost, BaseMap, BaseArray, 
 			
 			@Override
 			public void remove() {
-				
-				
+
 				// empty
 			}
 		}
 		
 		@Override
 		public Iterator<String> iterator() {
-			
-			
+
 			return new KeySetIterator();
 		}
 		
 		@Override
 		public int size() {
-			
-			
+
 			return BaseMapSqlResultSet.this.size();
 		}
 	}
 	
 	final class ValueCollection extends AbstractCollection<Object> {
-		
-		
+
 		final class ValueCollectionIterator implements Iterator<Object> {
-			
-			
+
 			private int counter = 0;
 			
 			private final int size = BaseMapSqlResultSet.this.size();
 			
 			@Override
 			public boolean hasNext() {
-				
-				
+
 				return this.counter < this.size;
 			}
 			
 			@Override
 			public Object next() {
-				
-				
-				/**
-				 * zero-based
-				 */
+
+				/** zero-based */
 				return BaseMapSqlResultSet.this.get(this.counter++);
 			}
 			
 			@Override
 			public void remove() {
-				
-				
+
 				// empty
 			}
 		}
 		
 		@Override
 		public Iterator<Object> iterator() {
-			
-			
+
 			return new ValueCollectionIterator();
 		}
 		
 		@Override
 		public int size() {
-			
-			
+
 			return BaseMapSqlResultSet.this.size();
 		}
 	}
 	
 	private static final TransferCopier getBlob(final java.sql.Blob blob) throws java.sql.SQLException {
-		
-		
+
 		if (blob == null) {
 			return null;
 		}
@@ -212,9 +184,7 @@ public final class BaseMapSqlResultSet implements BaseHost, BaseMap, BaseArray, 
 		final TransferCollector collector = Transfer.createCollector();
 		try {
 			Transfer.toStream(blob.getBinaryStream(), collector.getOutputStream(), true);
-			/**
-			 * collector is closed buy ^^^
-			 */
+			/** collector is closed buy ^^^ */
 			return collector.toCloneFactory();
 		} catch (final IOException e) {
 			throw new RuntimeException(e);
@@ -222,8 +192,7 @@ public final class BaseMapSqlResultSet implements BaseHost, BaseMap, BaseArray, 
 	}
 	
 	private static final String getClob(final java.sql.Clob clob) throws java.sql.SQLException {
-		
-		
+
 		assert clob != null;
 		return clob.getSubString(1L, (int) clob.length());
 	}
@@ -236,9 +205,7 @@ public final class BaseMapSqlResultSet implements BaseHost, BaseMap, BaseArray, 
 	
 	private EntrySet entrySet;
 	
-	/**
-	 * @param record
-	 */
+	/** @param record */
 	public BaseMapSqlResultSet(final ResultSet record) {
 		
 		if (record == null) {
@@ -249,15 +216,13 @@ public final class BaseMapSqlResultSet implements BaseHost, BaseMap, BaseArray, 
 	
 	@Override
 	public String baseClass() {
-		
-		
+
 		return "ResultSet";
 	}
 	
 	@Override
 	public boolean baseDefine(final BasePrimitiveString name, final BaseObject value, final short attributes) {
-		
-		
+
 		if (attributes != BaseProperty.ATTRS_MASK_WED) {
 			return false;
 		}
@@ -267,8 +232,7 @@ public final class BaseMapSqlResultSet implements BaseHost, BaseMap, BaseArray, 
 	
 	@Override
 	public boolean baseDefine(final String name, final BaseObject value, final short attributes) {
-		
-		
+
 		if (attributes != BaseProperty.ATTRS_MASK_WED) {
 			return false;
 		}
@@ -278,8 +242,7 @@ public final class BaseMapSqlResultSet implements BaseHost, BaseMap, BaseArray, 
 	
 	@Override
 	public boolean baseDelete(final String name) {
-		
-		
+
 		try {
 			this.record.updateNull(name);
 		} catch (final java.sql.SQLException e) {
@@ -290,8 +253,7 @@ public final class BaseMapSqlResultSet implements BaseHost, BaseMap, BaseArray, 
 	
 	@Override
 	public BaseObject baseGet(final int index, final BaseObject defaultValue) {
-		
-		
+
 		if (index < 0) {
 			return defaultValue;
 		}
@@ -299,9 +261,7 @@ public final class BaseMapSqlResultSet implements BaseHost, BaseMap, BaseArray, 
 			return defaultValue;
 		}
 		try {
-			/**
-			 * first column is at index 1
-			 */
+			/** first column is at index 1 */
 			final int dtype = this.record.getMetaData().getColumnType(index + 1);
 			switch (dtype) {
 				case java.sql.Types.NULL : {
@@ -381,16 +341,8 @@ public final class BaseMapSqlResultSet implements BaseHost, BaseMap, BaseArray, 
 	}
 	
 	@Override
-	public ExecStateCode vmPropertyRead(final ExecProcess ctx, final int index, final BaseObject originalIfKnown, final BaseObject defaultValue, final ResultHandler store) {
-		
-		
-		return store.execReturn(ctx, this.baseGet(index, defaultValue));
-	}
-	
-	@Override
 	public BaseProperty baseGetOwnProperty(final BasePrimitiveString name) {
-		
-		
+
 		return this.containsKey(name.toString())
 			? this
 			: null;
@@ -398,8 +350,7 @@ public final class BaseMapSqlResultSet implements BaseHost, BaseMap, BaseArray, 
 	
 	@Override
 	public BaseProperty baseGetOwnProperty(final String name) {
-		
-		
+
 		return this.containsKey(name)
 			? this
 			: null;
@@ -407,57 +358,49 @@ public final class BaseMapSqlResultSet implements BaseHost, BaseMap, BaseArray, 
 	
 	@Override
 	public boolean baseHasKeysOwn() {
-		
-		
+
 		return !this.isEmpty();
 	}
 	
 	@Override
 	public boolean baseIsExtensible() {
-		
-		
+
 		return false;
 	}
 	
 	@Override
 	public Iterator<String> baseKeysOwn() {
-		
-		
+
 		return this.keySet().iterator();
 	}
 	
 	@Override
 	public Iterator<? extends BasePrimitive<?>> baseKeysOwnPrimitive() {
-		
-		
+
 		return Base.iteratorPrimitiveSafe(this.baseKeysOwn());
 	}
 	
 	@Override
 	public BaseObject basePrototype() {
-		
-		
+
 		return BaseArray.PROTOTYPE;
 	}
 	
 	@Override
 	public BasePrimitiveNumber baseToNumber() {
-		
-		
+
 		return BasePrimitiveNumber.NAN;
 	}
 	
 	@Override
 	public void clear() {
-		
-		
+
 		// empty
 	}
 	
 	@Override
 	public boolean containsKey(final Object key) {
-		
-		
+
 		try {
 			return key == null
 				? false
@@ -469,8 +412,7 @@ public final class BaseMapSqlResultSet implements BaseHost, BaseMap, BaseArray, 
 	
 	@Override
 	public boolean containsValue(final Object value) {
-		
-		
+
 		for (final Object val : this.values()) {
 			if (val == value || val != null && val.equals(value)) {
 				return true;
@@ -481,24 +423,18 @@ public final class BaseMapSqlResultSet implements BaseHost, BaseMap, BaseArray, 
 	
 	@Override
 	public final Set<Map.Entry<String, Object>> entrySet() {
-		
-		
+
 		return this.entrySet == null
 			? this.entrySet = new EntrySet()
 			: this.entrySet;
 	}
 	
-	/**
-	 * zero-based
-	 */
+	/** zero-based */
 	@Override
 	public Object get(final int i) {
-		
-		
+
 		try {
-			/**
-			 * first column is at index 1
-			 */
+			/** first column is at index 1 */
 			final int index = i + 1;
 			final int dtype = this.record.getMetaData().getColumnType(index);
 			switch (dtype) {
@@ -586,8 +522,7 @@ public final class BaseMapSqlResultSet implements BaseHost, BaseMap, BaseArray, 
 	
 	@Override
 	public Object get(final Object key) {
-		
-		
+
 		if (key == null) {
 			return null;
 		}
@@ -595,9 +530,7 @@ public final class BaseMapSqlResultSet implements BaseHost, BaseMap, BaseArray, 
 		try {
 			index = key instanceof Number && ((Number) key).intValue() == ((Number) key).doubleValue()
 				? ((Number) key).intValue()
-				/**
-				 * first column is at index 1
-				 */
+				/** first column is at index 1 */
 				: this.record.findColumn(key.toString()) - 1;
 		} catch (final SQLException e) {
 			return null;
@@ -607,15 +540,13 @@ public final class BaseMapSqlResultSet implements BaseHost, BaseMap, BaseArray, 
 	
 	@Override
 	public boolean isEmpty() {
-		
-		
+
 		return this.size() == 0;
 	}
 	
 	@Override
 	public final Set<String> keySet() {
-		
-		
+
 		return this.keySet == null
 			? this.keySet = new KeySet()
 			: this.keySet;
@@ -623,53 +554,44 @@ public final class BaseMapSqlResultSet implements BaseHost, BaseMap, BaseArray, 
 	
 	@Override
 	public int length() {
-		
-		
+
 		return this.size();
 	}
 	
-	/**
-	 * actually non-dynamic, but we set NULLs for baseDelete/remove methods
-	 */
+	/** actually non-dynamic, but we set NULLs for baseDelete/remove methods */
 	@Override
 	public short propertyAttributes(final CharSequence name) {
-		
-		
+
 		return BaseProperty.ATTRS_MASK_WED_NPK;
 	}
 	
 	@Override
 	public BaseObject propertyGet(final BaseObject instance, final BasePrimitiveString key) {
-		
-		
-		return Base.forUnknown(this.get(key));
+
+		return Base.forUnknown(this.get(key.stringValue()));
 	}
 	
 	@Override
 	public BaseObject propertyGet(final BaseObject instance, final String name) {
-		
-		
+
 		return Base.forUnknown(this.get(name));
 	}
 	
 	@Override
 	public BaseObject propertyGetAndSet(final BaseObject instance, final String name, final BaseObject value) {
-		
-		
+
 		return Base.forUnknown(this.put(name, value.baseValue()));
 	}
 	
 	@Override
 	public ExecStateCode propertyGetCtxResult(final ExecProcess ctx, final BaseObject instance, final BasePrimitive<?> name, final ResultHandler store) {
-		
-		
+
 		return store.execReturn(ctx, this.propertyGet(instance, name.stringValue()));
 	}
 	
 	@Override
 	public boolean propertySet(final BaseObject instance, final CharSequence name, final BaseObject value, final short attributes) {
-		
-		
+
 		if (attributes != BaseProperty.ATTRS_MASK_WED) {
 			return false;
 		}
@@ -679,8 +601,7 @@ public final class BaseMapSqlResultSet implements BaseHost, BaseMap, BaseArray, 
 	
 	@Override
 	public Object put(final String key, final Object value) {
-		
-		
+
 		if (key == null) {
 			return null;
 		}
@@ -712,8 +633,7 @@ public final class BaseMapSqlResultSet implements BaseHost, BaseMap, BaseArray, 
 	
 	@Override
 	public void putAll(final Map<? extends String, ? extends Object> map) {
-		
-		
+
 		if (!map.isEmpty()) {
 			for (final Map.Entry<? extends String, ? extends Object> current : map.entrySet()) {
 				this.put(current.getKey(), current.getValue());
@@ -723,8 +643,7 @@ public final class BaseMapSqlResultSet implements BaseHost, BaseMap, BaseArray, 
 	
 	@Override
 	public Object remove(final Object key) {
-		
-		
+
 		if (key == null) {
 			return null;
 		}
@@ -741,8 +660,7 @@ public final class BaseMapSqlResultSet implements BaseHost, BaseMap, BaseArray, 
 	
 	@Override
 	public int size() {
-		
-		
+
 		try {
 			return this.record.getMetaData().getColumnCount();
 		} catch (final SQLException e) {
@@ -752,17 +670,21 @@ public final class BaseMapSqlResultSet implements BaseHost, BaseMap, BaseArray, 
 	
 	@Override
 	public String toString() {
-		
-		
+
 		return "[object " + this.baseClass() + "(" + Ecma.toEcmaSourceCompact(this) + ")]";
 	}
 	
 	@Override
 	public final Collection<Object> values() {
-		
-		
+
 		return this.valueCollection == null
 			? this.valueCollection = new ValueCollection()
 			: this.valueCollection;
+	}
+	
+	@Override
+	public ExecStateCode vmPropertyRead(final ExecProcess ctx, final int index, final BaseObject originalIfKnown, final BaseObject defaultValue, final ResultHandler store) {
+
+		return store.execReturn(ctx, this.baseGet(index, defaultValue));
 	}
 }

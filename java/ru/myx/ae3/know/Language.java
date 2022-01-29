@@ -4,6 +4,7 @@
 package ru.myx.ae3.know;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -20,70 +21,58 @@ import ru.myx.ae3.base.BaseSealed;
 import ru.myx.ae3.binary.Transfer;
 import ru.myx.ae3.report.Report;
 
-/**
- * @author myx
- * 		
- */
+/** @author myx */
 public final class Language extends BaseHostMap {
-	
+
 	private final static BaseObject REAL_ALL;
-	
+
 	/**
-	 * 
+	 *
 	 */
 	public final static BaseObject ALL;
-	
+
 	private static final Map<String, Language> LANGUAGES = new HashMap<>();
-	
+
 	private static int ORDINAL = 0;
-	
-	/**
-	 * Default language
-	 * 
-	 */
+
+	/** Default language */
 	public static final Language en;
-	
+
 	static {
 		// main
-		
+
 		en = new Language(Language.ORDINAL++, "en", "ISO-8859-1", "ISO-8859-1", "ENG", "English", "English", "US", "WIN");
-		
+
 		// maps
 		REAL_ALL = new BaseNativeObject(Language.en.name, Language.en);
 		ALL = new BaseSealed(Language.REAL_ALL);
-		
+
 		// read
-		
+
 		Language.readLanguages(new File(new File(new File(Engine.PATH_PUBLIC, "resources"), "data"), "languages.txt"));
-		
+
 	}
-	
-	/**
-	 * @return
-	 */
+
+	/** @return */
 	public static Collection<Language> getAllLanguages() {
-		
+
 		return Language.LANGUAGES.values();
 	}
-	
-	/**
-	 * 'en' is default
-	 * 
+
+	/** 'en' is default
+	 *
 	 * @param language
-	 * @return language
-	 */
+	 * @return language */
 	public static final Language getLanguage(final String language) {
-		
+
 		return Language.getLanguage(language, Language.en);
 	}
-	
-	/**
-	 * @param language
+
+	/** @param language
 	 * @param defaultLanguage
-	 * @return language
-	 */
+	 * @return language */
 	public static final Language getLanguage(final String language, final Language defaultLanguage) {
-		
+
 		if (language.length() != 2) {
 			return defaultLanguage;
 		}
@@ -92,21 +81,19 @@ public final class Language extends BaseHostMap {
 			? defaultLanguage
 			: result;
 	}
-	
-	/**
-	 * @return
-	 */
+
+	/** @return */
 	public static int ordinalMax() {
-		
+
 		return Language.ORDINAL;
 	}
-	
+
 	private static final void readLanguages(final File file) {
-		
+
 		if (!file.exists()) {
 			return;
 		}
-		final String source = Transfer.createBuffer(file).toString(Engine.CHARSET_UTF8);
+		final String source = Transfer.createBuffer(file).toString(StandardCharsets.UTF_8);
 		for (final StringTokenizer lines = new StringTokenizer(source, "\r\n"); lines.hasMoreTokens();) {
 			final String line = lines.nextToken().trim();
 			if (line.length() == 0 || line.charAt(0) == '#') {
@@ -202,27 +189,27 @@ public final class Language extends BaseHostMap {
 			}
 		}
 	}
-	
+
 	final int ordinal;
-	
+
 	final String name;
-	
+
 	String webEncoding;
-	
+
 	String javaEncoding;
-	
+
 	String shortName;
-	
+
 	String commonName;
-	
+
 	String nativeName;
-	
+
 	String country;
-	
+
 	String variant;
-	
+
 	Locale locale;
-	
+
 	Language(
 			final int ordinal,
 			final String name,
@@ -233,6 +220,7 @@ public final class Language extends BaseHostMap {
 			final String nativeName,
 			final String country,
 			final String variant) {
+
 		this.ordinal = ordinal;
 		this.name = name;
 		this.webEncoding = webEncoding;
@@ -254,95 +242,75 @@ public final class Language extends BaseHostMap {
 		this.baseDefine("shortName", Base.forString(shortName));
 		this.baseDefine("originalName", Base.forString(nativeName));
 	}
-	
-	/**
-	 * @return string
-	 */
+
+	/** @return string */
 	public String getCommonEncoding() {
-		
+
 		return this.webEncoding;
 	}
-	
-	/**
-	 * @return string
-	 */
+
+	/** @return string */
 	public String getCommonName() {
-		
+
 		return this.commonName;
 	}
-	
-	/**
-	 * @return
-	 */
+
+	/** @return */
 	public String getCountryCode() {
-		
+
 		return this.country;
 	}
-	
-	/**
-	 * @return string
-	 */
+
+	/** @return string */
 	public String getJavaEncoding() {
-		
+
 		return this.javaEncoding;
 	}
-	
-	/**
-	 * @return locale
-	 */
+
+	/** @return locale */
 	public Locale getLocale() {
-		
+
 		return this.locale;
 	}
-	
-	/**
-	 * @return string
-	 */
+
+	/** @return string */
 	public String getName() {
-		
+
 		return this.name;
 	}
-	
-	/**
-	 * @return string
-	 */
+
+	/** @return string */
 	public String getNativeName() {
-		
+
 		return this.nativeName;
 	}
-	
-	/**
-	 * @return string
-	 */
+
+	/** @return string */
 	public String getOriginalName() {
-		
+
 		return this.nativeName;
 	}
-	
-	/**
-	 * @return string
-	 */
+
+	/** @return string */
 	public String getShortName() {
-		
+
 		return this.shortName;
 	}
-	
-	/**
-	 * @return
-	 */
+
+	/** @return */
 	public int ordinal() {
-		
+
 		return this.ordinal;
 	}
-	
+
 	@Override
 	public String toString() {
-		
+
 		return "[object " + this.baseClass() + "(" + this.toStringDetails() + ")]";
 	}
-	
+
 	private String toStringDetails() {
-		
+
 		return "name=" + this.name + ", ce=" + this.webEncoding + ", je=" + this.javaEncoding + ", sn=" + this.shortName + ", cn=" + this.commonName + ", on=" + this.nativeName;
 	}
 }

@@ -12,27 +12,21 @@ import ru.myx.ae3.base.BaseHostLookup;
 import ru.myx.ae3.base.BaseObject;
 import ru.myx.ae3.base.BasePrimitive;
 
-/**
- * @author myx
- * 
- * @param <E>
- */
+/** @author myx
+ *
+ * @param <E> */
 public final class ControlLookupEnum<E extends Enum<E>> extends BaseHostLookup {
 	
-	
 	private final E[] universe;
-	
-	/**
-	 * @param enumeration
-	 */
+
+	/** @param enumeration */
 	public ControlLookupEnum(final Class<E> enumeration) {
-		
+
 		this.universe = enumeration.getEnumConstants();
 	}
-	
+
 	@Override
 	public final BaseObject baseGetLookupValue(final BaseObject key) {
-		
 		
 		for (final E element : this.universe) {
 			if (element == key || element == key.baseValue()) {
@@ -40,23 +34,21 @@ public final class ControlLookupEnum<E extends Enum<E>> extends BaseHostLookup {
 			}
 		}
 		for (final E element : this.universe) {
-			if (key.equals(element.name()) || key.baseToJavaString().equals(element.name())) {
+			if (key.baseToJavaString().equals(element.name())) {
 				return Base.forUnknown(element);
 			}
 		}
 		return null;
 	}
-	
+
 	@Override
 	public boolean baseHasKeysOwn() {
 		
-		
 		return this.universe.length > 0;
 	}
-	
+
 	@Override
 	public final Iterator<String> baseKeysOwn() {
-		
 		
 		final List<String> keys = new ArrayList<>();
 		for (final E element : this.universe) {
@@ -64,17 +56,15 @@ public final class ControlLookupEnum<E extends Enum<E>> extends BaseHostLookup {
 		}
 		return keys.iterator();
 	}
-	
+
 	@Override
 	public Iterator<? extends CharSequence> baseKeysOwnAll() {
 		
-		
 		return this.baseKeysOwn();
 	}
-	
+
 	@Override
 	public final Iterator<? extends BasePrimitive<?>> baseKeysOwnPrimitive() {
-		
 		
 		final List<BasePrimitive<?>> keys = new ArrayList<>();
 		for (final E element : this.universe) {
@@ -82,10 +72,9 @@ public final class ControlLookupEnum<E extends Enum<E>> extends BaseHostLookup {
 		}
 		return keys.iterator();
 	}
-	
+
 	@Override
 	public String toString() {
-		
 		
 		return "[Lookup: Java Enum: " + this.universe[0].getClass().getName() + "]";
 	}

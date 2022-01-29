@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -539,7 +540,7 @@ public final class Xml {
 					if (in.read() == '<' && in.read() == '?') {
 						reader.reuse(identity, xml.nextInputStream(), uri, null, handler, attachment);
 					} else {
-						final InputStreamReader input = new InputStreamReader(xml.nextInputStream(), Engine.CHARSET_DEFAULT);
+						final InputStreamReader input = new InputStreamReader(xml.nextInputStream(), Charset.defaultCharset());
 						reader.reuse(identity, input, uri, null, handler, attachment);
 					}
 				}
@@ -1099,7 +1100,7 @@ public final class Xml {
 						if (reader == null) {
 							reader = new XmlToMapContentHandler();
 						}
-						reader.reuse(identity, new InputStreamReader(xml.nextInputStream(), Engine.CHARSET_DEFAULT), uri, target, handler, attachment);
+						reader.reuse(identity, new InputStreamReader(xml.nextInputStream(), Charset.defaultCharset()), uri, target, handler, attachment);
 					}
 				}
 			} else {
@@ -1169,7 +1170,7 @@ public final class Xml {
 						final String ready = lookup.get(o);
 						if (ready == null) {
 							try {
-								extra = handler.putExternal(attachment, namePrefix + name, "text/plain", Transfer.wrapCopier(string.getBytes(Engine.CHARSET_UTF8)));
+								extra = handler.putExternal(attachment, namePrefix + name, "text/plain", Transfer.wrapCopier(string.getBytes(StandardCharsets.UTF_8)));
 							} catch (final RuntimeException e) {
 								throw e;
 							} catch (final Exception e) {
@@ -1487,7 +1488,7 @@ public final class Xml {
 					final String ready = lookup.get(o);
 					if (ready == null) {
 						try {
-							extra = handler.putExternal(attachment, namePrefix + name, "text/plain", Transfer.wrapCopier(((String) o).getBytes(Engine.CHARSET_UTF8)));
+							extra = handler.putExternal(attachment, namePrefix + name, "text/plain", Transfer.wrapCopier(((String) o).getBytes(StandardCharsets.UTF_8)));
 						} catch (final RuntimeException e) {
 							throw e;
 						} catch (final Exception e) {
@@ -1592,7 +1593,7 @@ public final class Xml {
 					final String ready = lookup.get(o);
 					if (ready == null) {
 						try {
-							extra = handler.putExternal(attachment, namePrefix + name, "text/plain", Transfer.wrapCopier(o.toString().getBytes(Engine.CHARSET_UTF8)));
+							extra = handler.putExternal(attachment, namePrefix + name, "text/plain", Transfer.wrapCopier(o.toString().getBytes(StandardCharsets.UTF_8)));
 						} catch (final RuntimeException e) {
 							throw e;
 						} catch (final Exception e) {
@@ -1876,7 +1877,7 @@ public final class Xml {
 		if (map == null || map.isEmpty()) {
 			final int length = name.length();
 			if (length > 0 && length < 128 && Format.Xml.isValidName(name)) {
-				return Transfer.wrapCopier(('<' + name + " class=\"map\"/>").getBytes(Engine.CHARSET_UTF8));
+				return Transfer.wrapCopier(('<' + name + " class=\"map\"/>").getBytes(StandardCharsets.UTF_8));
 			}
 			final Document doc = Dom.createDocument();
 			final Element root = doc.createElement("param");

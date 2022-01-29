@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.ConcurrentModificationException;
 
@@ -19,7 +20,7 @@ import ru.myx.io.WrapInputStream;
 
 /** @author myx */
 public final class WrapCopier implements BaseObjectNoOwnProperties, TransferCopier, Describable {
-	
+
 	private final byte[] bytes;
 
 	private final int offset;
@@ -46,19 +47,19 @@ public final class WrapCopier implements BaseObjectNoOwnProperties, TransferCopi
 
 	@Override
 	public String baseDescribe() {
-		
+
 		return "[" + this.getClass().getSimpleName() + " size=" + Format.Compact.toBytes(this.length) + "]";
 	}
 
 	@Override
 	public WrapCopier baseValue() {
-		
+
 		return this;
 	}
 
 	@Override
 	public int compareTo(final TransferCopier o) {
-		
+
 		if (o == null) {
 			return 1;
 		}
@@ -94,7 +95,7 @@ public final class WrapCopier implements BaseObjectNoOwnProperties, TransferCopi
 
 	@Override
 	public int copy(final long start, final byte[] target, final int offset, final int count) throws ConcurrentModificationException {
-		
+
 		if (start >= this.length) {
 			return 0;
 		}
@@ -105,7 +106,7 @@ public final class WrapCopier implements BaseObjectNoOwnProperties, TransferCopi
 
 	@Override
 	public boolean equals(final Object obj) {
-		
+
 		if (obj == null || !(obj instanceof TransferCopier) || ((TransferCopier) obj).length() != this.length) {
 			return false;
 		}
@@ -120,7 +121,7 @@ public final class WrapCopier implements BaseObjectNoOwnProperties, TransferCopi
 
 	@Override
 	public MessageDigest getMessageDigest() {
-		
+
 		final MessageDigest digest = Engine.getMessageDigestInstance();
 		digest.update(this.bytes, this.offset, this.length);
 		return digest;
@@ -128,7 +129,7 @@ public final class WrapCopier implements BaseObjectNoOwnProperties, TransferCopi
 
 	@Override
 	public int hashCode() {
-		
+
 		int result = 1;
 		for (int i = this.offset, l = this.length; l > 0; --l, ++i) {
 			result = 31 * result + (this.bytes[i] & 0xFF);
@@ -138,19 +139,19 @@ public final class WrapCopier implements BaseObjectNoOwnProperties, TransferCopi
 
 	@Override
 	public final long length() {
-		
+
 		return this.length;
 	}
 
 	@Override
 	public final TransferBuffer nextCopy() {
-		
+
 		return new WrapBuffer(this.bytes, this.offset, this.length);
 	}
 
 	@Override
 	public byte[] nextDirectArray() {
-		
+
 		if (this.offset == 0 && this.length == this.bytes.length) {
 			return this.bytes;
 		}
@@ -159,16 +160,16 @@ public final class WrapCopier implements BaseObjectNoOwnProperties, TransferCopi
 		System.arraycopy(this.bytes, this.offset, result, 0, length);
 		return result;
 	}
-	
+
 	@Override
 	public InputStream nextInputStream() {
-		
+
 		return new WrapInputStream(this.bytes, this.offset, this.length);
 	}
-	
+
 	@Override
 	public ByteBuffer nextNioBuffer() {
-		
+
 		if (this.offset == 0 && this.length == this.bytes.length) {
 			return ByteBuffer.wrap(this.bytes);
 		}
@@ -177,13 +178,13 @@ public final class WrapCopier implements BaseObjectNoOwnProperties, TransferCopi
 
 	@Override
 	public final InputStreamReader nextReaderUtf8() {
-		
-		return new InputStreamReader(this.nextInputStream(), Engine.CHARSET_UTF8);
+
+		return new InputStreamReader(this.nextInputStream(), StandardCharsets.UTF_8);
 	}
 
 	@Override
 	public TransferCopier slice(final long start, final long count) throws ConcurrentModificationException {
-		
+
 		if (start == 0 && count == this.length) {
 			return this;
 		}
@@ -198,13 +199,13 @@ public final class WrapCopier implements BaseObjectNoOwnProperties, TransferCopi
 
 	@Override
 	public String toString() {
-		
-		return this.toString(Engine.CHARSET_DEFAULT);
+
+		return this.toString(Charset.defaultCharset());
 	}
 
 	@Override
 	public String toString(final Charset charset) {
-		
+
 		return 0 == this.length
 			? ""
 			: new String(this.bytes, this.offset, this.length, charset);
@@ -212,7 +213,7 @@ public final class WrapCopier implements BaseObjectNoOwnProperties, TransferCopi
 
 	@Override
 	public String toString(final String encoding) throws UnsupportedEncodingException {
-		
+
 		return 0 == this.length
 			? ""
 			: new String(this.bytes, this.offset, this.length, encoding);
@@ -220,13 +221,13 @@ public final class WrapCopier implements BaseObjectNoOwnProperties, TransferCopi
 
 	@Override
 	public String toStringUtf8() {
-		
-		return this.toString(Engine.CHARSET_UTF8);
+
+		return this.toString(StandardCharsets.UTF_8);
 	}
 
 	@Override
 	public MessageDigest updateMessageDigest(final MessageDigest digest) {
-		
+
 		digest.update(this.bytes, this.offset, this.length);
 		return digest;
 	}

@@ -11,6 +11,7 @@ import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 
 import ru.myx.ae3.Engine;
@@ -18,9 +19,9 @@ import ru.myx.util.WeakFinalizer;
 
 /** @author myx */
 public final class BufferFileComplete implements TransferBuffer {
-
+	
 	private static void finalizeStatic(final BufferFileComplete x) {
-
+		
 		if (x.in != null) {
 			try {
 				x.in.close();
@@ -30,24 +31,24 @@ public final class BufferFileComplete implements TransferBuffer {
 			x.in = null;
 		}
 	}
-	
+
 	private final File file;
-	
+
 	private RandomAccessFile in;
-
+	
 	private long position;
-
+	
 	{
 		WeakFinalizer.register(this, BufferFileComplete::finalizeStatic);
 	}
-	
+
 	/** Please consider using one of the Transfer.createBuffer(). They are smarter then just
 	 * creating instance of this class in every situation.
 	 *
 	 * @param file
 	 * @throws IllegalArgumentException */
 	public BufferFileComplete(final File file) throws IllegalArgumentException {
-
+		
 		assert file != null : "file is null";
 		if (!file.isFile()) {
 			throw new IllegalArgumentException("file '" + file.getAbsolutePath() + "' doesn't exist or not a file!");
@@ -55,9 +56,9 @@ public final class BufferFileComplete implements TransferBuffer {
 		this.file = file;
 		this.position = 0;
 	}
-	
-	BufferFileComplete(final File file, final long position) throws IllegalArgumentException {
 
+	BufferFileComplete(final File file, final long position) throws IllegalArgumentException {
+		
 		assert file != null : "file is null";
 		if (!file.isFile()) {
 			throw new IllegalArgumentException("file '" + file.getAbsolutePath() + "' doesn't exist or not a file!");
@@ -65,10 +66,10 @@ public final class BufferFileComplete implements TransferBuffer {
 		this.file = file;
 		this.position = position;
 	}
-	
+
 	@Override
 	public final void destroy() {
-
+		
 		if (this.in != null) {
 			try {
 				this.in.close();
@@ -78,34 +79,34 @@ public final class BufferFileComplete implements TransferBuffer {
 			this.in = null;
 		}
 	}
-	
+
 	@Override
 	public final MessageDigest getMessageDigest() {
-
+		
 		return this.updateMessageDigest(Engine.getMessageDigestInstance());
 	}
-	
+
 	@Override
 	public final boolean hasRemaining() {
-
+		
 		return this.file.length() > this.position;
 	}
-	
+
 	@Override
 	public boolean isDirectAbsolutely() {
-
+		
 		return false;
 	}
-	
+
 	@Override
 	public final boolean isSequence() {
-
+		
 		return false;
 	}
-	
+
 	@Override
 	public final int next() {
-
+		
 		final long limit = this.file.length();
 		if (this.position == limit) {
 			return -1;
@@ -131,10 +132,10 @@ public final class BufferFileComplete implements TransferBuffer {
 			return -1;
 		}
 	}
-	
+
 	@Override
 	public final int next(final byte[] buffer, final int offset, final int length) {
-
+		
 		final long limit = this.file.length();
 		final int amount = (int) Math.min(limit - this.position, length);
 		if (amount > 0) {
@@ -157,22 +158,22 @@ public final class BufferFileComplete implements TransferBuffer {
 		}
 		return amount;
 	}
-	
+
 	@Override
 	public final TransferBuffer nextSequenceBuffer() {
-
+		
 		throw new UnsupportedOperationException("Not a sequence!");
 	}
-	
+
 	@Override
 	public final long remaining() {
-
+		
 		return this.file.length() - this.position;
 	}
-	
+
 	@Override
 	public final TransferCopier toBinary() {
-
+		
 		final long limit = this.file.length();
 		if (this.position == 0) {
 			this.position = limit;
@@ -183,10 +184,10 @@ public final class BufferFileComplete implements TransferBuffer {
 		}
 		return new CopierFilePart(this.file, this.position, limit);
 	}
-	
+
 	@Override
 	public final byte[] toDirectArray() {
-
+		
 		try {
 			if (this.in == null) {
 				this.in = new RandomAccessFile(this.file, "r");
@@ -216,10 +217,10 @@ public final class BufferFileComplete implements TransferBuffer {
 			throw new RuntimeException("Error reading file contents", e);
 		}
 	}
-	
+
 	@Override
 	public final FileInputStream toInputStream() {
-
+		
 		try {
 			final FileInputStream stream = new FileInputStream(this.file);
 			if (this.position != 0) {
@@ -239,10 +240,10 @@ public final class BufferFileComplete implements TransferBuffer {
 			throw new RuntimeException("Error reading file contents", e);
 		}
 	}
-	
+
 	@Override
 	public final TransferBuffer toNioBuffer(final ByteBuffer target) throws IOException {
-
+		
 		final long limit = this.file.length();
 		final long sourceRemaining = limit - this.position;
 		if (sourceRemaining <= 0) {
@@ -296,22 +297,22 @@ public final class BufferFileComplete implements TransferBuffer {
 		}
 		return this;
 	}
-	
+
 	@Override
 	public final InputStreamReader toReaderUtf8() {
-
-		return new InputStreamReader(this.toInputStream(), Engine.CHARSET_UTF8);
+		
+		return new InputStreamReader(this.toInputStream(), StandardCharsets.UTF_8);
 	}
-	
+
 	@Override
 	public final String toString() {
-
-		return this.toString(Engine.CHARSET_DEFAULT);
+		
+		return this.toString(Charset.defaultCharset());
 	}
-	
+
 	@Override
 	public final String toString(final Charset charset) {
-
+		
 		final byte[] bytes = this.toDirectArray();
 		return bytes == null
 			? null
@@ -319,10 +320,10 @@ public final class BufferFileComplete implements TransferBuffer {
 				? ""
 				: new String(bytes, charset);
 	}
-	
+
 	@Override
 	public final String toString(final String encoding) throws UnsupportedEncodingException {
-
+		
 		final byte[] bytes = this.toDirectArray();
 		return bytes == null
 			? null
@@ -330,10 +331,10 @@ public final class BufferFileComplete implements TransferBuffer {
 				? ""
 				: new String(bytes, encoding);
 	}
-	
+
 	@Override
 	public final TransferBuffer toSubBuffer(final long start, final long end) {
-
+		
 		final long limit = this.file.length();
 		final long remaining = limit - this.position;
 		if (start < 0 || start > end || end > remaining) {
@@ -363,10 +364,10 @@ public final class BufferFileComplete implements TransferBuffer {
 		}
 		return this;
 	}
-	
+
 	@Override
 	public final MessageDigest updateMessageDigest(final MessageDigest digest) {
-
+		
 		try (final RandomAccessFile in = new RandomAccessFile(this.file, "r")) {
 			if (this.position != 0) {
 				in.seek(this.position);

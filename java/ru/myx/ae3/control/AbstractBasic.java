@@ -13,10 +13,9 @@ import ru.myx.ae3.base.BaseObject;
 import ru.myx.ae3.help.Format;
 
 /** @author myx
- * @param <T>
- */
+ * @param <T> */
 public abstract class AbstractBasic<T extends AbstractBasic<?>> implements BaseHostDataSubstitution<BaseObject>, ControlBasic<T> {
-	
+
 	private BaseNativeObject attributes = null;
 
 	/**
@@ -26,25 +25,25 @@ public abstract class AbstractBasic<T extends AbstractBasic<?>> implements BaseH
 
 	@Override
 	public BaseObject baseGetSubstitution() {
-		
+
 		return this.getData();
 	}
 
 	@Override
 	public final BaseObject getAttributes() {
-		
+
 		return this.attributes;
 	}
 
 	@Override
 	public BaseObject getData() {
-		
+
 		return BaseObject.UNDEFINED;
 	}
 
 	@Override
 	public String getIcon() {
-		
+
 		/** attributes could be null */
 		return this.attributes == null
 			? null
@@ -53,7 +52,7 @@ public abstract class AbstractBasic<T extends AbstractBasic<?>> implements BaseH
 
 	@Override
 	public String getKey() {
-		
+
 		if (this.key == null) {
 			this.key = this.attributes == null
 				? null
@@ -67,7 +66,7 @@ public abstract class AbstractBasic<T extends AbstractBasic<?>> implements BaseH
 
 	@Override
 	public String getTitle() {
-		
+
 		/** attributes could be null */
 		final String title = this.attributes == null
 			? null
@@ -77,17 +76,16 @@ public abstract class AbstractBasic<T extends AbstractBasic<?>> implements BaseH
 			: title;
 	}
 
-	/** @throws IllegalArgumentException
-	 */
+	/** @throws IllegalArgumentException */
 	protected void recalculate() throws IllegalArgumentException {
-		
+
 		// empty
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public final T setAttribute(final String name, final BaseObject value) {
-		
+
 		if (value == null) {
 			if (this.attributes != null) {
 				this.attributes.baseDelete(name);
@@ -112,10 +110,9 @@ public abstract class AbstractBasic<T extends AbstractBasic<?>> implements BaseH
 	/** Call this method to prevent recalculation. Don't forget to call recalculate() explicitly.
 	 *
 	 * @param name
-	 * @param value
-	 */
+	 * @param value */
 	protected final void setAttributeIntern(final String name, final BaseObject value) {
-		
+
 		if (this.attributes == null) {
 			this.attributes = new BaseNativeObject();
 		}
@@ -128,10 +125,9 @@ public abstract class AbstractBasic<T extends AbstractBasic<?>> implements BaseH
 	/** Call this method to prevent recalculation. Don't forget to call recalculate() explicitly.
 	 *
 	 * @param name
-	 * @param value
-	 */
+	 * @param value */
 	protected final void setAttributeIntern(final String name, final boolean value) {
-		
+
 		if (this.attributes == null) {
 			this.attributes = new BaseNativeObject();
 		}
@@ -144,10 +140,9 @@ public abstract class AbstractBasic<T extends AbstractBasic<?>> implements BaseH
 	/** Call this method to prevent recalculation. Don't forget to call recalculate() explicitly.
 	 *
 	 * @param name
-	 * @param value
-	 */
+	 * @param value */
 	protected final void setAttributeIntern(final String name, final double value) {
-		
+
 		if (this.attributes == null) {
 			this.attributes = new BaseNativeObject();
 		}
@@ -160,10 +155,9 @@ public abstract class AbstractBasic<T extends AbstractBasic<?>> implements BaseH
 	/** Call this method to prevent recalculation. Don't forget to call recalculate() explicitly.
 	 *
 	 * @param name
-	 * @param value
-	 */
+	 * @param value */
 	protected final void setAttributeIntern(final String name, final long value) {
-		
+
 		if (this.attributes == null) {
 			this.attributes = new BaseNativeObject();
 		}
@@ -176,10 +170,9 @@ public abstract class AbstractBasic<T extends AbstractBasic<?>> implements BaseH
 	/** Call this method to prevent recalculation. Don't forget to call recalculate() explicitly.
 	 *
 	 * @param name
-	 * @param value
-	 */
+	 * @param value */
 	protected final void setAttributeIntern(final String name, final String value) {
-		
+
 		if (this.attributes == null) {
 			this.attributes = new BaseNativeObject();
 		}
@@ -192,7 +185,7 @@ public abstract class AbstractBasic<T extends AbstractBasic<?>> implements BaseH
 	@Override
 	@SuppressWarnings("unchecked")
 	public final T setAttributes(final BaseObject map) {
-		
+
 		if (map != null && Base.hasKeys(map)) {
 			for (final Iterator<String> keys = map.baseKeysOwn(); keys.hasNext();) {
 				final String key = keys.next();
@@ -205,12 +198,12 @@ public abstract class AbstractBasic<T extends AbstractBasic<?>> implements BaseH
 
 	@Override
 	public String toString() {
-		
+
 		return "[object " + this.baseClass() + "(" + this.toStringDetails() + ")]";
 	}
 
 	protected String toStringDetails() {
-		
+
 		return this.key == null
 			? null
 			: "key=" + Format.Ecma.string(this.key);

@@ -6,6 +6,7 @@ package ru.myx.sapi;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Base64;
 import java.util.Date;
@@ -44,7 +45,7 @@ import ru.myx.util.Base58;
  *
  *         Window - Preferences - Java - Code Style - Code Templates */
 public class FormatSAPI {
-	
+
 	/** Formats bytes as base27, more compact and readable than base16/hex
 	 *
 	 * @param bytes
@@ -118,7 +119,7 @@ public class FormatSAPI {
 		if (bytes.length == 0) {
 			return "";
 		}
-		
+
 		return Base58.encode(bytes);
 	}
 
@@ -130,7 +131,7 @@ public class FormatSAPI {
 
 		return bytes == null
 			? ""
-			: new String(Base64.getEncoder().withoutPadding().encode(bytes), Engine.CHARSET_ASCII);
+			: new String(Base64.getEncoder().withoutPadding().encode(bytes), StandardCharsets.US_ASCII);
 	}
 
 	/** Formats bytes as base64, useful for formatting md5 checksums, etc.
@@ -523,7 +524,7 @@ public class FormatSAPI {
 					: h - '0');
 			bytes[--i] = (byte) ((H << 4) + L);
 		}
-		return new String(Base64.getEncoder().withoutPadding().encode(bytes), Engine.CHARSET_ASCII);
+		return new String(Base64.getEncoder().withoutPadding().encode(bytes), StandardCharsets.US_ASCII);
 	}
 
 	/** Formats binary value as hex, useful for formatting md5 checksums, etc.
@@ -908,7 +909,7 @@ public class FormatSAPI {
 	 * @return */
 	public static final String queryStringParameters(final BaseObject object) {
 
-		return QueryString.toQueryString(object, Engine.CHARSET_UTF8);
+		return QueryString.toQueryString(object, StandardCharsets.UTF_8);
 	}
 
 	/** @param base
@@ -917,11 +918,11 @@ public class FormatSAPI {
 	public static final String queryStringParameters(final BaseObject base, final BaseObject change) {
 
 		if (change == null || change == BaseObject.UNDEFINED) {
-			return QueryString.toQueryString(base, Engine.CHARSET_UTF8);
+			return QueryString.toQueryString(base, StandardCharsets.UTF_8);
 		}
 		final BaseMapEditable result = BaseObject.createObject(base);
 		result.baseDefineImportAllEnumerable(change);
-		return QueryString.toQueryString(result, Engine.CHARSET_UTF8);
+		return QueryString.toQueryString(result, StandardCharsets.UTF_8);
 	}
 
 	/** @param csvLine
@@ -1105,7 +1106,7 @@ public class FormatSAPI {
 
 		return text == null
 			? new byte[0]
-			: text.getBytes(Engine.CHARSET_ASCII);
+			: text.getBytes(StandardCharsets.US_ASCII);
 	}
 
 	/** Formats bytes as base64, useful for formatting md5 checksums, etc.
@@ -1116,7 +1117,7 @@ public class FormatSAPI {
 
 		return text == null
 			? ""
-			: new String(Base64.getEncoder().withoutPadding().encode(text.getBytes(Engine.CHARSET_UTF8)), Engine.CHARSET_ASCII);
+			: new String(Base64.getEncoder().withoutPadding().encode(text.getBytes(StandardCharsets.UTF_8)), StandardCharsets.US_ASCII);
 	}
 
 	/** @param text
@@ -1125,7 +1126,7 @@ public class FormatSAPI {
 
 		return text == null
 			? new byte[0]
-			: text.getBytes(Engine.CHARSET_UTF8);
+			: text.getBytes(StandardCharsets.UTF_8);
 	}
 
 	/** Formats bytes as base64, useful for formatting md5 checksums, etc.
@@ -1136,7 +1137,7 @@ public class FormatSAPI {
 
 		return base64 == null
 			? ""
-			: new String(Base64.getDecoder().decode(base64.getBytes(Engine.CHARSET_ASCII)), Engine.CHARSET_UTF8);
+			: new String(Base64.getDecoder().decode(base64.getBytes(StandardCharsets.US_ASCII)), StandardCharsets.UTF_8);
 	}
 
 	/** @param o

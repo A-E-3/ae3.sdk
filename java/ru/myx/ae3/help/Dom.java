@@ -12,6 +12,7 @@ import java.io.OutputStreamWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -43,7 +44,7 @@ import ru.myx.sapi.FormatSAPI;
 public final class Dom {
 
 	private static final DocumentBuilderFactory factory;
-	
+
 	/** <= JAVA8 <code>
 	private static final OutputFormat formatXmlCompact;
 
@@ -53,13 +54,13 @@ public final class Dom {
 	</code> */
 
 	private static final TransformerFactory transformerFactory;
-	
+
 	private static final Properties formatXmlCompact;
 
 	private static final Properties formatXmlExternal;
 
 	private static final Properties formatXmlReadable;
-	
+
 	static {
 		factory = DocumentBuilderFactory.newInstance();
 		Dom.factory.setCoalescing(true);
@@ -69,7 +70,7 @@ public final class Dom {
 		Dom.factory.setValidating(false);
 
 		transformerFactory = TransformerFactory.newInstance();
-		
+
 		formatXmlCompact = new Properties();
 		Dom.formatXmlCompact.setProperty(OutputKeys.INDENT, "no");
 		Dom.formatXmlCompact.setProperty(OutputKeys.ENCODING, Engine.ENCODING_UTF8);
@@ -78,7 +79,7 @@ public final class Dom {
 		Dom.formatXmlCompact.setProperty(OutputKeys.VERSION, "1.0");
 		Dom.formatXmlCompact.setProperty(OutputKeys.METHOD, "xml");
 		Dom.formatXmlCompact.setProperty(OutputKeys.MEDIA_TYPE, "text/xml");
-		
+
 		/** <= JAVA8 <code>
 		formatXmlCompact = new OutputFormat();
 		Dom.formatXmlCompact.setOmitXMLDeclaration(true);
@@ -100,7 +101,7 @@ public final class Dom {
 		Dom.formatXmlExternal.setProperty(OutputKeys.VERSION, "1.0");
 		Dom.formatXmlExternal.setProperty(OutputKeys.METHOD, "xml");
 		Dom.formatXmlExternal.setProperty(OutputKeys.MEDIA_TYPE, "text/xml");
-		
+
 		/** <= JAVA8 <code>
 		formatXmlExternal = new OutputFormat();
 		Dom.formatXmlExternal.setOmitXMLDeclaration(false);
@@ -122,7 +123,7 @@ public final class Dom {
 		Dom.formatXmlReadable.setProperty(OutputKeys.VERSION, "1.0");
 		Dom.formatXmlReadable.setProperty(OutputKeys.METHOD, "xml");
 		Dom.formatXmlReadable.setProperty(OutputKeys.MEDIA_TYPE, "text/xml");
-		
+
 		/** <= JAVA8 <code>
 		formatXmlReadable = new OutputFormat();
 		Dom.formatXmlReadable.setOmitXMLDeclaration(false);
@@ -397,7 +398,7 @@ public final class Dom {
 		assert root != null : "NULL root element!";
 		final TransferCollector collector = Transfer.createCollector();
 		final OutputStream output = collector.getOutputStream();
-		try (final Writer writer = new OutputStreamWriter(output, Engine.CHARSET_UTF8)) {
+		try (final Writer writer = new OutputStreamWriter(output, StandardCharsets.UTF_8)) {
 			final Transformer serializer = Dom.transformerFactory.newTransformer();
 			serializer.setOutputProperties(Dom.formatXmlCompact);
 			serializer.transform(new DOMSource(root), new StreamResult(writer));
@@ -507,7 +508,7 @@ public final class Dom {
 		assert root != null : "NULL root element!";
 		final TransferCollector collector = Transfer.createCollector();
 		final OutputStream output = collector.getOutputStream();
-		try (final Writer writer = new OutputStreamWriter(output, Engine.CHARSET_UTF8)) {
+		try (final Writer writer = new OutputStreamWriter(output, StandardCharsets.UTF_8)) {
 			final Transformer serializer = Dom.transformerFactory.newTransformer();
 			serializer.setOutputProperties(Dom.formatXmlReadable);
 			serializer.transform(new DOMSource(root), new StreamResult(writer));

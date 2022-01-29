@@ -1,9 +1,9 @@
 package ru.myx.ae3.l2;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.StringTokenizer;
 
-import ru.myx.ae3.Engine;
 import ru.myx.ae3.base.BaseNativeObject;
 import ru.myx.ae3.base.BaseObject;
 import ru.myx.ae3.base.BaseProperty;
@@ -16,16 +16,11 @@ import ru.myx.ae3.l2.base.BaseFunctionLayoutsConvertLayoutNameToClassName;
 import ru.myx.ae3.l2.base.BaseFunctionLayoutsExtend;
 import ru.myx.ae3.l2.base.BaseFunctionLayoutsFormatObject;
 
-/**
- * @author myx
- *
- */
+/** @author myx */
 public class LayoutEngine {
-	
+
 	static {
-		/**
-		 * Setup GLOBAL object with Layouts API!
-		 */
+		/** Setup GLOBAL object with Layouts API! */
 		final BaseObject layoutsApi = BaseObject.createObject();
 		layoutsApi.baseDefine("convertClassNameToLayoutName", new BaseFunctionLayoutsConvertClassNameToLayoutName(), BaseProperty.ATTRS_MASK_NNN);
 		layoutsApi.baseDefine("convertLayoutNameToClassName", new BaseFunctionLayoutsConvertLayoutNameToClassName(), BaseProperty.ATTRS_MASK_NNN);
@@ -34,14 +29,12 @@ public class LayoutEngine {
 		ExecProcess.GLOBAL.baseDefine("Layouts", layoutsApi, BaseProperty.ATTRS_MASK_NNN);
 	}
 
-	/**
-	 * SequenceAttachmentWest -> sequence-attachment-west
+	/** SequenceAttachmentWest -> sequence-attachment-west
 	 *
 	 * @param className
-	 * @return
-	 */
+	 * @return */
 	public final static String convertClassNameToLayoutName(final String className) {
-		
+
 		final int length = className.length();
 		final StringBuilder result = new StringBuilder(length + 16);
 		char prev = 0;
@@ -60,15 +53,12 @@ public class LayoutEngine {
 		return result.toString();
 	}
 
-	/**
-	 *
-	 * sequence-attachment-west -> SequenceAttachmentWest
+	/** sequence-attachment-west -> SequenceAttachmentWest
 	 *
 	 * @param layoutName
-	 * @return
-	 */
+	 * @return */
 	public final static String convertLayoutNameToClassName(final String layoutName) {
-		
+
 		final StringBuilder result = new StringBuilder(layoutName.length());
 		for (final StringTokenizer st = new StringTokenizer(layoutName, "_-"); st.hasMoreTokens();) {
 			final String token = st.nextToken();
@@ -77,29 +67,23 @@ public class LayoutEngine {
 		return result.toString();
 	}
 
-	/**
-	 * @return
-	 */
+	/** @return */
 	public final static BaseObject getDocumentation() {
-		
+
 		return new BaseNativeObject("layout", "documentation-layouts");
 	}
 
-	/**
-	 * @param input
-	 * @return
-	 */
+	/** @param input
+	 * @return */
 	public final static BaseObject parseJSLD(final InputStream input) {
-		
-		return LayoutEngine.parseJSLD(Transfer.createBuffer(input).toString(Engine.CHARSET_UTF8));
+
+		return LayoutEngine.parseJSLD(Transfer.createBuffer(input).toString(StandardCharsets.UTF_8));
 	}
 
-	/**
-	 * @param input
-	 * @return
-	 */
+	/** @param input
+	 * @return */
 	public final static BaseObject parseJSLD(final String input) {
-		
+
 		final ExecProcess ctx = Exec.createProcess(null, "JSON parse");
 		return Evaluate.evaluateObject(input, ctx, null);
 	}

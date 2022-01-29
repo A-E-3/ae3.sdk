@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.ConcurrentModificationException;
 
@@ -17,14 +18,13 @@ import ru.myx.ae3.common.Describable;
 import ru.myx.ae3.help.Format;
 
 final class CopierSequence implements BaseObjectNoOwnProperties, TransferCopier, Describable {
-	
-	
+
 	private final TransferCopier[] sequence;
-	
+
 	private final int length;
-	
+
 	CopierSequence(final TransferCopier[] sequence) {
-		
+
 		this.sequence = sequence;
 		int length = 0;
 		for (int i = sequence.length - 1; i >= 0; --i) {
@@ -32,25 +32,22 @@ final class CopierSequence implements BaseObjectNoOwnProperties, TransferCopier,
 		}
 		this.length = length;
 	}
-	
+
 	@Override
 	public String baseDescribe() {
-		
-		
+
 		return "[" + this.getClass().getSimpleName() + " size=" + Format.Compact.toBytes(this.length) + "]";
 	}
-	
+
 	@Override
 	public final CopierSequence baseValue() {
-		
-		
+
 		return this;
 	}
-	
+
 	@Override
 	public int compareTo(final TransferCopier o) {
-		
-		
+
 		if (o == null) {
 			return 1;
 		}
@@ -65,11 +62,10 @@ final class CopierSequence implements BaseObjectNoOwnProperties, TransferCopier,
 			throw new RuntimeException(e);
 		}
 	}
-	
+
 	@Override
 	public int copy(final long start, final byte[] target, final int offset, final int count) throws ConcurrentModificationException {
-		
-		
+
 		int index = 0, copied = 0;
 		long skipped = 0;
 		for (;;) {
@@ -99,57 +95,50 @@ final class CopierSequence implements BaseObjectNoOwnProperties, TransferCopier,
 			}
 		}
 	}
-	
+
 	@Override
 	public final MessageDigest getMessageDigest() {
-		
-		
+
 		return this.updateMessageDigest(Engine.getMessageDigestInstance());
 	}
-	
+
 	@Override
 	public final long length() {
-		
-		
+
 		return this.length;
 	}
-	
+
 	@Override
 	public final TransferBuffer nextCopy() {
-		
-		
+
 		final TransferBuffer[] result = new TransferBuffer[this.sequence.length];
 		for (int i = this.sequence.length - 1; i >= 0; --i) {
 			result[i] = this.sequence[i].nextCopy();
 		}
 		return new BufferSequence(result);
 	}
-	
+
 	@Override
 	public final byte[] nextDirectArray() {
-		
-		
+
 		return this.nextCopy().toDirectArray();
 	}
-	
+
 	@Override
 	public final InputStream nextInputStream() {
-		
-		
+
 		return this.nextCopy().toInputStream();
 	}
-	
+
 	@Override
 	public final Reader nextReaderUtf8() throws IOException {
-		
-		
+
 		return this.nextCopy().toReaderUtf8();
 	}
-	
+
 	@Override
 	public TransferCopier slice(final long start, final long count) throws ConcurrentModificationException {
-		
-		
+
 		if (start == 0 && count == this.length) {
 			return this;
 		}
@@ -158,39 +147,34 @@ final class CopierSequence implements BaseObjectNoOwnProperties, TransferCopier,
 		}
 		return this.nextCopy().toSubBuffer(start, Math.min(start + count, this.length)).toBinary();
 	}
-	
+
 	@Override
 	public final String toString() {
-		
-		
-		return this.toString(Engine.CHARSET_DEFAULT);
+
+		return this.toString(Charset.defaultCharset());
 	}
-	
+
 	@Override
 	public final String toString(final Charset charset) {
-		
-		
+
 		return this.nextCopy().toString(charset);
 	}
-	
+
 	@Override
 	public final String toString(final String encoding) throws UnsupportedEncodingException {
-		
-		
+
 		return this.nextCopy().toString(encoding);
 	}
-	
+
 	@Override
 	public String toStringUtf8() {
-		
-		
-		return this.nextCopy().toString(Engine.CHARSET_UTF8);
+
+		return this.nextCopy().toString(StandardCharsets.UTF_8);
 	}
-	
+
 	@Override
 	public final MessageDigest updateMessageDigest(final MessageDigest digest) {
-		
-		
+
 		int index = 0;
 		for (;;) {
 			if (index == this.sequence.length) {

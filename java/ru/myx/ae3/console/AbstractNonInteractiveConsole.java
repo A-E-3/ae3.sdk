@@ -36,7 +36,7 @@ public abstract class AbstractNonInteractiveConsole extends AbstractConsole {
 	@Override
 	public Value<Boolean> readBoolean(final String title) {
 
-		return "yes".equals(this.readString(title + "(yes/no)?", null))
+		return "yes".equals(this.readString(title + "(yes/no)?", null).baseValue())
 			? BaseObject.TRUE
 			: BaseObject.FALSE;
 	}
@@ -49,9 +49,10 @@ public abstract class AbstractNonInteractiveConsole extends AbstractConsole {
 						title + "(yes/no)?",
 						defaultValue
 							? "yes"
-							: "no"))
-								? BaseObject.TRUE
-								: BaseObject.FALSE;
+							: "no")
+						.baseValue())
+							? BaseObject.TRUE
+							: BaseObject.FALSE;
 	}
 
 	@Override

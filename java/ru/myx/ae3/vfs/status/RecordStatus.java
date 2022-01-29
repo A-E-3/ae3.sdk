@@ -1,8 +1,8 @@
 package ru.myx.ae3.vfs.status;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
-import ru.myx.ae3.Engine;
 import ru.myx.ae3.base.Base;
 import ru.myx.ae3.base.BaseObject;
 import ru.myx.ae3.binary.Transfer;
@@ -25,7 +25,7 @@ class RecordStatus implements ArsRecord, Value<RecordStatus> {
 			public TransferCopier apply(final StatusProvider provider) {
 
 				final StatusInfo status = provider.getStatus();
-				return Transfer.createCopier(status.toString().getBytes(Engine.CHARSET_UTF8));
+				return Transfer.createCopier(status.toString().getBytes(StandardCharsets.UTF_8));
 			}
 		});
 	}

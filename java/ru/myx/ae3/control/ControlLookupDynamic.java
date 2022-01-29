@@ -18,39 +18,33 @@ import ru.myx.ae3.exec.Exec;
 import ru.myx.ae3.exec.ExecNonMaskedException;
 import ru.myx.ae3.exec.ProgramPart;
 
-/**
- * @author myx
+/** @author myx
  *
- *         To change the template for this generated type comment go to
- *         Window>Preferences>Java>Code Generation>Code and Comments
- */
+ *         To change the template for this generated type comment go to Window>Preferences>Java>Code
+ *         Generation>Code and Comments */
 public final class ControlLookupDynamic extends BaseHostLookup {
 	
-	
 	private final String expression;
-
+	
 	private final ProgramPart calc;
-
+	
 	private final String entryDelimeter;
-
+	
 	private final String fieldDelimeter;
-
-	/**
-	 * @param expression
+	
+	/** @param expression
 	 * @param entryDelimeter
-	 * @param fieldDelimeter
-	 */
+	 * @param fieldDelimeter */
 	public ControlLookupDynamic(final String expression, final String entryDelimeter, final String fieldDelimeter) {
-		
+
 		this.expression = expression;
 		this.calc = Evaluate.prepareFunctionObjectForExpression(expression, null);
 		this.entryDelimeter = entryDelimeter;
 		this.fieldDelimeter = fieldDelimeter;
 	}
-
+	
 	@Override
 	public final BaseObject baseGetLookupValue(final BaseObject key) {
-		
 		
 		try {
 			final Object o = this.calc.callNE0(Exec.currentProcess(), this);
@@ -77,7 +71,7 @@ public final class ControlLookupDynamic extends BaseHostLookup {
 						Key = Current.substring(0, Pos);
 						Title = Current.substring(Pos + fdLength);
 					}
-					if (Key.equals(key)) {
+					if (Key.equals(key.baseToJavaString())) {
 						return Base.forString(Title);
 					}
 				}
@@ -97,7 +91,7 @@ public final class ControlLookupDynamic extends BaseHostLookup {
 						Key = Current.substring(0, Pos);
 						Title = Current.substring(Pos + fdLength);
 					}
-					if (Key.equals(key)) {
+					if (Key.equals(key.baseToJavaString())) {
 						return Base.forString(Title);
 					}
 				}
@@ -109,10 +103,9 @@ public final class ControlLookupDynamic extends BaseHostLookup {
 			throw new RuntimeException("Dynamic lookup exception, expr=" + this.expression, e);
 		}
 	}
-
+	
 	@Override
 	public final Iterator<String> baseKeysOwn() {
-		
 		
 		try {
 			final Object o = this.calc.callNE0(Exec.currentProcess(), this);
@@ -131,9 +124,10 @@ public final class ControlLookupDynamic extends BaseHostLookup {
 						continue;
 					}
 					final int Pos = Current.indexOf(this.fieldDelimeter);
-					keys.add(Pos == -1
-						? Current
-						: Current.substring(0, Pos));
+					keys.add(
+							Pos == -1
+								? Current
+								: Current.substring(0, Pos));
 				}
 			} else {
 				final String[] entries = s.split(this.entryDelimeter);
@@ -143,9 +137,10 @@ public final class ControlLookupDynamic extends BaseHostLookup {
 						continue;
 					}
 					final int Pos = Current.indexOf(this.fieldDelimeter);
-					keys.add(Pos == -1
-						? Current
-						: Current.substring(0, Pos));
+					keys.add(
+							Pos == -1
+								? Current
+								: Current.substring(0, Pos));
 				}
 			}
 			return keys.iterator();
@@ -155,24 +150,21 @@ public final class ControlLookupDynamic extends BaseHostLookup {
 			throw new RuntimeException("Dynamic lookup exception, expr=" + this.expression, e);
 		}
 	}
-
+	
 	@Override
 	public Iterator<? extends CharSequence> baseKeysOwnAll() {
 		
-		
 		return this.baseKeysOwn();
 	}
-
+	
 	@Override
 	public Iterator<? extends BasePrimitive<?>> baseKeysOwnPrimitive() {
 		
-		
 		return Base.iteratorPrimitiveSafe(this.baseKeysOwn());
 	}
-
+	
 	@Override
 	public String toString() {
-		
 		
 		return "[Lookup: dynamic: " + this.expression + "]";
 	}
