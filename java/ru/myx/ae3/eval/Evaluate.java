@@ -12,6 +12,7 @@ import java.util.function.Function;
 import ru.myx.ae3.base.Base;
 import ru.myx.ae3.base.BaseList;
 import ru.myx.ae3.base.BaseObject;
+import ru.myx.ae3.eval.tokens.TokenInstruction;
 import ru.myx.ae3.exec.ExecNonMaskedException;
 import ru.myx.ae3.exec.ExecProcess;
 import ru.myx.ae3.exec.OperationsA10;
@@ -19,7 +20,6 @@ import ru.myx.ae3.exec.ProgramAssembly;
 import ru.myx.ae3.exec.ProgramPart;
 import ru.myx.ae3.exec.ResultHandler;
 import ru.myx.ae3.exec.ResultHandlerBasic;
-import ru.myx.ae3.exec.parse.expression.TokenInstruction;
 import ru.myx.ae3.report.Report;
 import ru.myx.renderer.ecma.AcmEcmaLanguageImpl;
 

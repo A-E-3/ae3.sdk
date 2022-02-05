@@ -19,14 +19,14 @@ import ru.myx.ae3.base.BaseNativeObject;
 import ru.myx.ae3.base.BaseObject;
 import ru.myx.ae3.base.BasePrimitiveString;
 import ru.myx.ae3.eval.BalanceType;
+import ru.myx.ae3.eval.tokens.TokenInstruction;
+import ru.myx.ae3.eval.tokens.TokenValue;
 import ru.myx.ae3.exec.IAVV_ARGS_CREATEN_X_X_R;
 import ru.myx.ae3.exec.Instruction;
 import ru.myx.ae3.exec.InstructionResult;
 import ru.myx.ae3.exec.ModifierArgument;
 import ru.myx.ae3.exec.ModifierArguments;
 import ru.myx.ae3.exec.ProgramAssembly;
-import ru.myx.ae3.exec.parse.expression.TokenInstruction;
-import ru.myx.ae3.exec.parse.expression.TokenValue;
 import ru.myx.ae3.help.Create;
 import ru.myx.ae3.help.Format;
 import ru.myx.ae3.reflect.Reflect;
@@ -1221,23 +1221,28 @@ public final class ExpressionParser {
 		Map<String, Integer> nameToIndex = null;
 		{
 			int tokenCount = callArguments.size();
-			if (tokenCount > 1) {
-				for (int i = 0, param = 0; i < tokenCount; ++i) {
-					final Object current = callArguments.get(i);
-					if (current == ParseConstants.TKS_COMMA) {
-						param++;
-					} else {
-						if (current instanceof TKA_FSTORE_BA_SC_S && (i == 0 || callArguments.get(i - 1) == ParseConstants.TKS_COMMA)) {
-							if (nameToIndex == null) {
-								nameToIndex = Create.treeMap();
-							}
-							final String name = ((TKA_FSTORE_BA_SC_S) current).getName();
-							nameToIndex.put(name, Reflect.getInteger(param));
-							callArguments.remove(i);
-							tokenCount--;
+			boolean argumentStart = true;
+			for (int i = 0, param = 0; i < tokenCount; ++i) {
+				final Object current = callArguments.get(i);
+				if (current == ParseConstants.TKS_COMMA) {
+					argumentStart = true;
+					param++;
+				} else //
+				if (argumentStart) {
+					if (current instanceof TKA_FSTORE_BA_SC_S) {
+						if (nameToIndex == null) {
+							nameToIndex = Create.treeMap();
 						}
+						final String name = ((TKA_FSTORE_BA_SC_S) current).getName();
+						nameToIndex.put(name, Reflect.getInteger(param));
+						callArguments.remove(i);
+						tokenCount--;
 					}
+					argumentStart = false;
 				}
+			}
+			if (argumentStart && tokenCount > 0) {
+				callArguments.remove(tokenCount - 1);
 			}
 		}
 		ExpressionParser.EXPR_PRIVATE_COUNT++;
@@ -1260,34 +1265,43 @@ public final class ExpressionParser {
 	}
 	
 	/** DIRECT (r7RR) */
-	private static final TokenInstruction encodeCallAccessDXE(final ProgramAssembly assembly, final TokenInstruction accessProperty, final List<TokenInstruction> params)
+	private static final TokenInstruction encodeCallAccessDXE(final ProgramAssembly assembly, final TokenInstruction accessProperty, final List<TokenInstruction> callArguments)
 			throws Exception {
 		
 		assert accessProperty != null;
 		assert accessProperty.assertStackValue();
-		if (params == null || params.size() == 0) {
+		if (callArguments == null || callArguments.size() == 0) {
 			return new TKO_ACALLV_BA_VS_S(accessProperty);
 		}
 		Map<String, Integer> nameToIndex = null;
-		int size = params.size();
-		for (int i = 0, param = 0; i < size; ++i) {
-			final Object current = params.get(i);
-			if (current == ParseConstants.TKS_COMMA) {
-				param++;
-			} else {
-				if (current instanceof TKA_FSTORE_BA_SC_S && (i == 0 || params.get(i - 1) == ParseConstants.TKS_COMMA)) {
-					if (nameToIndex == null) {
-						nameToIndex = Create.treeMap();
+		{
+			int tokenCount = callArguments.size();
+			boolean argumentStart = true;
+			for (int i = 0, param = 0; i < tokenCount; ++i) {
+				final Object current = callArguments.get(i);
+				if (current == ParseConstants.TKS_COMMA) {
+					argumentStart = true;
+					param++;
+				} else //
+				if (argumentStart) {
+					if (current instanceof TKA_FSTORE_BA_SC_S) {
+						if (nameToIndex == null) {
+							nameToIndex = Create.treeMap();
+						}
+						final String name = ((TKA_FSTORE_BA_SC_S) current).getName();
+						nameToIndex.put(name, Reflect.getInteger(param));
+						callArguments.remove(i);
+						tokenCount--;
 					}
-					final String name = ((TKA_FSTORE_BA_SC_S) current).getName();
-					nameToIndex.put(name, Reflect.getInteger(param));
-					params.remove(i);
-					size--;
+					argumentStart = false;
 				}
+			}
+			if (argumentStart && tokenCount > 0) {
+				callArguments.remove(tokenCount - 1);
 			}
 		}
 		ExpressionParser.EXPR_PRIVATE_COUNT++;
-		final TokenInstruction arguments = assembly.compileExpression(params, BalanceType.ARGUMENT_LIST);
+		final TokenInstruction arguments = assembly.compileExpression(callArguments, BalanceType.ARGUMENT_LIST);
 		final int paramCount = arguments.getResultCount();
 		if (nameToIndex == null) {
 			if (paramCount == 1) {
@@ -1308,12 +1322,12 @@ public final class ExpressionParser {
 	private static final TokenInstruction encodeCallAccessXXE(final ProgramAssembly assembly,
 			final ModifierArgument accessObjectModifier,
 			final TokenInstruction accessProperty,
-			final List<TokenInstruction> params) throws Exception {
+			final List<TokenInstruction> callArguments) throws Exception {
 		
 		assert accessObjectModifier != ModifierArguments.AE21POP && accessObjectModifier != ModifierArguments.AA0RB && accessObjectModifier != null;
 		assert accessProperty != null;
 		assert accessProperty.assertStackValue();
-		if (params == null || params.size() == 0) {
+		if (callArguments == null || callArguments.size() == 0) {
 			return /* modifierA == null ? new TKO_ACALLV_BA_VS_S( argumentB, detachable ) : */accessObjectModifier == ModifierArguments.AB7FV
 				? new TKV_FCALLV_A_V_S(accessProperty)
 				: accessObjectModifier == ModifierArguments.AB4CT
@@ -1321,25 +1335,34 @@ public final class ExpressionParser {
 					: new TKV_ACALLV_BA_VM_S(accessObjectModifier, accessProperty);
 		}
 		Map<String, Integer> nameToIndex = null;
-		int size = params.size();
-		for (int i = 0, param = 0; i < size; ++i) {
-			final Object current = params.get(i);
-			if (current == ParseConstants.TKS_COMMA) {
-				param++;
-			} else {
-				if (current instanceof TKA_FSTORE_BA_SC_S && (i == 0 || params.get(i - 1) == ParseConstants.TKS_COMMA)) {
-					if (nameToIndex == null) {
-						nameToIndex = Create.treeMap();
+		{
+			int tokenCount = callArguments.size();
+			boolean argumentStart = true;
+			for (int i = 0, param = 0; i < tokenCount; ++i) {
+				final Object current = callArguments.get(i);
+				if (current == ParseConstants.TKS_COMMA) {
+					argumentStart = true;
+					param++;
+				} else //
+				if (argumentStart) {
+					if (current instanceof TKA_FSTORE_BA_SC_S) {
+						if (nameToIndex == null) {
+							nameToIndex = Create.treeMap();
+						}
+						final String name = ((TKA_FSTORE_BA_SC_S) current).getName();
+						nameToIndex.put(name, Reflect.getInteger(param));
+						callArguments.remove(i);
+						tokenCount--;
 					}
-					final String name = ((TKA_FSTORE_BA_SC_S) current).getName();
-					nameToIndex.put(name, Reflect.getInteger(param));
-					params.remove(i);
-					size--;
+					argumentStart = false;
 				}
+			}
+			if (argumentStart && tokenCount > 0) {
+				callArguments.remove(tokenCount - 1);
 			}
 		}
 		ExpressionParser.EXPR_PRIVATE_COUNT++;
-		final TokenInstruction arguments = assembly.compileExpression(params, BalanceType.ARGUMENT_LIST);
+		final TokenInstruction arguments = assembly.compileExpression(callArguments, BalanceType.ARGUMENT_LIST);
 		final int paramCount = arguments.getResultCount();
 		if (nameToIndex == null) {
 			if (paramCount == 1) {

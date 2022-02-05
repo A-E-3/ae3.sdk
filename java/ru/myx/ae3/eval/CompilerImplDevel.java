@@ -9,8 +9,8 @@ package ru.myx.ae3.eval;
 import java.util.Set;
 
 import ru.myx.ae3.eval.parse.ExpressionParser;
+import ru.myx.ae3.eval.tokens.TokenInstruction;
 import ru.myx.ae3.exec.ProgramAssembly;
-import ru.myx.ae3.exec.parse.expression.TokenInstruction;
 import ru.myx.ae3.help.Convert;
 import ru.myx.ae3.help.Create;
 import ru.myx.ae3.report.Report;

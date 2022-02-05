@@ -7,12 +7,12 @@
 package ru.myx.ae3.eval.parse;
 
 import ru.myx.ae3.base.Base;
+import ru.myx.ae3.eval.tokens.TokenValue;
 import ru.myx.ae3.exec.InstructionResult;
 import ru.myx.ae3.exec.ModifierArgument;
 import ru.myx.ae3.exec.OperationsA10;
 import ru.myx.ae3.exec.ProgramAssembly;
 import ru.myx.ae3.exec.ResultHandlerBasic;
-import ru.myx.ae3.exec.parse.expression.TokenValue;
 
 final class TKV_DELETE_BA_CF_S extends TokenValue {
 	

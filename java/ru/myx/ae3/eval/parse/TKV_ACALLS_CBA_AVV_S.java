@@ -6,6 +6,8 @@
  */
 package ru.myx.ae3.eval.parse;
 
+import ru.myx.ae3.eval.tokens.TokenInstruction;
+import ru.myx.ae3.eval.tokens.TokenValue;
 import ru.myx.ae3.exec.InstructionResult;
 import ru.myx.ae3.exec.ModifierArgument;
 import ru.myx.ae3.exec.ModifierArguments;
@@ -14,8 +16,6 @@ import ru.myx.ae3.exec.OperationsS2X;
 import ru.myx.ae3.exec.ProgramAssembly;
 import ru.myx.ae3.exec.ResultHandler;
 import ru.myx.ae3.exec.ResultHandlerBasic;
-import ru.myx.ae3.exec.parse.expression.TokenInstruction;
-import ru.myx.ae3.exec.parse.expression.TokenValue;
 
 final class TKV_ACALLS_CBA_AVV_S extends TokenValue {
 	

@@ -6,7 +6,7 @@
  */
 package ru.myx.ae3.eval.parse;
 
-import ru.myx.ae3.exec.parse.expression.TokenSyntax;
+import ru.myx.ae3.eval.tokens.TokenSyntax;
 
 final class TKS_CREATE_OPEN extends TokenSyntax {
 	

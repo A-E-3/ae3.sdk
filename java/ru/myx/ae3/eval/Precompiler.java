@@ -3,8 +3,8 @@
  */
 package ru.myx.ae3.eval;
 
+import ru.myx.ae3.eval.tokens.TokenInstruction;
 import ru.myx.ae3.exec.ProgramAssembly;
-import ru.myx.ae3.exec.parse.expression.TokenInstruction;
 
 interface Precompiler {
 	/**

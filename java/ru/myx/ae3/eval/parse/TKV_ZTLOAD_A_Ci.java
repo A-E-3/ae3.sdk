@@ -12,6 +12,8 @@ import ru.myx.ae3.base.BasePrimitiveNumber;
 import ru.myx.ae3.base.BasePrimitiveString;
 import ru.myx.ae3.ecma.Ecma;
 import ru.myx.ae3.eval.Evaluate;
+import ru.myx.ae3.eval.tokens.TokenInstruction;
+import ru.myx.ae3.eval.tokens.TokenValue;
 import ru.myx.ae3.exec.ExecProcess;
 import ru.myx.ae3.exec.InstructionEditable;
 import ru.myx.ae3.exec.InstructionResult;
@@ -22,8 +24,6 @@ import ru.myx.ae3.exec.OperationsA2X;
 import ru.myx.ae3.exec.ProgramAssembly;
 import ru.myx.ae3.exec.ResultHandler;
 import ru.myx.ae3.exec.ResultHandlerBasic;
-import ru.myx.ae3.exec.parse.expression.TokenInstruction;
-import ru.myx.ae3.exec.parse.expression.TokenValue;
 
 /** @author myx */
 public final class TKV_ZTLOAD_A_Ci extends TokenValue implements ModifierArgument {

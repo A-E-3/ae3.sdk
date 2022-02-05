@@ -8,6 +8,7 @@ package ru.myx.ae3.eval.parse;
 
 import ru.myx.ae3.base.BasePrimitiveString;
 import ru.myx.ae3.eval.Evaluate;
+import ru.myx.ae3.eval.tokens.TokenValue;
 import ru.myx.ae3.exec.IAVV_ARGS_SETUP;
 import ru.myx.ae3.exec.InstructionResult;
 import ru.myx.ae3.exec.Instructions;
@@ -17,7 +18,6 @@ import ru.myx.ae3.exec.OperationsA11;
 import ru.myx.ae3.exec.ProgramAssembly;
 import ru.myx.ae3.exec.ProgramPart;
 import ru.myx.ae3.exec.ResultHandlerBasic;
-import ru.myx.ae3.exec.parse.expression.TokenValue;
 import ru.myx.ae3.help.Text;
 import ru.myx.renderer.ecma.AcmEcmaLanguageImpl;
 

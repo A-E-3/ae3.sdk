@@ -6,6 +6,7 @@
  */
 package ru.myx.ae3.eval.parse;
 
+import ru.myx.ae3.eval.tokens.TokenValue;
 import ru.myx.ae3.exec.InstructionEditable;
 import ru.myx.ae3.exec.InstructionResult;
 import ru.myx.ae3.exec.Instructions;
@@ -16,7 +17,6 @@ import ru.myx.ae3.exec.OperationsA11;
 import ru.myx.ae3.exec.ProgramAssembly;
 import ru.myx.ae3.exec.ResultHandler;
 import ru.myx.ae3.exec.ResultHandlerBasic;
-import ru.myx.ae3.exec.parse.expression.TokenValue;
 
 final class TKV_LTHIS extends TokenValue {
 	

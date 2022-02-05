@@ -7,6 +7,7 @@ import ru.myx.ae3.base.BaseNativeObject;
 import ru.myx.ae3.base.BaseObject;
 import ru.myx.ae3.eval.BalanceType;
 import ru.myx.ae3.eval.Evaluate;
+import ru.myx.ae3.eval.tokens.TokenInstruction;
 import ru.myx.ae3.exec.InstructionEditable;
 import ru.myx.ae3.exec.Instructions;
 import ru.myx.ae3.exec.ModifierArgumentA30IMM;
@@ -15,7 +16,6 @@ import ru.myx.ae3.exec.OperationsA10;
 import ru.myx.ae3.exec.ProgramAssembly;
 import ru.myx.ae3.exec.ProgramPart;
 import ru.myx.ae3.exec.ResultHandler;
-import ru.myx.ae3.exec.parse.expression.TokenInstruction;
 
 final class TokenStatementWhile extends TokenStatementAbstract {
 	

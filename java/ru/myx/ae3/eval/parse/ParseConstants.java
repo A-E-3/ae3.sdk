@@ -7,11 +7,11 @@ import ru.myx.ae3.base.Base;
 import ru.myx.ae3.base.BaseObject;
 import ru.myx.ae3.base.BasePrimitiveNumber;
 import ru.myx.ae3.base.BaseString;
-import ru.myx.ae3.exec.parse.expression.TokenAssignment;
-import ru.myx.ae3.exec.parse.expression.TokenInstruction;
-import ru.myx.ae3.exec.parse.expression.TokenOperator;
-import ru.myx.ae3.exec.parse.expression.TokenSyntax;
-import ru.myx.ae3.exec.parse.expression.TokenValue;
+import ru.myx.ae3.eval.tokens.TokenAssignment;
+import ru.myx.ae3.eval.tokens.TokenInstruction;
+import ru.myx.ae3.eval.tokens.TokenOperator;
+import ru.myx.ae3.eval.tokens.TokenSyntax;
+import ru.myx.ae3.eval.tokens.TokenValue;
 
 /** @author myx */
 public class ParseConstants {

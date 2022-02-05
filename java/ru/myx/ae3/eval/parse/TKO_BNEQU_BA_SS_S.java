@@ -6,6 +6,7 @@
  */
 package ru.myx.ae3.eval.parse;
 
+import ru.myx.ae3.eval.tokens.TokenOperator;
 import ru.myx.ae3.exec.InstructionResult;
 import ru.myx.ae3.exec.Instructions;
 import ru.myx.ae3.exec.ModifierArgument;
@@ -14,7 +15,6 @@ import ru.myx.ae3.exec.OperationsA2X;
 import ru.myx.ae3.exec.ProgramAssembly;
 import ru.myx.ae3.exec.ResultHandler;
 import ru.myx.ae3.exec.ResultHandlerBasic;
-import ru.myx.ae3.exec.parse.expression.TokenOperator;
 
 final class TKO_BNEQU_BA_SS_S extends TokenOperator {
 	

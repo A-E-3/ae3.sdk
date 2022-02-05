@@ -6,13 +6,13 @@
  */
 package ru.myx.ae3.eval.parse;
 
+import ru.myx.ae3.eval.tokens.TokenAssignment;
+import ru.myx.ae3.eval.tokens.TokenInstruction;
 import ru.myx.ae3.exec.InstructionResult;
 import ru.myx.ae3.exec.ModifierArgument;
 import ru.myx.ae3.exec.OperationsA10;
 import ru.myx.ae3.exec.ProgramAssembly;
 import ru.myx.ae3.exec.ResultHandlerBasic;
-import ru.myx.ae3.exec.parse.expression.TokenAssignment;
-import ru.myx.ae3.exec.parse.expression.TokenInstruction;
 
 final class TKA_XOUTPUT_A_S_S extends TokenAssignment {
 	

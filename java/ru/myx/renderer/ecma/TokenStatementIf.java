@@ -8,10 +8,10 @@ import static ru.myx.ae3.exec.OperationsA01.XESKIP_P;
 import ru.myx.ae3.base.BaseObject;
 import ru.myx.ae3.eval.BalanceType;
 import ru.myx.ae3.eval.Evaluate;
+import ru.myx.ae3.eval.tokens.TokenInstruction;
 import ru.myx.ae3.exec.ProgramAssembly;
 import ru.myx.ae3.exec.ProgramPart;
 import ru.myx.ae3.exec.ResultHandler;
-import ru.myx.ae3.exec.parse.expression.TokenInstruction;
 
 final class TokenStatementIf extends TokenStatementAbstract {
 

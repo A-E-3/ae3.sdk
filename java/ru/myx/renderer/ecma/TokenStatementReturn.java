@@ -6,10 +6,10 @@ package ru.myx.renderer.ecma;
 import ru.myx.ae3.base.BaseObject;
 import ru.myx.ae3.eval.BalanceType;
 import ru.myx.ae3.eval.Evaluate;
+import ru.myx.ae3.eval.tokens.TokenInstruction;
 import ru.myx.ae3.exec.Instructions;
 import ru.myx.ae3.exec.ProgramAssembly;
 import ru.myx.ae3.exec.ResultHandler;
-import ru.myx.ae3.exec.parse.expression.TokenInstruction;
 
 final class TokenStatementReturn extends TokenStatementAbstract {
 	

@@ -31,8 +31,8 @@ import ru.myx.ae3.eval.parse.TKV_EFLOWX;
 import ru.myx.ae3.eval.parse.TKV_ERROR_A_C_E;
 import ru.myx.ae3.eval.parse.TKV_FDECLARE_BA_VC_S;
 import ru.myx.ae3.eval.parse.TK_WRAP_STACKX;
-import ru.myx.ae3.exec.parse.expression.TokenInstruction;
-import ru.myx.ae3.exec.parse.expression.TokenValue;
+import ru.myx.ae3.eval.tokens.TokenInstruction;
+import ru.myx.ae3.eval.tokens.TokenValue;
 import ru.myx.ae3.report.Report;
 
 /** @author myx */
