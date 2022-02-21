@@ -32,7 +32,7 @@ final class TokenStatementDo extends TokenStatementAbstract {
 	private boolean hasContinue;
 
 	TokenStatementDo(final String identity, final int line) {
-		
+
 		super(identity, line);
 	}
 
@@ -198,7 +198,12 @@ final class TokenStatementDo extends TokenStatementAbstract {
 					loop = assembly.toProgram(size);
 				}
 			} else {
-				final InstructionEditable loopInstruction = token.toBooleanConditionalSkip(assembly, startOffset, true, ResultHandler.FU_BNN_NXT);
+				final InstructionEditable loopInstruction = token.toConditionalSkipEditable(//
+						assembly,
+						startOffset,
+						TokenInstruction.ConditionType.TRUISH_YES,
+						ResultHandler.FU_BNN_NXT//
+				);
 				loop = assembly.toProgram(size);
 				loopInstruction.setConstant(-loop.length()).setFinished();
 			}

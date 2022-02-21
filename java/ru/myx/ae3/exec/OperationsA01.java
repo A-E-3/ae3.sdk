@@ -14,6 +14,7 @@ import ru.myx.vm_vliw32_2010.OperationA01;
  *
  * @author myx */
 public enum OperationsA01 implements OperationA01 {
+
 	/**
 	 *
 	 */
@@ -662,6 +663,71 @@ public enum OperationsA01 implements OperationA01 {
 	/**
 	 *
 	 */
+	XNSKIPRB0_P {
+
+		final InstructionA01[] cacheNN = new InstructionA01[256];
+
+		final InstructionA01[] cacheNR = new InstructionA01[256];
+
+		final InstructionA01[] cachePN = new InstructionA01[256];
+
+		final InstructionA01[] cachePR = new InstructionA01[256];
+
+		{
+			for (int i = 255; i >= 0; --i) {
+				this.cachePN[i] = new IA01_XNSKIPRB0_C_NN_NXT(i);
+				this.cacheNN[i] = new IA01_XNSKIPRB0_C_NN_NXT(-i - 1);
+				this.cachePR[i] = new IA01_XNSKIPRB0_C_NN_RET(i);
+				this.cacheNR[i] = new IA01_XNSKIPRB0_C_NN_RET(-i - 1);
+			}
+		}
+
+		@Override
+		public final ExecStateCode execute(final ExecProcess process, final int constant, final ResultHandler store) {
+
+			if (process.ra0RB.baseValue() == null) {
+				process.ri08IP += constant;
+				/** return NEXT - skip other VLIW command parts */
+				return null;
+			}
+			return store.execReturn(process);
+		}
+
+		@Override
+		public final InstructionResult getResultType() {
+
+			return null;
+		}
+
+		@Override
+		public InstructionIA instruction(final int constant, final ResultHandler store) {
+
+			if (store == ResultHandler.FA_BNN_NXT) {
+				return constant >= 0 && constant < 256
+					? this.cachePN[constant]
+					: constant < 0 && constant >= -256
+						? this.cacheNN[-constant - 1]
+						: new IA01_XNSKIPRB0_C_NN_NXT(constant);
+			}
+			if (store == ResultHandler.FC_PNN_RET) {
+				return constant >= 0 && constant < 256
+					? this.cachePR[constant]
+					: constant < 0 && constant >= -256
+						? this.cacheNR[-constant - 1]
+						: new IA01_XNSKIPRB0_C_NN_RET(constant);
+			}
+			return super.instruction(constant, store);
+		}
+
+		@Override
+		public final boolean isRelativeAddressInConstant() {
+
+			return true;
+		}
+	},
+	/**
+	 *
+	 */
 	XESKIPRB1_P {
 
 		final InstructionA01[] cacheNN = new InstructionA01[256];
@@ -714,6 +780,71 @@ public enum OperationsA01 implements OperationA01 {
 					: constant < 0 && constant >= -256
 						? this.cacheNR[-constant - 1]
 						: new IA01_XESKIPRB1_C_NN_RET(constant);
+			}
+			return super.instruction(constant, store);
+		}
+
+		@Override
+		public final boolean isRelativeAddressInConstant() {
+
+			return true;
+		}
+	},
+	/**
+	 *
+	 */
+	XNSKIPRB1_P {
+
+		final InstructionA01[] cacheNN = new InstructionA01[256];
+
+		final InstructionA01[] cacheNR = new InstructionA01[256];
+
+		final InstructionA01[] cachePN = new InstructionA01[256];
+
+		final InstructionA01[] cachePR = new InstructionA01[256];
+
+		{
+			for (int i = 255; i >= 0; --i) {
+				this.cachePN[i] = new IA01_XNSKIPRB1_C_NN_NXT(i);
+				this.cacheNN[i] = new IA01_XNSKIPRB1_C_NN_NXT(-i - 1);
+				this.cachePR[i] = new IA01_XNSKIPRB1_C_NN_RET(i);
+				this.cacheNR[i] = new IA01_XNSKIPRB1_C_NN_RET(-i - 1);
+			}
+		}
+
+		@Override
+		public final ExecStateCode execute(final ExecProcess process, final int constant, final ResultHandler store) {
+
+			if (process.ra0RB.baseValue() != null) {
+				process.ri08IP += constant;
+				/** return NEXT - skip other VLIW command parts */
+				return null;
+			}
+			return store.execReturn(process);
+		}
+
+		@Override
+		public final InstructionResult getResultType() {
+
+			return null;
+		}
+
+		@Override
+		public InstructionIA instruction(final int constant, final ResultHandler store) {
+
+			if (store == ResultHandler.FA_BNN_NXT) {
+				return constant >= 0 && constant < 256
+					? this.cachePN[constant]
+					: constant < 0 && constant >= -256
+						? this.cacheNN[-constant - 1]
+						: new IA01_XNSKIPRB1_C_NN_NXT(constant);
+			}
+			if (store == ResultHandler.FC_PNN_RET) {
+				return constant >= 0 && constant < 256
+					? this.cachePR[constant]
+					: constant < 0 && constant >= -256
+						? this.cacheNR[-constant - 1]
+						: new IA01_XNSKIPRB1_C_NN_RET(constant);
 			}
 			return super.instruction(constant, store);
 		}

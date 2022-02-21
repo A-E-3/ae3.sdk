@@ -256,15 +256,17 @@ public class ParseConstants {
 	 */
 	public static final TokenSyntax TKS_ASSIGNMENT = new TKS_ASSIGNMENT();
 
-	/**
-	 *
-	 */
+	/** Logical AND operator (&&) */
 	public static final TokenSyntax TKS_EAND = new TKS_EAND();
 
-	/**
-	 *
-	 */
+	/** Optional chaining operator (&&) */
+	public static final TokenSyntax TKS_EOCO = new TKS_EOCO();
+
+	/** Logical OR operator (||) */
 	public static final TokenSyntax TKS_EOR = new TKS_EOR();
+
+	/** Nullish coalescing operator (??) */
+	public static final TokenSyntax TKS_ENCO = new TKS_ENCO();
 
 	/**
 	 *
@@ -399,7 +401,7 @@ public class ParseConstants {
 	/**
 	 *
 	 */
-	public static final TokenValue TKV_NULL = new TKV_LCONST(BaseObject.NULL);
+	public static final TokenValue TKV_NULL = new TKV_LNULL();
 
 	/**
 	 *

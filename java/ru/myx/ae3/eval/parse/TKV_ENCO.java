@@ -24,7 +24,7 @@ import ru.myx.ae3.exec.ResultHandlerDirect;
  *
  *         To change the template for this generated type comment go to
  *         Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments */
-public final class TKV_EBOR extends TokenValue {
+public final class TKV_ENCO extends TokenValue {
 
 	private TokenInstruction tokenLeft;
 
@@ -32,7 +32,7 @@ public final class TKV_EBOR extends TokenValue {
 
 	/** @param tokenLeft
 	 * @param tokenRight */
-	public TKV_EBOR(final TokenInstruction tokenLeft, final TokenInstruction tokenRight) {
+	public TKV_ENCO(final TokenInstruction tokenLeft, final TokenInstruction tokenRight) {
 
 		assert tokenLeft.assertStackValue();
 		assert tokenRight.assertStackValue();
@@ -49,7 +49,7 @@ public final class TKV_EBOR extends TokenValue {
 	@Override
 	public final String getNotation() {
 
-		return "" + this.tokenLeft.getNotation() + " || " + this.tokenRight.getNotation() + "";
+		return "" + this.tokenLeft.getNotation() + " ?? " + this.tokenRight.getNotation() + "";
 	}
 
 	@Override
@@ -74,7 +74,7 @@ public final class TKV_EBOR extends TokenValue {
 			if (modifierLeft == ModifierArguments.AA0RB) {
 				this.tokenLeft.toAssembly(assembly, null, null, ResultHandler.FA_BNN_NXT);
 			}
-			assembly.addInstruction(OperationsA2X.XEBOR_T.instruction(modifierLeft, modifierRight, 0, store));
+			assembly.addInstruction(OperationsA2X.XENCO_T.instruction(modifierLeft, modifierRight, 0, store));
 			return;
 		}
 
@@ -82,7 +82,7 @@ public final class TKV_EBOR extends TokenValue {
 			final InstructionEditable skip = this.tokenLeft.toConditionalSkipEditable(//
 					assembly,
 					-1,
-					TokenInstruction.ConditionType.TRUISH_YES,
+					TokenInstruction.ConditionType.NULLISH_NOT,
 					store//
 			);
 			// never skips
@@ -105,13 +105,13 @@ public final class TKV_EBOR extends TokenValue {
 			if (onlyEffects != null) {
 				assembly.addInstruction(
 						direct == ResultHandler.FA_BNN_NXT
-							? OperationsA01.XESKIPRB0_P.instruction(0, onlyEffects)
-							: OperationsA11.XESKIP0A_P.instruction(ModifierArgument.forStore(direct), 0, onlyEffects));
+							? OperationsA01.XNSKIPRB0_P.instruction(0, onlyEffects)
+							: OperationsA11.XNSKIP0A_P.instruction(ModifierArgument.forStore(direct), 0, onlyEffects));
 			}
 
 			final InstructionEditable skip = direct == ResultHandler.FA_BNN_NXT
-				? OperationsA01.XESKIPRB1_P.instructionCreate(0, ResultHandler.FA_BNN_NXT)
-				: OperationsA11.XESKIP1A_P.instructionCreate(ModifierArgument.forStore(direct), 0, ResultHandler.FA_BNN_NXT);
+				? OperationsA01.XNSKIPRB1_P.instructionCreate(0, ResultHandler.FA_BNN_NXT)
+				: OperationsA11.XNSKIP1A_P.instructionCreate(ModifierArgument.forStore(direct), 0, ResultHandler.FA_BNN_NXT);
 			assembly.addInstruction(skip);
 			final int rightStart = assembly.size();
 			this.tokenRight.toAssembly(assembly, null, null, store);
@@ -119,14 +119,14 @@ public final class TKV_EBOR extends TokenValue {
 			return;
 		}
 
-		this.tokenLeft.toConditionalSkipSingleton(assembly, TokenInstruction.ConditionType.TRUISH_NOT, 0, store);
+		this.tokenLeft.toConditionalSkipSingleton(assembly, TokenInstruction.ConditionType.NULLISH_YES, 0, store);
 		this.tokenRight.toAssembly(assembly, null, null, store);
 	}
 
 	@Override
 	public String toCode() {
 
-		return "BOR [" + this.tokenLeft + ", " + this.tokenRight + "];";
+		return "NCO [" + this.tokenLeft + ", " + this.tokenRight + "];";
 	}
 
 	@Override

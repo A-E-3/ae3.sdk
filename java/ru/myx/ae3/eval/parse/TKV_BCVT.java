@@ -13,46 +13,44 @@ import ru.myx.ae3.exec.InstructionResult;
 import ru.myx.ae3.exec.Instructions;
 import ru.myx.ae3.exec.ModifierArgument;
 import ru.myx.ae3.exec.ModifierArguments;
-import ru.myx.ae3.exec.OperationsA01;
 import ru.myx.ae3.exec.OperationsA10;
-import ru.myx.ae3.exec.OperationsA11;
 import ru.myx.ae3.exec.ProgramAssembly;
 import ru.myx.ae3.exec.ResultHandler;
 import ru.myx.ae3.exec.ResultHandlerBasic;
 import ru.myx.ae3.exec.ResultHandlerDirect;
 
 final class TKV_BCVT extends TokenValue {
-
+	
 	private final TokenInstruction argumentA;
-
+	
 	TKV_BCVT(final TokenInstruction argumentA) {
-
+		
 		assert argumentA.toConstantModifier() == null : "Reduce then!";
 		this.argumentA = argumentA;
 	}
-
+	
 	@Override
 	public final String getNotation() {
-
+		
 		return "(!!" + this.argumentA.getNotationValue() + ')';
 	}
-
+	
 	@Override
 	public final InstructionResult getResultType() {
-
+		
 		return InstructionResult.BOOLEAN;
 	}
-
+	
 	@Override
 	public void toAssembly(final ProgramAssembly assembly, final ModifierArgument argumentA, final ModifierArgument argumentB, final ResultHandlerBasic store) {
-
+		
 		/** zero operands (one operand is already embedded in this token) */
 		assert argumentA == null;
 		assert argumentB == null;
-
+		
 		/** valid store */
 		assert store != null;
-
+		
 		/** flush all values to assembly */
 		final ModifierArgument modifierA = this.argumentA.toDirectModifier();
 		if (modifierA == ModifierArguments.AA0RB) {
@@ -74,9 +72,52 @@ final class TKV_BCVT extends TokenValue {
 		}
 		assembly.addInstruction(OperationsA10.XBCVT_N.instruction(modifierA, 0, store));
 	}
-
+	
 	@Override
-	public void toBooleanConditionalSkip(final ProgramAssembly assembly, final boolean compare, final int constant, final ResultHandler store) {
+	public final String toCode() {
+		
+		return "BCVT\t1\tV [" + this.argumentA + "]  ->S;";
+	}
+	
+	@Override
+	public InstructionEditable toConditionalSkipEditable(final ProgramAssembly assembly, final int start, final TokenInstruction.ConditionType compare, final ResultHandler store) {
+		
+		if (store != ResultHandler.FU_BNN_NXT) {
+			// super.toBooleanConditionalSkip(assembly, start, compare, store);
+			// return;
+			final ModifierArgument modifierA = this.argumentA.toDirectModifier();
+			if (modifierA != ModifierArguments.AA0RB) {
+				assembly.addInstruction(OperationsA10.XBCVT_N.instruction(modifierA, 0, ResultHandler.FA_BNN_NXT));
+			} else {
+				this.argumentA.toAssembly(assembly, null, null, ResultHandler.FA_BNN_NXT);
+				assembly.addInstruction(Instructions.INSTR_BCVT_1_R_NN_NEXT);
+			}
+			/* normal boolean order */
+			final InstructionEditable editable = compare.createEditableDirect(store);
+			assembly.addInstruction(editable);
+			return editable;
+		}
+		
+		final ResultHandlerDirect direct = store.execDirectTransportType().transportForBooleanCheck().handlerForStoreNext();
+
+		final ModifierArgument modifierA = this.argumentA.toDirectModifier();
+		if (modifierA != ModifierArguments.AA0RB) {
+			/* normal boolean order */
+			final InstructionEditable editable = compare.createEditable(modifierA, store);
+			assembly.addInstruction(editable);
+			return editable;
+		}
+
+		this.argumentA.toAssembly(assembly, null, null, direct);
+
+		/* normal boolean order */
+		final InstructionEditable editable = compare.createEditable(direct, store);
+		assembly.addInstruction(editable);
+		return editable;
+	}
+	
+	@Override
+	public void toConditionalSkipSingleton(final ProgramAssembly assembly, final TokenInstruction.ConditionType compare, final int constant, final ResultHandler store) {
 
 		if (store != ResultHandler.FU_BNN_NXT) {
 			// super.toBooleanConditionalSkip(assembly, compare, constant, store);
@@ -88,100 +129,22 @@ final class TKV_BCVT extends TokenValue {
 				this.argumentA.toAssembly(assembly, null, null, ResultHandler.FA_BNN_NXT);
 				assembly.addInstruction(Instructions.INSTR_BCVT_1_R_NN_NEXT);
 			}
-			assembly.addInstruction(
-					(compare
-						/* normal boolean order */
-						? OperationsA01.XESKIPRB1_P
-						: OperationsA01.XESKIPRB0_P).instruction(constant, store));
-			return;
-		}
-
-		final ModifierArgument modifierA = this.argumentA.toDirectModifier();
-		if (modifierA != ModifierArguments.AA0RB) {
-			assembly.addInstruction(
-					(compare
-						/* normal boolean order */
-						? OperationsA11.XESKIP1A_P
-						: OperationsA11.XESKIP0A_P).instruction(modifierA, constant, store));
-			return;
-		}
-
-		final ResultHandlerDirect direct = store.execDirectTransportType().transportForBooleanCheck().handlerForStoreNext();
-		this.argumentA.toAssembly(assembly, null, null, direct);
-
-		if (direct == ResultHandler.FA_BNN_NXT) {
-			assembly.addInstruction(
-					(compare
-						/* normal boolean order */
-						? OperationsA01.XESKIPRB1_P
-						: OperationsA01.XESKIPRB0_P).instruction(constant, store));
-			return;
-		}
-
-		assembly.addInstruction(
-				(compare
-					/* normal boolean order */
-					? OperationsA11.XESKIP1A_P
-					: OperationsA11.XESKIP0A_P).instruction(ModifierArgument.forStore(direct), constant, store));
-
-	}
-
-	@Override
-	public InstructionEditable toBooleanConditionalSkip(final ProgramAssembly assembly, final int start, final boolean compare, final ResultHandler store) {
-
-		if (store != ResultHandler.FU_BNN_NXT) {
-			// super.toBooleanConditionalSkip(assembly, start, compare, store);
-			// return;
-			final ModifierArgument modifierA = this.argumentA.toDirectModifier();
-			if (modifierA != ModifierArguments.AA0RB) {
-				assembly.addInstruction(OperationsA10.XBCVT_N.instruction(modifierA, 0, ResultHandler.FA_BNN_NXT));
-			} else {
-				this.argumentA.toAssembly(assembly, null, null, ResultHandler.FA_BNN_NXT);
-				assembly.addInstruction(Instructions.INSTR_BCVT_1_R_NN_NEXT);
-			}
-			final InstructionEditable editable = (compare
-				/* normal boolean order */
-				? OperationsA01.XESKIPRB1_P
-				: OperationsA01.XESKIPRB0_P).instructionCreate(0, store);
-			assembly.addInstruction(editable);
-			return editable;
-		}
-
-		final ResultHandlerDirect direct = store.execDirectTransportType().transportForBooleanCheck().handlerForStoreNext();
-		
-		final ModifierArgument modifierA = this.argumentA.toDirectModifier();
-		if (modifierA != ModifierArguments.AA0RB) {
-			final InstructionEditable editable = (compare
-				/* normal boolean order */
-				? OperationsA11.XESKIP1A_P
-				: OperationsA11.XESKIP0A_P).instructionCreate(modifierA, 0, store);
-			assembly.addInstruction(editable);
-			return editable;
-		}
-		
-		this.argumentA.toAssembly(assembly, null, null, direct);
-
-		if (direct == ResultHandler.FA_BNN_NXT) {
-			final InstructionEditable editable = (compare
-				/* normal boolean order */
-				? OperationsA01.XESKIPRB1_P
-				: OperationsA01.XESKIPRB0_P).instructionCreate(0, store);
-			assembly.addInstruction(editable);
-			return editable;
-		}
-
-		final InstructionEditable editable = (compare
 			/* normal boolean order */
-			? OperationsA11.XESKIP1A_P
-			: OperationsA11.XESKIP0A_P).instructionCreate(ModifierArgument.forStore(direct), 0, store);
-		assembly.addInstruction(editable);
-		return editable;
+			assembly.addInstruction(compare.createSingletonDirect(constant, store));
+			return;
+		}
 
-	}
+		final ModifierArgument modifierA = this.argumentA.toDirectModifier();
+		if (modifierA != ModifierArguments.AA0RB) {
+			/* normal boolean order */
+			assembly.addInstruction(compare.createSingleton(modifierA, constant, store));
+			return;
+		}
 
-	@Override
-	public final String toCode() {
+		final ResultHandlerDirect direct = store.execDirectTransportType().transportForBooleanCheck().handlerForStoreNext();
+		this.argumentA.toAssembly(assembly, null, null, direct);
 
-		return "BCVT\t1\tV [" + this.argumentA + "]  ->S;";
+		/* normal boolean order */
+		assembly.addInstruction(compare.createSinglton(direct, constant, store));
 	}
 }

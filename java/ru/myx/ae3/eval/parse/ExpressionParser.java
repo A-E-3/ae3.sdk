@@ -389,32 +389,32 @@ public final class ExpressionParser {
 				if (length == 1) {
 					/** = */
 					final int size = precompiled.size();
-					if (size > 0) {
-						final TokenInstruction last = precompiled.get(size - 1);
-						if (last == ParseConstants.TKV_THIS) {
-							throw new RuntimeException("Cannot assign to 'this'!");
-						}
-						if (last == ParseConstants.TKS_COMMA || last == ParseConstants.TKS_SEMICOLON || last == ParseConstants.TKS_BRACE_OPEN) {
-							precompiled.add(ParseConstants.TKA_OUTPUT_A_S_S);
-							return;
-						}
-						if (last instanceof TKV_FLOAD_A_Cs_S) {
-							/** used for named arguments parser */
-							precompiled.set(size - 1, new TKA_FSTORE_BA_SC_S(last.toContextPropertyName()));
-							return;
-						}
-						if (last.isAccessReference()) {
-							precompiled.add(ParseConstants.TKS_ASSIGNMENT);
-							// precompiled.set( size - 1, ((AccessReference)
-							// last).toReferenceWrite() );
-							return;
-						}
-						throw new RuntimeException(
-								"Invalid '=' operator usage, reference expected to be on the left side, previous token class=" + last.getClass().getName() + ", notation="
-										+ last.getNotation() + ", precompiled=" + precompiled);
+					if (size == 0) {
+						precompiled.add(ParseConstants.TKA_OUTPUT_A_S_S);
+						return;
 					}
-					precompiled.add(ParseConstants.TKA_OUTPUT_A_S_S);
-					return;
+					final TokenInstruction last = precompiled.get(size - 1);
+					if (last == ParseConstants.TKV_THIS) {
+						throw new RuntimeException("Cannot assign to 'this'!");
+					}
+					if (last == ParseConstants.TKS_COMMA || last == ParseConstants.TKS_SEMICOLON || last == ParseConstants.TKS_BRACE_OPEN) {
+						precompiled.add(ParseConstants.TKA_OUTPUT_A_S_S);
+						return;
+					}
+					if (last instanceof TKV_FLOAD_A_Cs_S) {
+						/** used for named arguments parser */
+						precompiled.set(size - 1, new TKA_FSTORE_BA_SC_S(last.toContextPropertyName()));
+						return;
+					}
+					if (last.isAccessReference()) {
+						precompiled.add(ParseConstants.TKS_ASSIGNMENT);
+						// precompiled.set( size - 1, ((AccessReference)
+						// last).toReferenceWrite() );
+						return;
+					}
+					throw new RuntimeException(
+							"Invalid '=' operator usage, reference expected to be on the left side, previous token class=" + last.getClass().getName() + ", notation="
+									+ last.getNotation() + ", precompiled=" + precompiled);
 				}
 				/** length > 1 for sure */
 				final char second = token.charAt(1);
@@ -434,13 +434,13 @@ public final class ExpressionParser {
 						return;
 					}
 					{
-						/** ==... */
+						/** == ... */
 						precompiled.add(ParseConstants.TKO_BEQU_BA_SS_S);
 						ExpressionParser.addOperator(assembly, precompiled, token.substring(2));
 						return;
 					}
 				}
-				/** =... */
+				/** = ... */
 				ExpressionParser.addOperator(assembly, precompiled, "=");
 				ExpressionParser.addOperator(assembly, precompiled, token.substring(1));
 				return;
@@ -466,8 +466,8 @@ public final class ExpressionParser {
 					break;
 				}
 				if (length == 3) {
-					/** <<= */
 					if (second == '<' && token.charAt(2) == '=') {
+						/** <<= */
 						precompiled.add(ParseConstants.TKA_ASSIGN_MSHL);
 						return;
 					}
@@ -520,18 +520,18 @@ public final class ExpressionParser {
 							if (third == '>') {
 								/** length > 4 cause we checked this explicitly in case 4 */
 								if (token.charAt(3) == '=') {
-									/** >>>=... */
+									/** >>>= ... */
 									precompiled.add(ParseConstants.TKA_ASSIGN_MSHRU);
 									ExpressionParser.addOperator(assembly, precompiled, token.substring(4));
 									return;
 								}
-								/** >>>... */
+								/** >>> ... */
 								precompiled.add(ParseConstants.TKO_MSHRU_BA_SS);
 								ExpressionParser.addOperator(assembly, precompiled, token.substring(3));
 								return;
 							}
 							if (third == '=') {
-								/** >>=... */
+								/** >>= ... */
 								precompiled.add(ParseConstants.TKA_ASSIGN_MSHRS);
 								ExpressionParser.addOperator(assembly, precompiled, token.substring(3));
 								return;
@@ -540,17 +540,19 @@ public final class ExpressionParser {
 				}
 				if (length > 2) {
 					if (second == '=') {
+						/** >= ... */
 						precompiled.add(ParseConstants.TKO_BNLESS_BA_SS_S);
 						ExpressionParser.addOperator(assembly, precompiled, token.substring(2));
 						return;
 					}
 					if (second == '>') {
+						/** >> ... */
 						precompiled.add(ParseConstants.TKO_MSHRS_BA_SS);
 						ExpressionParser.addOperator(assembly, precompiled, token.substring(2));
 						return;
 					}
 				}
-				/** >... */
+				/** > ... */
 				precompiled.add(ParseConstants.TKO_BMORE_BA_SS_S);
 				ExpressionParser.addOperator(assembly, precompiled, token.substring(1));
 				return;
@@ -644,10 +646,12 @@ public final class ExpressionParser {
 					return;
 				}
 				if (length == 2 && token.charAt(1) == '|') {
+					/** || */
 					precompiled.add(ParseConstants.TKS_EOR);
 					return;
 				}
 				if (length == 2 && token.charAt(1) == '=') {
+					/** |= */
 					final int size = precompiled.size();
 					if (size > 0) {
 						final TokenInstruction last = precompiled.get(size - 1);
@@ -662,10 +666,12 @@ public final class ExpressionParser {
 				break;
 			case '^' :
 				if (length == 1) {
+					/** ^ */
 					precompiled.add(ParseConstants.TKO_MXOR_BA_SS);
 					return;
 				}
 				if (length == 2 && token.charAt(1) == '=') {
+					/** ^= */
 					final int size = precompiled.size();
 					if (size > 0) {
 						final TokenInstruction last = precompiled.get(size - 1);
@@ -679,6 +685,7 @@ public final class ExpressionParser {
 				}
 				break;
 			case '~' :
+				/** ~ */
 				precompiled.add(ParseConstants.TKO_MNOT_A_S_S);
 				if (length > 1) {
 					ExpressionParser.addOperator(assembly, precompiled, token.substring(1));
@@ -686,6 +693,7 @@ public final class ExpressionParser {
 				return;
 			case '+' :
 				if (length == 1) {
+					/** + */
 					final int size = precompiled.size();
 					if (size == 0) {
 						precompiled.add(ParseConstants.TKO_ZCVTN_A_S);
@@ -705,6 +713,7 @@ public final class ExpressionParser {
 				if (length == 2) {
 					final char second = token.charAt(1);
 					if (second == '+') {
+						/** ++ */
 						final int size = precompiled.size();
 						final TokenInstruction last = size == 0
 							? null
@@ -721,6 +730,7 @@ public final class ExpressionParser {
 						return;
 					}
 					if (second == '=') {
+						/** += */
 						final int size = precompiled.size();
 						if (size == 0) {
 							throw new RuntimeException("Addressable value required!!");
@@ -736,6 +746,7 @@ public final class ExpressionParser {
 				break;
 			case '-' :
 				if (length == 1) {
+					/** - */
 					final int size = precompiled.size();
 					precompiled.add(
 							size > 0 && precompiled.get(size - 1).isParseValueRight()
@@ -746,6 +757,7 @@ public final class ExpressionParser {
 				if (length == 2) {
 					final char second = token.charAt(1);
 					if (second == '-') {
+						/** -- */
 						final int size = precompiled.size();
 						final TokenInstruction last = size == 0
 							? null
@@ -773,6 +785,7 @@ public final class ExpressionParser {
 						return;
 					}
 					if (second == '=') {
+						/** -= */
 						final int size = precompiled.size();
 						if (size > 0) {
 							final TokenInstruction last = precompiled.get(size - 1);
@@ -803,16 +816,19 @@ public final class ExpressionParser {
 				break;
 			case '*' :
 				if (length == 1) {
+					/** * */
 					precompiled.add(ParseConstants.TKO_MMUL_BA_SS);
 					return;
 				}
 				if (length == 2) {
 					final char second = token.charAt(1);
 					if (second == '*') {
+						/** ** */
 						precompiled.add(ParseConstants.TKO_MPOW_BA_SS);
 						return;
 					}
 					if (second == '=') {
+						/** *= */
 						final int size = precompiled.size();
 						if (size > 0) {
 							final TokenInstruction last = precompiled.get(size - 1);
@@ -842,10 +858,12 @@ public final class ExpressionParser {
 				break;
 			case '/' :
 				if (length == 1) {
+					/** / */
 					precompiled.add(ParseConstants.TKO_MDIV_BA_SS);
 					return;
 				}
 				if (length == 2 && token.charAt(1) == '=') {
+					/** /= */
 					final int size = precompiled.size();
 					if (size > 0) {
 						final TokenInstruction last = precompiled.get(size - 1);
@@ -860,10 +878,12 @@ public final class ExpressionParser {
 				break;
 			case '%' :
 				if (length == 1) {
+					/** % */
 					precompiled.add(ParseConstants.TKO_MMOD_BA_SS);
 					return;
 				}
 				if (length == 2 && token.charAt(1) == '=') {
+					/** %= */
 					final int size = precompiled.size();
 					if (size > 0) {
 						final TokenInstruction last = precompiled.get(size - 1);
@@ -877,42 +897,79 @@ public final class ExpressionParser {
 				}
 				break;
 			case '(' :
+				/** ( */
 				precompiled.add(ParseConstants.TKS_BRACE_OPEN);
 				if (length > 1) {
 					ExpressionParser.addOperator(assembly, precompiled, token.substring(1));
 				}
 				return;
 			case '[' :
+				/** [ */
 				precompiled.add(ParseConstants.TKS_INDEX_OPEN);
 				if (length > 1) {
 					ExpressionParser.addOperator(assembly, precompiled, token.substring(1));
 				}
 				return;
 			case '?' :
-				precompiled.add(ParseConstants.TKS_QUESTION_MARK);
-				if (length > 1) {
-					ExpressionParser.addOperator(assembly, precompiled, token.substring(1));
+				if (length == 1) {
+					/** ? */
+					precompiled.add(ParseConstants.TKS_QUESTION_MARK);
+					return;
 				}
+				if (length == 2) {
+					if (token.charAt(1) == '?') {
+						/** ?? */
+						precompiled.add(ParseConstants.TKS_ENCO);
+						return;
+					}
+					if (token.charAt(1) == '.') {
+						/** ?. */
+						precompiled.add(ParseConstants.TKS_EOCO);
+						return;
+					}
+				}
+				if (length == 3) {
+					if (token.charAt(1) == '?' && token.charAt(2) == '=') {
+						/** ??= */
+						final int size = precompiled.size();
+						if (size == 0) {
+							throw new RuntimeException("Addressable value required!!");
+						}
+						final TokenInstruction last = precompiled.get(size - 1);
+						if (last.isAccessReference()) {
+							throw new RuntimeException("TKA_ASSIGN_ELNA is not yet supported!!");
+							// precompiled.add(ParseConstants.TKA_ASSIGN_ELNA);
+							// return;
+						}
+						throw new RuntimeException("Invalid " + token + " operator usage, previous token type=" + last.getClass().getName() + "!");
+					}
+				}
+				precompiled.add(ParseConstants.TKS_QUESTION_MARK);
+				ExpressionParser.addOperator(assembly, precompiled, token.substring(1));
 				return;
 			case ':' :
+				/** : */
 				precompiled.add(ParseConstants.TKS_COLON);
 				if (length > 1) {
 					ExpressionParser.addOperator(assembly, precompiled, token.substring(1));
 				}
 				return;
 			case ',' :
+				/** , */
 				precompiled.add(ParseConstants.TKS_COMMA);
 				if (length > 1) {
 					ExpressionParser.addOperator(assembly, precompiled, token.substring(1));
 				}
 				return;
 			case ';' :
+				/** ; */
 				precompiled.add(ParseConstants.TKS_SEMICOLON);
 				if (length > 1) {
 					ExpressionParser.addOperator(assembly, precompiled, token.substring(1));
 				}
 				return;
 			case '{' :
+				/** { */
 				precompiled.add(ParseConstants.TKS_CREATE_OPEN);
 				if (length > 1) {
 					ExpressionParser.addOperator(assembly, precompiled, token.substring(1));

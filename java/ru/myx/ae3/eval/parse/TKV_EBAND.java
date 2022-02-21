@@ -34,7 +34,7 @@ public final class TKV_EBAND extends TokenValue {
 	/** @param tokenLeft
 	 * @param tokenRight */
 	public TKV_EBAND(final TokenInstruction tokenLeft, final TokenInstruction tokenRight) {
-
+		
 		assert tokenLeft.assertStackValue();
 		assert tokenRight.assertStackValue();
 		this.tokenLeft = tokenLeft;
@@ -82,7 +82,12 @@ public final class TKV_EBAND extends TokenValue {
 		}
 		
 		if (store == ResultHandler.FA_BNN_NXT || store == ResultHandler.FU_BNN_NXT) {
-			final InstructionEditable skip = this.tokenLeft.toBooleanConditionalSkip(assembly, -1, false, store);
+			final InstructionEditable skip = this.tokenLeft.toConditionalSkipEditable(//
+					assembly,
+					-1,
+					TokenInstruction.ConditionType.TRUISH_NOT,
+					store//
+			);
 			// never skips
 			if (skip == null) {
 				this.tokenRight.toAssembly(assembly, null, null, store);
@@ -117,7 +122,7 @@ public final class TKV_EBAND extends TokenValue {
 			return;
 		}
 		
-		this.tokenLeft.toBooleanConditionalSkip(assembly, true, 0, store);
+		this.tokenLeft.toConditionalSkipSingleton(assembly, TokenInstruction.ConditionType.TRUISH_YES, 0, store);
 		this.tokenRight.toAssembly(assembly, null, null, store);
 	}
 	

@@ -10,13 +10,13 @@ import ru.myx.ae3.base.BaseObject;
 import ru.myx.ae3.base.BasePrimitiveNumber;
 import ru.myx.ae3.base.BasePrimitiveString;
 import ru.myx.ae3.ecma.Ecma;
+import ru.myx.ae3.eval.tokens.TokenInstruction;
 import ru.myx.ae3.eval.tokens.TokenValue;
 import ru.myx.ae3.exec.ExecProcess;
 import ru.myx.ae3.exec.InstructionEditable;
 import ru.myx.ae3.exec.InstructionResult;
 import ru.myx.ae3.exec.ModifierArgument;
 import ru.myx.ae3.exec.OperationsA10;
-import ru.myx.ae3.exec.OperationsA11;
 import ru.myx.ae3.exec.ProgramAssembly;
 import ru.myx.ae3.exec.ResultHandler;
 import ru.myx.ae3.exec.ResultHandlerBasic;
@@ -179,29 +179,23 @@ final class TKV_LCONST extends TokenValue implements ModifierArgument {
 	}
 	
 	@Override
-	public void toBooleanConditionalSkip(final ProgramAssembly assembly, final boolean compare, final int constant, final ResultHandler store) {
+	public final String toCode() {
 
-		assembly.addInstruction(
-				(compare
-					? OperationsA11.XESKIP1A_P
-					: OperationsA11.XESKIP0A_P).instruction(this, constant, store));
+		return "LOAD\t1\tC  ->S\tCONST('" + this.value + "');";
 	}
 	
 	@Override
-	public InstructionEditable
-			toBooleanConditionalSkip(final ProgramAssembly assembly, final int start, final boolean compare, final ResultHandler store) {
+	public InstructionEditable toConditionalSkipEditable(final ProgramAssembly assembly, final int start, final TokenInstruction.ConditionType compare, final ResultHandler store) {
 
-		final InstructionEditable editable = (compare
-			? OperationsA11.XESKIP1A_P
-			: OperationsA11.XESKIP0A_P).instructionCreate(this, 0, store);
+		final InstructionEditable editable = compare.createEditable(this, store);
 		assembly.addInstruction(editable);
 		return editable;
 	}
 	
 	@Override
-	public final String toCode() {
+	public void toConditionalSkipSingleton(final ProgramAssembly assembly, final TokenInstruction.ConditionType compare, final int constant, final ResultHandler store) {
 
-		return "LOAD\t1\tC  ->S\tCONST('" + this.value + "');";
+		assembly.addInstruction(compare.createSingleton(this, constant, store));
 	}
 	
 	@Override

@@ -22,41 +22,45 @@ import ru.myx.ae3.exec.ResultHandler;
 import ru.myx.ae3.exec.ResultHandlerBasic;
 
 /** @author myx */
-final class TKV_LTRUE extends TokenValue {
-	
+final class TKV_LNULL extends TokenValue {
+
 	/** @param value */
-	TKV_LTRUE() {
-		
+	TKV_LNULL() {
+
 		//
 	}
 
 	@Override
 	public final String getNotation() {
-		
-		return String.valueOf(true);
+
+		return String.valueOf(BaseObject.NULL);
 	}
 
 	@Override
 	public final String getNotationValue() {
-		
+
 		return this.getNotation();
 	}
 
 	@Override
 	public final InstructionResult getResultType() {
-		
-		return InstructionResult.BOOLEAN;
+
+		return InstructionResult.NULL;
 	}
 
 	@Override
 	public void toAssembly(final ProgramAssembly assembly, final ModifierArgument argumentA, final ModifierArgument argumentB, final ResultHandlerBasic store) {
-		
-		if (store == ResultHandler.FA_BNN_NXT) {
-			assembly.addInstruction(Instructions.INSTR_LOAD_TRUE_NN_NEXT);
+
+		if (store == ResultHandler.FB_BSN_NXT) {
+			assembly.addInstruction(Instructions.INSTR_LOAD_NULL_SN_NEXT);
 			return;
 		}
-		if (store == ResultHandler.FB_BSN_NXT) {
-			assembly.addInstruction(Instructions.INSTR_LOAD_TRUE_SN_NEXT);
+		if (store == ResultHandler.FA_BNN_NXT) {
+			assembly.addInstruction(Instructions.INSTR_LOAD_NULL_NN_NEXT);
+			return;
+		}
+		if (store == ResultHandler.FC_PNN_RET) {
+			assembly.addInstruction(Instructions.INSTR_LOAD_NULL_NN_RETURN);
 			return;
 		}
 
@@ -67,21 +71,21 @@ final class TKV_LTRUE extends TokenValue {
 		/** valid store */
 		assert store != null;
 
-		assembly.addInstruction(OperationsA10.XFLOAD_P.instruction(BaseObject.TRUE, ModifierArguments.AC15TRUE, 0, store));
+		assembly.addInstruction(OperationsA10.XFLOAD_P.instruction(BaseObject.NULL, ModifierArguments.AC12NULL, 0, store));
 	}
 
 	@Override
 	public final String toCode() {
-		
-		return "LOAD\t1\tC  ->S\tCONST(true);";
+
+		return "LOAD\t1\tC  ->S\tCONST(null);";
 	}
 
 	@Override
 	public InstructionEditable toConditionalSkipEditable(final ProgramAssembly assembly, final int start, final TokenInstruction.ConditionType compare, final ResultHandler store) {
-		
+
 		switch (compare) {
-			case TRUISH_YES :
-			case NULLISH_NOT :
+			case TRUISH_NOT :
+			case NULLISH_YES :
 				final InstructionEditable editable = OperationsA01.XESKIP_P.instructionCreate(0, store);
 				assembly.addInstruction(editable);
 				return editable;
@@ -92,10 +96,10 @@ final class TKV_LTRUE extends TokenValue {
 
 	@Override
 	public void toConditionalSkipSingleton(final ProgramAssembly assembly, final TokenInstruction.ConditionType compare, final int constant, final ResultHandler store) {
-		
+
 		switch (compare) {
-			case TRUISH_YES :
-			case NULLISH_NOT :
+			case TRUISH_NOT :
+			case NULLISH_YES :
 				assembly.addInstruction(OperationsA01.XESKIP_P.instruction(constant, store));
 				return;
 			default :
@@ -105,19 +109,19 @@ final class TKV_LTRUE extends TokenValue {
 
 	@Override
 	public final ModifierArgument toConstantModifier() {
-		
-		return ModifierArgumentA30IMM.TRUE;
+
+		return ModifierArgumentA30IMM.NULL;
 	}
 
 	@Override
 	public final BaseObject toConstantValue() {
-		
-		return BaseObject.TRUE;
+
+		return BaseObject.NULL;
 	}
 
 	@Override
 	public ModifierArgument toDirectModifier() {
-		
-		return ModifierArgumentA30IMM.TRUE;
+
+		return ModifierArgumentA30IMM.NULL;
 	}
 }

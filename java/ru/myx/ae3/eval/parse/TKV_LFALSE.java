@@ -7,6 +7,7 @@
 package ru.myx.ae3.eval.parse;
 
 import ru.myx.ae3.base.BaseObject;
+import ru.myx.ae3.eval.tokens.TokenInstruction;
 import ru.myx.ae3.eval.tokens.TokenValue;
 import ru.myx.ae3.exec.InstructionEditable;
 import ru.myx.ae3.exec.InstructionResult;
@@ -21,34 +22,34 @@ import ru.myx.ae3.exec.ResultHandlerBasic;
 
 /** @author myx */
 final class TKV_LFALSE extends TokenValue {
-
+	
 	/** @param value */
 	TKV_LFALSE() {
-
+		
 		//
 	}
 	
 	@Override
 	public final String getNotation() {
-
+		
 		return String.valueOf(false);
 	}
 	
 	@Override
 	public final String getNotationValue() {
-
+		
 		return this.getNotation();
 	}
 	
 	@Override
 	public final InstructionResult getResultType() {
-
+		
 		return InstructionResult.BOOLEAN;
 	}
 	
 	@Override
 	public void toAssembly(final ProgramAssembly assembly, final ModifierArgument argumentA, final ModifierArgument argumentB, final ResultHandlerBasic store) {
-
+		
 		if (store == ResultHandler.FA_BNN_NXT) {
 			assembly.addInstruction(Instructions.INSTR_LOAD_FALSE_NN_NEXT);
 			return;
@@ -69,46 +70,53 @@ final class TKV_LFALSE extends TokenValue {
 	}
 	
 	@Override
-	public void toBooleanConditionalSkip(final ProgramAssembly assembly, final boolean compare, final int constant, final ResultHandler store) {
-
-		if (!compare) {
-			assembly.addInstruction(OperationsA01.XESKIP_P.instruction(constant, store));
-		}
-	}
-	
-	@Override
-	public InstructionEditable
-			toBooleanConditionalSkip(final ProgramAssembly assembly, final int start, final boolean compare, final ResultHandler store) {
-
-		if (!compare) {
-			final InstructionEditable editable = OperationsA01.XESKIP_P.instructionCreate(0, store);
-			assembly.addInstruction(editable);
-			return editable;
-		}
-		return null;
-	}
-	
-	@Override
 	public final String toCode() {
-
+		
 		return "LOAD\t1\tC  ->S\tCONST(false);";
 	}
 	
 	@Override
+	public InstructionEditable toConditionalSkipEditable(final ProgramAssembly assembly, final int start, final TokenInstruction.ConditionType compare, final ResultHandler store) {
+		
+		switch (compare) {
+			case TRUISH_NOT :
+			case NULLISH_NOT :
+				final InstructionEditable editable = OperationsA01.XESKIP_P.instructionCreate(0, store);
+				assembly.addInstruction(editable);
+				return editable;
+			default :
+				return null;
+		}
+	}
+	
+	@Override
+	public void toConditionalSkipSingleton(final ProgramAssembly assembly, final TokenInstruction.ConditionType compare, final int constant, final ResultHandler store) {
+		
+		switch (compare) {
+			case TRUISH_NOT :
+			case NULLISH_NOT :
+				assembly.addInstruction(OperationsA01.XESKIP_P.instruction(constant, store));
+				return;
+			default :
+				return;
+		}
+	}
+	
+	@Override
 	public final ModifierArgument toConstantModifier() {
-
+		
 		return ModifierArgumentA30IMM.FALSE;
 	}
 	
 	@Override
 	public final BaseObject toConstantValue() {
-
+		
 		return BaseObject.FALSE;
 	}
 	
 	@Override
 	public ModifierArgument toDirectModifier() {
-
+		
 		return ModifierArgumentA30IMM.FALSE;
 	}
 }

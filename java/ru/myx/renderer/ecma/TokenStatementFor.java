@@ -39,7 +39,7 @@ final class TokenStatementFor extends TokenStatementAbstract {
 	private boolean hasContinue;
 
 	TokenStatementFor(final String identity, final int line) {
-		
+
 		super(identity, line);
 	}
 
@@ -570,7 +570,12 @@ final class TokenStatementFor extends TokenStatementAbstract {
 						? 0
 						: calcOperation.length());
 					final int size = assembly.size();
-					calcCondition.toBooleanConditionalSkip(assembly, false, skipSize, ResultHandler.FU_BNN_NXT);
+					calcCondition.toConditionalSkipSingleton(//
+							assembly,
+							TokenInstruction.ConditionType.TRUISH_NOT,
+							skipSize,
+							ResultHandler.FU_BNN_NXT//
+					);
 					loopSize += assembly.getInstructionCount(size);
 					if (calcOperation != null) {
 						assembly.addInstruction(calcOperation);
@@ -628,7 +633,12 @@ final class TokenStatementFor extends TokenStatementAbstract {
 				final int skipSize = 1 + bodySize + operationSize;
 				// if (calcModifier == ModifierArguments.A07RR) {
 				final int size = assembly.size();
-				calcCondition.toBooleanConditionalSkip(assembly, false, skipSize, ResultHandler.FU_BNN_NXT);
+				calcCondition.toConditionalSkipSingleton(//
+						assembly,
+						TokenInstruction.ConditionType.TRUISH_NOT,
+						skipSize,
+						ResultHandler.FU_BNN_NXT//
+				);
 				loopSize += assembly.getInstructionCount(size);
 			}
 			assembly.addInstruction(body);
