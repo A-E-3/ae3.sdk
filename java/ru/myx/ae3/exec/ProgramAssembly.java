@@ -16,112 +16,109 @@ import ru.myx.ae3.e4.parse.TokenType;
 import ru.myx.ae3.eval.BalanceType;
 import ru.myx.ae3.eval.Evaluate;
 import ru.myx.ae3.eval.parse.ParseConstants;
-import ru.myx.ae3.eval.parse.TKA_FSTORE_BA_SC_S;
+import ru.myx.ae3.eval.parse.TKA_ASSIGN_FSTORE_BA_SC_S;
 import ru.myx.ae3.eval.parse.TKV_ASSIGN;
-import ru.myx.ae3.eval.parse.TKV_ASSIGN1;
 import ru.myx.ae3.eval.parse.TKV_CARRAY0;
 import ru.myx.ae3.eval.parse.TKV_CARRAY1;
 import ru.myx.ae3.eval.parse.TKV_CARRAYX_BY_PUSH;
 import ru.myx.ae3.eval.parse.TKV_CARRAYX_ON_STACK;
-import ru.myx.ae3.eval.parse.TKV_EBAND;
-import ru.myx.ae3.eval.parse.TKV_EBOR;
 import ru.myx.ae3.eval.parse.TKV_EFLOW2;
 import ru.myx.ae3.eval.parse.TKV_EFLOW3;
 import ru.myx.ae3.eval.parse.TKV_EFLOWX;
-import ru.myx.ae3.eval.parse.TKV_ENCO;
 import ru.myx.ae3.eval.parse.TKV_ERROR_A_C_E;
 import ru.myx.ae3.eval.parse.TKV_FDECLARE_BA_VC_S;
 import ru.myx.ae3.eval.parse.TK_WRAP_STACKX;
 import ru.myx.ae3.eval.tokens.TokenInstruction;
+import ru.myx.ae3.eval.tokens.TokenSyntax;
 import ru.myx.ae3.eval.tokens.TokenValue;
 import ru.myx.ae3.report.Report;
 
 /** @author myx */
 public class ProgramAssembly {
-	
+
 	final class PlaceholderSimple implements InstructionPlaceholder {
-		
+
 		Instruction instruction;
-		
+
 		@Override
 		public ExecStateCode execCall(final ExecProcess process) throws Exception {
-			
+
 			return process.vmRaise("Placeholder instruction should have been replaced before execution!");
 		}
-		
+
 		/** Returns non-editable (optimised?) instruction.
 		 *
 		 * @return */
 		@Override
-		
+
 		public Instruction getFinalIfReady() {
-			
+
 			return this.instruction;
 		}
-		
+
 		@Override
 		public int getOperandCount() {
-			
+
 			throw new UnsupportedOperationException("Placeholder Instruction should have been replaced before execution!");
 		}
-		
+
 		@Override
 		public int getResultCount() {
-			
+
 			throw new UnsupportedOperationException("Placeholder Instruction should have been replaced before execution!");
 		}
-		
+
 		/** @param instruction
 		 * @return this */
 		@Override
-		
+
 		public InstructionPlaceholder setInstruction(final Instruction instruction) {
-			
+
 			this.instruction = instruction;
 			return this;
 		}
-		
+
 		@Override
 		public String toCode() {
-			
+
 			return "[PlaceholderInstruction]";
 		}
-		
+
 	}
-	
+
 	/**
 	 *
 	 */
 	public static final String FLAG_REPORT_ERRORS = "_report$errors_";
-	
+
 	private static final Instruction VALUE_TRUE = Instructions.INSTR_LOAD_TRUE_SN_NEXT;
-	
+
 	private static final Instruction VALUE_FALSE = Instructions.INSTR_LOAD_FALSE_SN_NEXT;
-	
+
 	private static final Instruction VALUE_UNDEFINED = Instructions.INSTR_LOAD_UNDEFINED_SN_NEXT;
-	
+
 	/** Empty program */
 	public static final ProgramPart PROGRAM_EMPTY = new ProgramPart(new Instruction[0]);
-	
+
 	/** Program with the only command to load TRUE in stack */
 	public static final ProgramPart PROGRAM_PUSH_TRUE = new ProgramPart(new Instruction[]{
 			ProgramAssembly.VALUE_TRUE
 	});
-	
+
 	/** Program with the only command to load FALSE in stack */
 	public static final ProgramPart PROGRAM_PUSH_FALSE = new ProgramPart(new Instruction[]{
 			ProgramAssembly.VALUE_FALSE
 	});
-	
+
 	/** Program with the only command to load UNDEFINED in stack */
 	public static final ProgramPart PROGRAM_PUSH_UNDEFINED = new ProgramPart(new Instruction[]{
 			ProgramAssembly.VALUE_UNDEFINED
 	});
-	
+
 	private static final int INITIAL = 64;
-	
+
 	private static int compilerSearchInSource(final List<TokenInstruction> precompiled, final int exprLength, final int i, final int priorityRight) {
-		
+
 		int length = i + 1;
 		for (; length < exprLength; length++) {
 			final TokenInstruction candidate = precompiled.get(length);
@@ -132,41 +129,41 @@ public class ProgramAssembly {
 		}
 		return length;
 	}
-	
+
 	private TokenInstruction[] compilerTokens;
-	
+
 	/** operators may have 0..3 operand count and must have 1 result count. */
 	private int compilerPointerOperator;
-	
+
 	/** values all must have 0 operand count and 1 execution result. */
 	private int compilerPointerValue;
-	
+
 	private Instruction[] assemblyCode;
-	
+
 	private int assemblyCapacity;
-	
+
 	private int assemblySize;
-	
+
 	private String lastDebug = null;
-	
+
 	private Object errors = null;
-	
+
 	private List<TokenValue> constants;
-	
+
 	private Map<BasePrimitive<?>, Integer> constantMap;
-	
+
 	/**
 	 *
 	 */
 	public final ExecProcess ctx;
-	
+
 	private boolean reportErrors = true;
-	
+
 	/**
 	 *
 	 */
 	public ProgramAssembly() {
-		
+
 		final ExecProcess ctx = Exec.currentProcess();
 		this.ctx = Exec.createProcess(ctx, "Assembly Builder / Optimizer");
 		this.assemblyCode = null;
@@ -177,10 +174,10 @@ public class ProgramAssembly {
 				ProgramAssembly.FLAG_REPORT_ERRORS,
 				true);
 	}
-	
+
 	/** @param container */
 	public ProgramAssembly(final ExecProcess container) {
-		
+
 		final ExecProcess ctx = container;
 		this.ctx = Exec.createProcess(ctx, "Assembly Builder / Optimizer");
 		this.assemblyCode = null;
@@ -191,11 +188,11 @@ public class ProgramAssembly {
 				ProgramAssembly.FLAG_REPORT_ERRORS,
 				true);
 	}
-	
+
 	/** @param offset
 	 * @param length */
 	public void addCloned(final int offset, final int length) {
-		
+
 		if (this.assemblySize + length > this.assemblyCapacity) {
 			this.assemblyCapacity = this.assemblySize + length + ProgramAssembly.INITIAL;
 			final Instruction[] newRpn = new Instruction[this.assemblyCapacity];
@@ -205,18 +202,18 @@ public class ProgramAssembly {
 		System.arraycopy(this.assemblyCode, offset, this.assemblyCode, this.assemblySize, length);
 		this.assemblySize += length;
 	}
-	
+
 	/** @param message
 	 * @throws Evaluate.CompilationException */
 	public void addDebug(final String message) throws Evaluate.CompilationException {
-		
+
 		this.lastDebug = message;
 		this.addInstruction(new IAVV_VFDEBUG_C(message));
 	}
-	
+
 	/** @param error */
 	public void addError(final Object error) {
-		
+
 		if (this.reportErrors) {
 			if (error instanceof Throwable) {
 				Report.exception("ASSEMBLY", "Assembly error", (Throwable) error);
@@ -257,11 +254,11 @@ public class ProgramAssembly {
 		}
 		((ListString) this.errors).add(text);
 	}
-	
+
 	/** @param instruction
 	 * @throws Evaluate.CompilationException */
 	public void addInstruction(final Instruction instruction) throws Evaluate.CompilationException {
-		
+
 		if (instruction == null) {
 			throw new NullPointerException();
 		}
@@ -286,33 +283,33 @@ public class ProgramAssembly {
 		this.assemblyCode[this.assemblySize++] = instruction;
 		return;
 	}
-	
+
 	/** CATCH METHOD - use addTokenInstruction method
 	 *
 	 * @param instruction */
 	@SuppressWarnings("static-method")
 	@Deprecated
 	public void addInstruction(final TokenInstruction instruction) {
-		
+
 		throw new IllegalStateException("Use addTokenInstruction method");
 	}
-	
+
 	/** @return
 	 * @throws Exception */
 	public InstructionPlaceholder addInstructionPlaceholder() throws Exception {
-		
+
 		final InstructionPlaceholder placeholder = new PlaceholderSimple();
 		this.addInstruction(placeholder);
 		return placeholder;
 	}
-	
+
 	/** TokenInstructions are expanded (and not accepted at all in assert mode) as an argument for
 	 * addInstruction method. Use this method if you intentionally want to collect TokenInstructions
 	 * using assembly instruction buffer.
 	 *
 	 * @param token */
 	public void addTokenInstruction(final TokenInstruction token) {
-		
+
 		assert token != null;
 		if (this.assemblyCode == null) {
 			this.assemblyCapacity = ProgramAssembly.INITIAL;
@@ -327,13 +324,13 @@ public class ProgramAssembly {
 		}
 		this.assemblyCode[this.assemblySize++] = token;
 	}
-	
+
 	/** @param precompiled
 	 * @param balanceType
 	 * @return stack result count
 	 * @throws Exception */
 	public TokenInstruction compileExpression(final List<TokenInstruction> precompiled, final BalanceType balanceType) throws Exception {
-		
+
 		/** <code>
 		System.out.println( ">>>>> expression ("
 				+ balanceType
@@ -359,10 +356,10 @@ public class ProgramAssembly {
 		final int valueCount = this.compilerTokens.length - this.compilerPointerValue;
 		{
 			int found = 0, last = 0;
-			for (int i = 0;;) {
+			expression : for (int i = 0;;) {
 				final boolean end = i == exprLength;
 				if (end && last == 0) {
-					break;
+					break expression;
 				}
 				/** FIXME: just support ',' as an operator which clears stack, why not? */
 				if (end || precompiled.get(i++) == ParseConstants.TKS_COMMA) {
@@ -390,7 +387,7 @@ public class ProgramAssembly {
 					// + precompiled );
 					if (end && balanceType == BalanceType.ARRAY_LITERAL && sub.isEmpty()) {
 						/** last empty COMMA is allowed */
-						break;
+						break expression;
 					}
 					final TokenInstruction token = this.compileExpression(sub, balance);
 					/** possible for VOID balance type */
@@ -400,10 +397,10 @@ public class ProgramAssembly {
 							if (found == 0) {
 								return null;
 							}
-							break;
+							break expression;
 						}
 						last = i;
-						continue;
+						continue expression;
 					}
 					assert balance != BalanceType.STATEMENT || token.toConstantModifier() == null : "Optimizer failure";
 					found++;
@@ -413,7 +410,7 @@ public class ProgramAssembly {
 							return token;
 						}
 						this.compilerPushOperator(token);
-						break;
+						break expression;
 					}
 					this.compilerPushOperator(token);
 					last = i;
@@ -494,330 +491,252 @@ public class ProgramAssembly {
 		}
 		if (balanceType == BalanceType.DECLARATION) {
 			final TokenInstruction token1 = precompiled.get(0);
-			if (token1 instanceof TKA_FSTORE_BA_SC_S) {
+			if (token1 instanceof TKA_ASSIGN_FSTORE_BA_SC_S) {
 				final TokenInstruction rightHand = this.compileExpression(precompiled.subList(1, exprLength), BalanceType.EXPRESSION);
-				return new TKV_FDECLARE_BA_VC_S(((TKA_FSTORE_BA_SC_S) token1).getBaseName(), rightHand);
+				return new TKV_FDECLARE_BA_VC_S(((TKA_ASSIGN_FSTORE_BA_SC_S) token1).getBaseName(), rightHand);
 			}
 			return ParseConstants.TKV_ERROR_DECLARATION_EXPECTED;
 		}
-		for (int i = 0; i < exprLength; ++i) {
+		expression : for (int i = 0; i < exprLength; ++i) {
 			final TokenInstruction token = precompiled.get(i);
 			// System.out.println( ">>>>> token " + token );
 			final TokenType type = token.getTokenType();
-			if (type == TokenType.OPERATOR) {
-				// System.out.println( ">>>>> operator " + token + ", prio=" +
-				// token.getPriority() );
-				if (!this.compilerFlushOperators(
-						operatorCount, //
-						valueCount,
-						token.getPriorityLeft(),
-						sideEffectsOnly)) {
-					break;
-				}
-				this.compilerPushOperator(token);
-				continue;
-			}
-			if (type == TokenType.VALUE) {
-				// System.out.println( ">>>>> value " + token );
-				assert token.getResultCount() == 1;
-				if (token.getOperandCount() == 0) {
-					this.compilerPushValue(token);
-				} else {
-					this.compilerPushOperator(token);
-				}
-				continue;
-			}
-			if (type == TokenType.ASSIGNMENT) {
-				/** DEBUG <code>
-				System.out.println( ">>>>> assignment "
-						+ token
-						+ ", class="
-						+ token.getClass().getName()
-						+ ", operandCount="
-						+ token.getOperandCount() );
-				</code> */
-				/** assertion */
-				assert token.getResultCount() == 1;
-				if (!this.compilerFlushOperators(operatorCount, valueCount, token.getPriorityLeft(), false)) {
-					break;
-				}
-				final int tokenOperands = token.getOperandCount();
-				if (tokenOperands == 0) {
-					assert token.assertStackValue();
-					assert false : "Why ASSINGMENT? class=" + token.getClass().getName();
-					this.compilerPushValue(token);
-					continue;
-				}
-				// if ((tokenOperands == 1) && false) {
-				if (tokenOperands == 1 && balanceType == BalanceType.EXPRESSION) {
-					/** assignment requires expression on right */
-					this.compilerPushOperator(token);
-					continue;
-				}
-				
-				final int length = ProgramAssembly.compilerSearchInSource(precompiled, exprLength, i, token.getPriorityRight());
-				final TokenInstruction rightHand = this.compileExpression(precompiled.subList(i + 1, length), BalanceType.EXPRESSION);
-				// System.out.println( ">>> >>> assign " + token +
-				// " >>>>> rightHand=" + rightHand );
-				if (rightHand.getResultType() == InstructionResult.NEVER) {
-					this.compilerTruncateAll(operatorCount, valueCount);
-					this.compilerPushValue(rightHand);
-					break;
-				}
-				i = length - 1;
-				if (tokenOperands == 1) {
-					this.compilerPushValue(token.toStackValue(this, rightHand, false));
-				} else //
-				if (tokenOperands == 2) {
-					final TokenInstruction operand = this.compilerPopValue(valueCount);
-					assert operand != null : "lvalue expected";
-					assert operand.assertStackValue();
-					this.compilerPushOperator(new TKV_ASSIGN1(operand, token, rightHand));
-				} else {
-					assert false : "Too many operands for assignment, operandCount=" + tokenOperands + ", tokenClass=" + token.getClass().getName() + ", token=" + token;
-					throw new IllegalStateException("Too many operands for assignment, operandCount=" + tokenOperands);
-				}
-				continue;
-			}
-			if (type == TokenType.SYNTAX) {
-				/** DEBUG <code>
-				System.out.println( ">>>>> syntax " + token );
-				</code> */
-				if (token == ParseConstants.TKS_EOR) {
-					final int length = ProgramAssembly.compilerSearchInSource(precompiled, exprLength, i, token.getPriorityRight());
-					/** full expression from what's on left */
+			switch (type) {
+				case OPERATOR : {
+					// System.out.println( ">>>>> operator " + token + ", prio=" +
+					// token.getPriority() );
 					if (!this.compilerFlushOperators(
 							operatorCount, //
 							valueCount,
 							token.getPriorityLeft(),
-							/** not only side effects! */
-							false)) {
-						break;
-					}
-					if (this.compilerValueCount(valueCount) < 1) {
-						final TKV_ERROR_A_C_E error = new TKV_ERROR_A_C_E("TKS_EOR: value expected, value count is " + this.compilerValueCount(valueCount) + " while 1 expected");
-						this.compilerTruncateAll(operatorCount, valueCount);
-						this.compilerPushValue(error);
-						break;
-					}
-					{
-						final BaseObject constantValue = this.compilerTokens[this.compilerPointerValue].toConstantValue();
-						if (constantValue != null) {
-							if (constantValue.baseToBoolean() == BaseObject.TRUE) {
-								/** true - leave calculations, skip || part. */
-								if (length == exprLength) {
-									break;
-								}
-								/** skip */
-								i = length - 1;
-								continue;
-							}
-							/** false - skip calculations, leave || part. */
-							this.compilerTokens[this.compilerPointerValue++] = null;
-							/** all clear, anyway we need to compile the rest */
-							continue;
-						}
-					}
-					final TokenInstruction leftHand = this.compilerPopValue(valueCount);
-					final TokenInstruction rightHand = this.compileExpression(
-							precompiled.subList(i + 1, length),
-							balanceType != BalanceType.STATEMENT
-								? BalanceType.EXPRESSION
-								: balanceType);
-					i = length - 1;
-					if (rightHand == null) {
-						assert balanceType == BalanceType.STATEMENT;
-						this.compilerPushValue(leftHand);
-					} else {
-						if (rightHand.getResultType() == InstructionResult.NEVER) {
-							this.compilerTruncateAll(operatorCount, valueCount);
-							this.compilerPushValue(rightHand);
-							break;
-						}
-						this.compilerPushValue(new TKV_EBOR(leftHand, rightHand));
-					}
-					continue;
-				}
-				if (token == ParseConstants.TKS_ENCO) {
-					final int length = ProgramAssembly.compilerSearchInSource(precompiled, exprLength, i, token.getPriorityRight());
-					/** full expression from what's on left */
-					if (!this.compilerFlushOperators(
-							operatorCount, //
-							valueCount,
-							token.getPriorityLeft(),
-							/** not only side effects! */
-							false)) {
-						break;
-					}
-					if (this.compilerValueCount(valueCount) < 1) {
-						final TKV_ERROR_A_C_E error = new TKV_ERROR_A_C_E("TKS_ENCO: value expected, value count is " + this.compilerValueCount(valueCount) + " while 1 expected");
-						this.compilerTruncateAll(operatorCount, valueCount);
-						this.compilerPushValue(error);
-						break;
-					}
-					{
-						final BaseObject constantValue = this.compilerTokens[this.compilerPointerValue].toConstantValue();
-						if (constantValue != null) {
-							if (constantValue != BaseObject.UNDEFINED && constantValue != BaseObject.NULL) {
-								/** true - leave calculations, skip || part. */
-								if (length == exprLength) {
-									break;
-								}
-								/** skip */
-								i = length - 1;
-								continue;
-							}
-							/** false - skip calculations, leave || part. */
-							this.compilerTokens[this.compilerPointerValue++] = null;
-							/** all clear, anyway we need to compile the rest */
-							continue;
-						}
-					}
-					final TokenInstruction leftHand = this.compilerPopValue(valueCount);
-					final TokenInstruction rightHand = this.compileExpression(
-							precompiled.subList(i + 1, length),
-							balanceType != BalanceType.STATEMENT
-								? BalanceType.EXPRESSION
-								: balanceType);
-					i = length - 1;
-					if (rightHand == null) {
-						assert balanceType == BalanceType.STATEMENT;
-						this.compilerPushValue(leftHand);
-					} else {
-						if (rightHand.getResultType() == InstructionResult.NEVER) {
-							this.compilerTruncateAll(operatorCount, valueCount);
-							this.compilerPushValue(rightHand);
-							break;
-						}
-						this.compilerPushValue(new TKV_ENCO(leftHand, rightHand));
-					}
-					continue;
-				}
-				if (token == ParseConstants.TKS_EAND) {
-					final int length = ProgramAssembly.compilerSearchInSource(precompiled, exprLength, i, token.getPriorityRight());
-					/** full expression from what's on left */
-					if (!this.compilerFlushOperators(
-							operatorCount, //
-							valueCount,
-							token.getPriorityLeft(),
-							/** not only side effects! */
-							false)) {
-						break;
-					}
-					if (this.compilerValueCount(valueCount) < 1) {
-						final TKV_ERROR_A_C_E error = new TKV_ERROR_A_C_E("BAND: value expected, value count is " + this.compilerValueCount(valueCount) + " while 1 expected");
-						this.compilerTruncateAll(operatorCount, valueCount);
-						this.compilerPushValue(error);
-						break;
-					}
-					{
-						final BaseObject constantValue = this.compilerTokens[this.compilerPointerValue].toConstantValue();
-						if (constantValue != null) {
-							if (constantValue.baseToBoolean() == BaseObject.FALSE) {
-								/** false - leave calculations, skip && part. */
-								if (length == exprLength) {
-									break;
-								}
-								/** skip */
-								i = length - 1;
-								continue;
-							}
-							/** true - skip calculations, leave && part. */
-							this.compilerTokens[this.compilerPointerValue++] = null;
-							/** all clear, anyway we need to compile the rest */
-							continue;
-						}
-					}
-					final TokenInstruction leftHand = this.compilerPopValue(valueCount);
-					final TokenInstruction rightHand = this.compileExpression(
-							precompiled.subList(i + 1, length),
-							balanceType != BalanceType.STATEMENT
-								? BalanceType.EXPRESSION
-								: balanceType);
-					i = length - 1;
-					if (rightHand == null) {
-						assert balanceType == BalanceType.STATEMENT;
-						this.compilerPushValue(leftHand);
-					} else {
-						if (rightHand.getResultType() == InstructionResult.NEVER) {
-							this.compilerTruncateAll(operatorCount, valueCount);
-							this.compilerPushValue(rightHand);
-							break;
-						}
-						this.compilerPushValue(new TKV_EBAND(leftHand, rightHand));
-					}
-					continue;
-				}
-				if (token == ParseConstants.TKS_BRACE_OPEN) {
-					this.compilerTruncateAll(operatorCount, valueCount);
-					this.compilerPushValue(ParseConstants.TKV_ERROR_UNMATCHED_BRACE_OPEN);
-					break;
-				}
-				if (token == ParseConstants.TKS_CREATE_OPEN) {
-					this.compilerTruncateAll(operatorCount, valueCount);
-					this.compilerPushValue(ParseConstants.TKV_ERROR_UNMATCHED_CREATE_OPEN);
-					break;
-				}
-				if (token == ParseConstants.TKS_INDEX_OPEN) {
-					this.compilerTruncateAll(operatorCount, valueCount);
-					this.compilerPushValue(ParseConstants.TKV_ERROR_UNMATCHED_INDEX_OPEN);
-					break;
-				}
-				if (token == ParseConstants.TKS_QUESTION_MARK) {
-					if (!this.compilerFlushOperators(
-							operatorCount, //
-							valueCount,
-							token.getPriorityLeft(),
-							/** not only side effects! */
-							false)) {
-						break;
+							sideEffectsOnly)) {
+						break expression;
 					}
 					this.compilerPushOperator(token);
-					/** ESKIP0 / ESKIP1 can do with any object */
-					continue;
+					continue expression;
 				}
-				if (token == ParseConstants.TKS_QUESTION_MARK_MATCHED) {
-					if (!this.compilerFlushOperators(
-							operatorCount, //
-							valueCount,
-							token.getPriorityLeft(),
-							/** not only side effects! */
-							false)) {
-						break;
+				case VALUE : {
+					// System.out.println( ">>>>> value " + token );
+					assert token.getResultCount() == 1;
+					if (token.getOperandCount() == 0) {
+						this.compilerPushValue(token);
+						continue expression;
 					}
-					/** No compilerPush */
-					/** ESKIP0 / ESKIP1 can do with any object */
-					continue;
+					this.compilerPushOperator(token);
+					continue expression;
 				}
-				if (token == ParseConstants.TKS_ASSIGNMENT) {
+				case ASSIGNMENT : {
 					/** DEBUG <code>
-					System.out.println( ">>>>> syntax assignment " + token );
+					System.out.println( ">>>>> assignment "
+							+ token
+							+ ", class="
+							+ token.getClass().getName()
+							+ ", operandCount="
+							+ token.getOperandCount() );
 					</code> */
-					final int length = ProgramAssembly.compilerSearchInSource(precompiled, exprLength, i, token.getPriorityRight());
+					/** assertion */
+					assert token.getResultCount() == 1;
 					if (!this.compilerFlushOperators(operatorCount, valueCount, token.getPriorityLeft(), false)) {
-						break;
+						break expression;
 					}
-					final TokenInstruction reference = this.compilerPopValue(valueCount);
-					assert reference != null : "lvalue expected";
-					assert reference.assertAccessReference();
+					final int tokenOperands = token.getOperandCount();
+					if (tokenOperands == 0) {
+						assert token.assertStackValue();
+						assert false : "Why ASSINGMENT? class=" + token.getClass().getName();
+						this.compilerPushValue(token);
+						continue expression;
+					}
+					// if ((tokenOperands == 1) && false) {
+					if (tokenOperands == 1 && balanceType == BalanceType.EXPRESSION) {
+						/** assignment requires expression on right */
+						this.compilerPushOperator(token);
+						continue expression;
+					}
+
+					final int length = ProgramAssembly.compilerSearchInSource(precompiled, exprLength, i, token.getPriorityRight());
 					final TokenInstruction rightHand = this.compileExpression(precompiled.subList(i + 1, length), BalanceType.EXPRESSION);
+					// System.out.println( ">>> >>> assign " + token +
+					// " >>>>> rightHand=" + rightHand );
 					if (rightHand.getResultType() == InstructionResult.NEVER) {
 						this.compilerTruncateAll(operatorCount, valueCount);
 						this.compilerPushValue(rightHand);
-						break;
+						break expression;
 					}
-					this.compilerPushValue(new TKV_ASSIGN(reference, rightHand));
 					i = length - 1;
-					continue;
+					if (tokenOperands == 1) {
+						this.compilerPushValue(token.toStackValue(this, rightHand, false));
+						continue expression;
+					}
+					if (tokenOperands == 2) {
+						final TokenInstruction operand = this.compilerPopValue(valueCount);
+						assert operand != null : "lvalue expected";
+						assert operand.assertStackValue();
+						this.compilerPushValue(token.toStackValue(this, operand, rightHand, false));
+						continue expression;
+					}
+					{
+						assert false : "Too many operands for assignment, operandCount=" + tokenOperands + ", tokenClass=" + token.getClass().getName() + ", token=" + token;
+						throw new IllegalStateException("Too many operands for assignment, operandCount=" + tokenOperands);
+					}
+				}
+				case SYNTAX : {
+					/** DEBUG <code>
+					System.out.println( ">>>>> syntax " + token );
+					</code> */
+					if (token instanceof TokenSyntax.ConditionalStackValuable) {
+
+						final int length = ProgramAssembly.compilerSearchInSource(//
+								precompiled,
+								exprLength,
+								i,
+								token.getPriorityRight()//
+						);
+						/** full expression from what's on left */
+						if (!this.compilerFlushOperators(
+								operatorCount, //
+								valueCount,
+								token.getPriorityLeft(),
+								/** not only side effects! */
+								false)) {
+							break expression;
+						}
+						if (this.compilerValueCount(valueCount) < 1) {
+							final TKV_ERROR_A_C_E error = new TKV_ERROR_A_C_E(
+									token + ": value expected, value count is " + this.compilerValueCount(valueCount) + " while 1 expected");
+							this.compilerTruncateAll(operatorCount, valueCount);
+							this.compilerPushValue(error);
+							break expression;
+						}
+						{
+							final BaseObject constantValue = this.compilerTokens[this.compilerPointerValue].toConstantValue();
+							if (constantValue != null) {
+								final TokenInstruction.ConditionType conditionSkip = //
+										((TokenSyntax.ConditionalStackValuable) token).getSkipCondition()//
+								;
+								if (conditionSkip.matchConstant(constantValue)) {
+									/** true - leave calculations, skip || part. */
+									/** non-nullish - leave calculations, skip ?? part. */
+									/** false - leave calculations, skip && part. */
+									if (length == exprLength) {
+										break expression;
+									}
+									/** skip */
+									i = length - 1;
+									continue expression;
+								}
+								/** false - skip calculations, leave || part. */
+								/** nullish - skip calculations, leave ?? part. */
+								/** true - skip calculations, leave && part. */
+								this.compilerTokens[this.compilerPointerValue++] = null;
+								/** all clear, anyway we need to compile the rest */
+								continue expression;
+							}
+						}
+						final TokenInstruction leftHand = this.compilerPopValue(valueCount);
+						final TokenInstruction rightHand = this.compileExpression(
+								precompiled.subList(i + 1, length),
+								balanceType != BalanceType.STATEMENT
+									? BalanceType.EXPRESSION
+									: balanceType);
+						i = length - 1;
+						if (rightHand == null) {
+							assert balanceType == BalanceType.STATEMENT;
+							this.compilerPushValue(leftHand);
+							continue expression;
+						}
+						if (rightHand.getResultType() == InstructionResult.NEVER) {
+							this.compilerTruncateAll(operatorCount, valueCount);
+							this.compilerPushValue(rightHand);
+							break expression;
+						}
+						{
+							this.compilerPushValue(token.toStackValue(this, leftHand, rightHand, sideEffectsOnly));
+							continue expression;
+						}
+					}
+					if (token == ParseConstants.TKS_BRACE_OPEN) {
+						this.compilerTruncateAll(operatorCount, valueCount);
+						this.compilerPushValue(ParseConstants.TKV_ERROR_UNMATCHED_BRACE_OPEN);
+						break expression;
+					}
+					if (token == ParseConstants.TKS_CREATE_OPEN) {
+						this.compilerTruncateAll(operatorCount, valueCount);
+						this.compilerPushValue(ParseConstants.TKV_ERROR_UNMATCHED_CREATE_OPEN);
+						break expression;
+					}
+					if (token == ParseConstants.TKS_INDEX_OPEN) {
+						this.compilerTruncateAll(operatorCount, valueCount);
+						this.compilerPushValue(ParseConstants.TKV_ERROR_UNMATCHED_INDEX_OPEN);
+						break expression;
+					}
+					if (token == ParseConstants.TKS_QUESTION_MARK) {
+						if (!this.compilerFlushOperators(
+								operatorCount, //
+								valueCount,
+								token.getPriorityLeft(),
+								/** not only side effects! */
+								false)) {
+							break expression;
+						}
+						this.compilerPushOperator(token);
+						/** ESKIP0 / ESKIP1 can do with any object */
+						continue expression;
+					}
+					if (token == ParseConstants.TKS_QUESTION_MARK_MATCHED) {
+						if (!this.compilerFlushOperators(
+								operatorCount, //
+								valueCount,
+								token.getPriorityLeft(),
+								/** not only side effects! */
+								false)) {
+							break expression;
+						}
+						/** No compilerPush */
+						/** ESKIP0 / ESKIP1 can do with any object */
+						continue expression;
+					}
+					if (token == ParseConstants.TKS_ASSIGNMENT) {
+						/** DEBUG <code>
+						System.out.println( ">>>>> syntax assignment " + token );
+						</code> */
+						final int length = ProgramAssembly.compilerSearchInSource(precompiled, exprLength, i, token.getPriorityRight());
+						if (!this.compilerFlushOperators(operatorCount, valueCount, token.getPriorityLeft(), false)) {
+							break expression;
+						}
+						final TokenInstruction reference = this.compilerPopValue(valueCount);
+						assert reference != null : "lvalue expected";
+						assert reference.assertAccessReference();
+						final TokenInstruction rightHand = this.compileExpression(precompiled.subList(i + 1, length), BalanceType.EXPRESSION);
+						if (rightHand.getResultType() == InstructionResult.NEVER) {
+							this.compilerTruncateAll(operatorCount, valueCount);
+							this.compilerPushValue(rightHand);
+							break expression;
+						}
+						this.compilerPushValue(new TKV_ASSIGN(reference, rightHand));
+						i = length - 1;
+						continue expression;
+					}
+					continue expression;
+				}
+				case STATEMENT : {
+					throw new IllegalStateException("Statement is an invalid compile-time token: " + token);
+				}
+				case COMMENT : {
+					throw new IllegalStateException("Comment is an invalid compile-time token: " + token);
+				}
+				case META : {
+					throw new IllegalStateException("Meta is an invalid compile-time token: " + token);
+				}
+				default : {
+					throw new IllegalStateException("Invalid compile-time token: " + token);
 				}
 			}
-			throw new IllegalStateException("Invalid compile-time token: " + token);
 		}
 		return this.compilerFlushToInstruction(operatorCount, valueCount, balanceType);
 	}
-	
+
 	private void compilerEnsure(final int count) {
-		
+
 		if (this.compilerTokens == null) {
 			final int length = Math.max(32, count);
 			this.compilerTokens = new TokenInstruction[length];
@@ -851,7 +770,7 @@ public class ProgramAssembly {
 			this.compilerPointerValue = length - valueCount;
 		}
 	}
-	
+
 	/** @param operatorCount
 	 * @param valueCount
 	 * @param priorityLeft
@@ -859,7 +778,7 @@ public class ProgramAssembly {
 	 *         <code>true</code> otherwise
 	 * @throws Exception */
 	private boolean compilerFlushOperators(final int operatorCount, final int valueCount, final int priorityLeft, final boolean sideEffectsOnly) throws Exception {
-		
+
 		for (; this.compilerPointerOperator > operatorCount;) {
 			final TokenInstruction token = this.compilerTokens[this.compilerPointerOperator - 1];
 			if (priorityLeft > token.getPriorityRight()) {
@@ -947,9 +866,9 @@ public class ProgramAssembly {
 		}
 		return true;
 	}
-	
+
 	private TokenInstruction compilerFlushToInstruction(final int operatorCount, final int valueCount, final BalanceType balanceType) throws Exception {
-		
+
 		final boolean sideEffectsOnly = balanceType == BalanceType.STATEMENT;
 		/** everything */
 		this.compilerFlushOperators(operatorCount, valueCount, -1, sideEffectsOnly);
@@ -995,9 +914,9 @@ public class ProgramAssembly {
 		assert this.compilerValueCount(valueCount) == 0;
 		return new TKV_EFLOWX(result);
 	}
-	
+
 	private TokenInstruction compilerPopOperator(final int operatorCount) {
-		
+
 		if (this.compilerPointerOperator > operatorCount) {
 			try {
 				return this.compilerTokens[--this.compilerPointerOperator];
@@ -1007,9 +926,9 @@ public class ProgramAssembly {
 		}
 		return null;
 	}
-	
+
 	private TokenInstruction compilerPopValue(final int valueCount) {
-		
+
 		if (this.compilerPointerValue < this.compilerTokens.length - valueCount) {
 			try {
 				return this.compilerTokens[this.compilerPointerValue++];
@@ -1019,24 +938,24 @@ public class ProgramAssembly {
 		}
 		return null;
 	}
-	
+
 	private void compilerPushOperator(final TokenInstruction token) {
-		
+
 		assert this.compilerPointerOperator < this.compilerPointerValue : "capacity: " + this.compilerTokens.length + ", ptrO=" + this.compilerPointerOperator + ", ptrV="
 				+ this.compilerPointerValue;
 		assert token != null;
 		this.compilerTokens[this.compilerPointerOperator++] = token;
 	}
-	
+
 	private void compilerPushValue(final TokenInstruction value) {
-		
+
 		assert this.compilerPointerValue > this.compilerPointerOperator;
 		assert value != null;
 		this.compilerTokens[--this.compilerPointerValue] = value;
 	}
-	
+
 	private void compilerTruncateAll(final int operatorCount, final int valueCount) {
-		
+
 		/** truncate values */
 		while (this.compilerPointerValue < this.compilerTokens.length - valueCount) {
 			this.compilerTokens[this.compilerPointerValue++] = null;
@@ -1046,32 +965,32 @@ public class ProgramAssembly {
 			this.compilerTokens[--this.compilerPointerOperator] = null;
 		}
 	}
-	
+
 	private int compilerValueCount(final int valueCount) {
-		
+
 		return this.compilerTokens.length - this.compilerPointerValue - valueCount;
 	}
-	
+
 	/** Can be null if actually not a constant
 	 *
 	 * @param index
 	 * @return
 	 * @throws IllegalArgumentException */
 	public BaseObject constantRead(final int index) throws IllegalArgumentException {
-		
+
 		if (this.constants == null) {
 			throw new IllegalArgumentException("No constants!");
 		}
 		return this.constants.get(index).toConstantValue();
 	}
-	
+
 	/** Compares strings as strings - to be compatible and interchangeable with another variant of
 	 * this method.
 	 *
 	 * @param constant
 	 * @return */
 	public int constantRegister(final BaseObject constant) {
-		
+
 		if (this.constants == null) {
 			this.constants = new ArrayList<>();
 			this.constantMap = new HashMap<>();
@@ -1092,14 +1011,14 @@ public class ProgramAssembly {
 			return position;
 		}
 	}
-	
+
 	/** Compares with string - kind hope that it would save time on BasePrimitiveString.getString()
 	 * execution.
 	 *
 	 * @param constant
 	 * @return */
 	public int constantRegister(final String constant) {
-		
+
 		if (this.constants == null) {
 			this.constants = new ArrayList<>();
 			this.constantMap = new HashMap<>();
@@ -1113,14 +1032,14 @@ public class ProgramAssembly {
 		}
 		return position.intValue();
 	}
-	
+
 	/** Compares strings as strings - to be compatible and interchangeable with another variant of
 	 * this method.
 	 *
 	 * @param constant
 	 * @return */
 	public int constantRegister(final TokenValue constant) {
-		
+
 		if (this.constants == null) {
 			this.constants = new ArrayList<>();
 			this.constantMap = new HashMap<>();
@@ -1142,24 +1061,24 @@ public class ProgramAssembly {
 			return position;
 		}
 	}
-	
+
 	/** @param index
 	 * @return
 	 * @throws IllegalArgumentException */
 	public TokenValue constantToken(final int index) throws IllegalArgumentException {
-		
+
 		if (this.constants == null) {
 			throw new IllegalArgumentException("No constants!");
 		}
 		return this.constants.get(index);
 	}
-	
+
 	/** @param buffer
 	 * @param start
 	 * @param end
 	 * @return builder */
 	public final StringBuilder dumpCode(final StringBuilder buffer, final int start, final int end) {
-		
+
 		for (int j = start; j < end; j++) {
 			final String stringValue = this.assemblyCode[j].toCode();
 			final String code;
@@ -1175,9 +1094,9 @@ public class ProgramAssembly {
 		}
 		return buffer;
 	}
-	
+
 	private final void expandPrograms(final int offset) {
-		
+
 		final Instruction[] assemblyCode;
 		{
 			final int instructionCount = this.getInstructionCount(offset);
@@ -1217,7 +1136,7 @@ public class ProgramAssembly {
 				i--;
 				continue;
 			}
-			
+
 			if (current instanceof InstructionEditable) {
 				if (null != (current = ((InstructionEditable) current).getFinalIfReady())) {
 					assemblyCode[i] = current;
@@ -1226,17 +1145,17 @@ public class ProgramAssembly {
 			}
 		}
 	}
-	
+
 	/** @return errors */
 	public Object getErrors() {
-		
+
 		return this.errors;
 	}
-	
+
 	/** @param offset
 	 * @return int */
 	public final int getInstructionCount(final int offset) {
-		
+
 		int counter = 0;
 		for (int i = offset; i < this.assemblySize; ++i) {
 			final Instruction instr = this.assemblyCode[i];
@@ -1248,36 +1167,36 @@ public class ProgramAssembly {
 		}
 		return counter;
 	}
-	
+
 	/** @param position
 	 * @param error
 	 * @throws Exception */
 	public void makeError(final int position, final Object error) throws Exception {
-		
+
 		if (!Report.MODE_DEVEL && position != -1) {
 			this.truncate(position);
 		}
 		this.addError(error);
 	}
-	
+
 	/** Default value is TRUE. When enabled, compilation errors will be logged.
 	 *
 	 * @param reportErrors */
 	public void setReportErrors(final boolean reportErrors) {
-		
+
 		this.reportErrors = reportErrors;
 	}
-	
+
 	/** @return size */
 	public final int size() {
-		
+
 		return this.assemblySize;
 	}
-	
+
 	/** @param offset
 	 * @return program */
 	public final Instruction toInstruction(final int offset) {
-		
+
 		if (offset == -1 && this.errors != null) {
 			throw new IllegalStateException("Unit has compile errors:\n" + this.errors);
 		}
@@ -1301,11 +1220,11 @@ public class ProgramAssembly {
 		this.assemblySize = offset;
 		return new ProgramPart(result);
 	}
-	
+
 	/** @param offset
 	 * @return program */
 	public final ProgramPart toProgram(final int offset) {
-		
+
 		if (offset == -1 && this.errors != null) {
 			throw new IllegalStateException("Unit has compile errors:\n" + this.errors);
 		}
@@ -1342,10 +1261,10 @@ public class ProgramAssembly {
 		this.assemblySize = offset;
 		return new ProgramPart(result);
 	}
-	
+
 	/** @param offset */
 	public void truncate(final int offset) {
-		
+
 		assert offset <= this.assemblySize : "Truncate should reduce size!";
 		assert offset >= 0 : "Truncation position should be non-negative!";
 		while (this.assemblySize > offset) {

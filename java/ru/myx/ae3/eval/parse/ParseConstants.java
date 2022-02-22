@@ -19,62 +19,77 @@ public class ParseConstants {
 	/**
 	 *
 	 */
-	public static final TokenAssignment TKA_ASSIGN_MADD = new TKA_WRAP_ASSIGN_LVALUE_O2X(TKO_MADD_D_BA_SS_S.INSTANCE);
+	public static final TokenAssignment TKA_ASSIGN_MADD = new TKA_ASSIGN_ARMW_O2X(TKO_MADD_D_BA_SS_S.INSTANCE);
 
 	/**
 	 *
 	 */
-	public static final TokenAssignment TKA_ASSIGN_MAND = new TKA_WRAP_ASSIGN_LVALUE_O2X(TKO_MAND_D_BA_SS_S.INSTANCE);
+	public static final TokenAssignment TKA_ASSIGN_MAND = new TKA_ASSIGN_ARMW_O2X(TKO_MAND_D_BA_SS_S.INSTANCE);
 
 	/**
 	 *
 	 */
-	public static final TokenAssignment TKA_ASSIGN_MDIV = new TKA_WRAP_ASSIGN_LVALUE_O2X(TKO_MDIV_D_BA_SS_S.INSTANCE);
+	public static final TokenAssignment TKA_ASSIGN_MDIV = new TKA_ASSIGN_ARMW_O2X(TKO_MDIV_D_BA_SS_S.INSTANCE);
 
 	/**
 	 *
 	 */
-	public static final TokenAssignment TKA_ASSIGN_MMOD = new TKA_WRAP_ASSIGN_LVALUE_O2X(TKO_MMOD_D_BA_SS_S.INSTANCE);
+	public static final TokenAssignment TKA_ASSIGN_MMOD = new TKA_ASSIGN_ARMW_O2X(TKO_MMOD_D_BA_SS_S.INSTANCE);
 
 	/**
 	 *
 	 */
-	public static final TokenAssignment TKA_ASSIGN_MMUL = new TKA_WRAP_ASSIGN_LVALUE_O2X(TKO_MMUL_D_BA_SS_S.INSTANCE);
+	public static final TokenAssignment TKA_ASSIGN_MMUL = new TKA_ASSIGN_ARMW_O2X(TKO_MMUL_D_BA_SS_S.INSTANCE);
 
 	/**
 	 *
 	 */
-	public static final TokenAssignment TKA_ASSIGN_MOR = new TKA_WRAP_ASSIGN_LVALUE_O2X(TKO_MOR_D_BA_SS_S.INSTANCE);
+	public static final TokenAssignment TKA_ASSIGN_MOR = new TKA_ASSIGN_ARMW_O2X(TKO_MOR_D_BA_SS_S.INSTANCE);
 
 	/**
 	 *
 	 */
-	public static final TokenAssignment TKA_ASSIGN_MSHL = new TKA_WRAP_ASSIGN_LVALUE_O2X(TKO_MSHL_D_BA_SS_S.INSTANCE);
+	public static final TokenAssignment TKA_ASSIGN_MSHL = new TKA_ASSIGN_ARMW_O2X(TKO_MSHL_D_BA_SS_S.INSTANCE);
 
 	/**
 	 *
 	 */
-	public static final TokenAssignment TKA_ASSIGN_MSHRS = new TKA_WRAP_ASSIGN_LVALUE_O2X(TKO_MSHRS_D_BA_SS_S.INSTANCE);
+	public static final TokenAssignment TKA_ASSIGN_MSHRS = new TKA_ASSIGN_ARMW_O2X(TKO_MSHRS_D_BA_SS_S.INSTANCE);
 
 	/**
 	 *
 	 */
-	public static final TokenAssignment TKA_ASSIGN_MSHRU = new TKA_WRAP_ASSIGN_LVALUE_O2X(TKO_MSHRU_D_BA_SS_S.INSTANCE);
+	public static final TokenAssignment TKA_ASSIGN_MSHRU = new TKA_ASSIGN_ARMW_O2X(TKO_MSHRU_D_BA_SS_S.INSTANCE);
 
 	/**
 	 *
 	 */
-	public static final TokenAssignment TKA_ASSIGN_MSUB = new TKA_WRAP_ASSIGN_LVALUE_O2X(TKO_MSUB_D_BA_SS_S.INSTANCE);
+	public static final TokenAssignment TKA_ASSIGN_MSUB = new TKA_ASSIGN_ARMW_O2X(TKO_MSUB_D_BA_SS_S.INSTANCE);
 
 	/**
 	 *
 	 */
-	public static final TokenAssignment TKA_ASSIGN_MXOR = new TKA_WRAP_ASSIGN_LVALUE_O2X(TKO_MXOR_D_BA_SS_S.INSTANCE);
+	public static final TokenAssignment TKA_ASSIGN_MXOR = new TKA_ASSIGN_ARMW_O2X(TKO_MXOR_D_BA_SS_S.INSTANCE);
 
 	/**
 	 *
 	 */
 	public static final TokenAssignment TKA_OUTPUT_A_S_S = new TKA_XOUTPUT_A_S_S();
+
+	/**
+	 *
+	 */
+	public static final TokenAssignment TKA_ASSIGN_ELOA_A_S_S = new TKA_ASSIGN_ELOA_A_S_S();
+
+	/**
+	 *
+	 */
+	public static final TokenAssignment TKA_ASSIGN_ELNA_A_S_S = new TKA_ASSIGN_ELNA_A_S_S();
+
+	/**
+	 *
+	 */
+	public static final TokenAssignment TKA_ASSIGN_ELAA_A_S_S = new TKA_ASSIGN_ELAA_A_S_S();
 
 	/**
 	 *

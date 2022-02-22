@@ -11,14 +11,15 @@ import ru.myx.vm_vliw32_2010.OperationA00;
 
 /** @author myx */
 public enum OperationsA00 implements OperationA00 {
+	
 	/**
 	 *
 	 */
 	XCARRAY_N {
-
+		
 		@Override
 		public final ExecStateCode execute(final ExecProcess ctx, final int constant, final ResultHandler store) {
-
+			
 			if (constant == 0) {
 				return store.execReturn(ctx, new BaseNativeArray(0));
 			}
@@ -32,16 +33,16 @@ public enum OperationsA00 implements OperationA00 {
 			ctx.ri0ASP -= constant;
 			return store.execReturn(ctx, array);
 		}
-
+		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return InstructionResult.ARRAY;
 		}
-
+		
 		@Override
 		public final int getStackInputCount(final int constant) {
-
+			
 			return constant;
 		}
 	},
@@ -49,10 +50,10 @@ public enum OperationsA00 implements OperationA00 {
 	 *
 	 */
 	XCOBJECT_N {
-
+		
 		@Override
 		public final ExecStateCode execute(final ExecProcess ctx, final int constant, final ResultHandler store) {
-
+			
 			if (constant == 0) {
 				return store.execReturn(ctx, BaseObject.createObject());
 			}
@@ -69,16 +70,16 @@ public enum OperationsA00 implements OperationA00 {
 			ctx.ri0ASP -= constant * 2;
 			return store.execReturn(ctx, object);
 		}
-
+		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return InstructionResult.OBJECT;
 		}
-
+		
 		@Override
 		public final int getStackInputCount(final int constant) {
-
+			
 			return constant * 2;
 		}
 	},
@@ -86,10 +87,10 @@ public enum OperationsA00 implements OperationA00 {
 	 *
 	 */
 	XCSANDBOX_N {
-
+		
 		@Override
 		public final ExecStateCode execute(final ExecProcess ctx, final int constant, final ResultHandler store) {
-
+			
 			if (constant == 0) {
 				return store.execReturn(ctx, ctx.vmScopeCreateSandbox(ExecProcess.GLOBAL));
 			}
@@ -106,16 +107,16 @@ public enum OperationsA00 implements OperationA00 {
 			ctx.ri0ASP -= constant * 2;
 			return store.execReturn(ctx, object);
 		}
-
+		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return InstructionResult.OBJECT;
 		}
-
+		
 		@Override
 		public final int getStackInputCount(final int constant) {
-
+			
 			return constant * 2;
 		}
 	},
@@ -123,10 +124,10 @@ public enum OperationsA00 implements OperationA00 {
 	 *
 	 */
 	XCSCOPE_N {
-
+		
 		@Override
 		public final ExecStateCode execute(final ExecProcess ctx, final int constant, final ResultHandler store) {
-
+			
 			if (constant == 0) {
 				return store.execReturn(ctx, ctx.vmScopeDeriveLocals());
 			}
@@ -144,16 +145,16 @@ public enum OperationsA00 implements OperationA00 {
 			ctx.ra0RB = object;
 			return store.execReturn(ctx, object);
 		}
-
+		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return InstructionResult.OBJECT;
 		}
-
+		
 		@Override
 		public final int getStackInputCount(final int constant) {
-
+			
 			return constant * 2;
 		}
 	},
@@ -161,10 +162,10 @@ public enum OperationsA00 implements OperationA00 {
 	 *
 	 */
 	XCSCOPECTX_N {
-
+		
 		@Override
 		public final ExecStateCode execute(final ExecProcess ctx, final int constant, final ResultHandler store) {
-
+			
 			if (constant == 0) {
 				return store.execReturn(ctx, ctx.vmScopeDeriveContextFromFV());
 			}
@@ -181,16 +182,16 @@ public enum OperationsA00 implements OperationA00 {
 			ctx.ri0ASP -= constant * 2;
 			return store.execReturn(ctx, object);
 		}
-
+		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return InstructionResult.OBJECT;
 		}
-
+		
 		@Override
 		public final int getStackInputCount(final int constant) {
-
+			
 			return constant * 2;
 		}
 	},
@@ -198,12 +199,12 @@ public enum OperationsA00 implements OperationA00 {
 	 *
 	 */
 	XCVOID_P {
-
+		
 		@Override
 		public final ExecStateCode execute(final ExecProcess ctx, final int constant, final ResultHandler store) {
-
+			
 			if (constant == 0) {
-				return store.execReturnUndefined(ctx);
+				return store.execReturn(ctx);
 			}
 			final BaseObject[] stack = ctx.stackRaw();
 			final int rASP = ctx.ri0ASP;
@@ -211,18 +212,18 @@ public enum OperationsA00 implements OperationA00 {
 				stack[rASP - i] = null;
 			}
 			ctx.ri0ASP -= constant;
-			return store.execReturnUndefined(ctx);
+			return store.execReturn(ctx);
 		}
-
+		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return null;
 		}
-
+		
 		@Override
 		public final int getStackInputCount(final int constant) {
-
+			
 			return constant;
 		}
 	},
@@ -230,16 +231,16 @@ public enum OperationsA00 implements OperationA00 {
 	 *
 	 */
 	XFDEBUG_P {
-
+		
 		@Override
 		public final ExecStateCode execute(final ExecProcess ctx, final int constant, final ResultHandler store) {
-
+			
 			return ctx.vmRaise("Oops, virtual!");
 		}
-
+		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return null;
 		}
 	},
@@ -247,10 +248,10 @@ public enum OperationsA00 implements OperationA00 {
 	 *
 	 */
 	XFOTBLDR_N {
-
+		
 		@Override
 		public final ExecStateCode execute(final ExecProcess ctx, final int constant, final ResultHandler store) {
-
+			
 			final BaseFunction previous = ctx.execOutputReplace(new ExecOutputBuilder(new StringBuilder(256)));
 			return store.execReturn(
 					ctx,
@@ -258,22 +259,22 @@ public enum OperationsA00 implements OperationA00 {
 						? BaseObject.NULL
 						: previous);
 		}
-
+		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return InstructionResult.OBJECT;
 		}
-
+		
 	},
 	/**
 	 *
 	 */
 	XFOTNULL_N {
-
+		
 		@Override
 		public final ExecStateCode execute(final ExecProcess ctx, final int constant, final ResultHandler store) {
-
+			
 			final BaseFunction previous = ctx.execOutputReplace(null);
 			return store.execReturn(
 					ctx,
@@ -281,22 +282,22 @@ public enum OperationsA00 implements OperationA00 {
 						? BaseObject.NULL
 						: previous);
 		}
-
+		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return InstructionResult.OBJECT;
 		}
-
+		
 	},
 	/**
 	 *
 	 */
 	XFPULLGV_N {
-
+		
 		@Override
 		public final ExecStateCode execute(final ExecProcess ctx, final int constant, final ResultHandler store) {
-
+			
 			if (constant == 0) {
 				final BaseObject r7RR = ctx.ri10GV = ctx.rb7FV;
 				return store.execReturn(ctx, r7RR);
@@ -314,38 +315,38 @@ public enum OperationsA00 implements OperationA00 {
 			ctx.ri0ASP -= constant * 2;
 			return store.execReturn(ctx, object);
 		}
-
+		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return InstructionResult.OBJECT;
 		}
-
+		
 		@Override
 		public final int getStackInputCount(final int constant) {
-
+			
 			return constant * 2;
 		}
 	},
-
+	
 	/** STACK LOAD: Relative to SB (Stack Base) */
 	XFSB_LOAD_D {
-
+		
 		@Override
 		public final ExecStateCode execute(final ExecProcess ctx, final int constant, final ResultHandler store) {
-
+			
 			return store.execReturn(ctx, ctx.fldStack[ctx.ri0ASP - constant]);
 		}
-
+		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return InstructionResult.OBJECT;
 		}
-
+		
 		@Override
 		public final int getStackInputCount(final int constant) {
-
+			
 			return 0;
 			/** TODO: should have had: <code>
 			return constant;
@@ -357,22 +358,22 @@ public enum OperationsA00 implements OperationA00 {
 	},
 	/** STACK LOAD: Relative to SP (Stack Pointer) */
 	XFSP_LOAD_D {
-
+		
 		@Override
 		public final ExecStateCode execute(final ExecProcess ctx, final int constant, final ResultHandler store) {
-
+			
 			return store.execReturn(ctx, ctx.fldStack[ctx.ri0ASP - constant]);
 		}
-
+		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return InstructionResult.OBJECT;
 		}
-
+		
 		@Override
 		public final int getStackInputCount(final int constant) {
-
+			
 			return 0;
 			/** TODO: should have had: <code>
 			return constant;
@@ -382,17 +383,17 @@ public enum OperationsA00 implements OperationA00 {
 			 * correct balance. */
 		}
 	},
-
+	
 	/**
 	 *
 	 */
 	;
-
+	
 	/** For ae3-vm-info script
 	 *
 	 * @return */
 	public abstract InstructionResult getResultType();
-
+	
 	/** @param constant
 	 * @param store
 	 * @param state
@@ -400,8 +401,8 @@ public enum OperationsA00 implements OperationA00 {
 	final Instruction instructionCached(//
 			final int constant,
 			final ResultHandler store) {
-
+		
 		return InstructionA00.instructionCached(this.instruction(constant, store));
 	}
-
+	
 }

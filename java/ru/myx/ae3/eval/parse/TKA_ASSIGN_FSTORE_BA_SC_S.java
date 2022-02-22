@@ -22,14 +22,14 @@ import ru.myx.ae3.exec.ResultHandlerBasic;
  * @author myx
  *
  */
-public final class TKA_FSTORE_BA_SC_S extends TokenAssignment implements ModifierArgument {
+public final class TKA_ASSIGN_FSTORE_BA_SC_S extends TokenAssignment implements ModifierArgument {
 	
 	private final BasePrimitiveString argumentA;
 
 	/**
 	 * @param argumentA
 	 */
-	public TKA_FSTORE_BA_SC_S(final BasePrimitiveString argumentA) {
+	public TKA_ASSIGN_FSTORE_BA_SC_S(final BasePrimitiveString argumentA) {
 		this.argumentA = argumentA;
 	}
 

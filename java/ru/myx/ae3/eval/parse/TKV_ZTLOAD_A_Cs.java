@@ -8,9 +8,11 @@ package ru.myx.ae3.eval.parse;
 
 import ru.myx.ae3.base.BaseObject;
 import ru.myx.ae3.base.BasePrimitiveString;
+import ru.myx.ae3.eval.Evaluate.CompilationException;
 import ru.myx.ae3.eval.tokens.TokenInstruction;
 import ru.myx.ae3.eval.tokens.TokenValue;
 import ru.myx.ae3.exec.ExecProcess;
+import ru.myx.ae3.exec.Instruction;
 import ru.myx.ae3.exec.InstructionEditable;
 import ru.myx.ae3.exec.InstructionResult;
 import ru.myx.ae3.exec.ModifierArgument;
@@ -34,50 +36,50 @@ public final class TKV_ZTLOAD_A_Cs extends TokenValue implements ModifierArgumen
 
 	@Override
 	public boolean argumentHasSideEffects() {
-		
+
 		return true;
 	}
 
 	@Override
 	public final String argumentNotation() {
-		
+
 		return "RT['" + this.argumentB + "']";
 	}
 
 	@Override
 	public final BaseObject argumentRead(final ExecProcess process) {
-		
+
 		assert process.rb4CT != null : "'this' is not available in current context";
 		return process.rb4CT.baseGet(this.argumentB, BaseObject.UNDEFINED);
 	}
 
 	@Override
 	public final String getNotation() {
-		
+
 		return "this." + this.argumentB;
 	}
 
 	@Override
 	public final String getNotationValue() {
-		
+
 		return this.getNotation();
 	}
 
 	@Override
 	public final InstructionResult getResultType() {
-		
+
 		return InstructionResult.OBJECT;
 	}
 
 	@Override
 	public final boolean isAccessReference() {
-		
+
 		return true;
 	}
 
 	@Override
 	public void toAssembly(final ProgramAssembly assembly, final ModifierArgument argumentA, final ModifierArgument argumentB, final ResultHandlerBasic store) {
-		
+
 		/** zero operands */
 		assert argumentA == null;
 		assert argumentB == null;
@@ -90,13 +92,13 @@ public final class TKV_ZTLOAD_A_Cs extends TokenValue implements ModifierArgumen
 
 	@Override
 	public final String toCode() {
-		
+
 		return "ACCESS\t2\tTC ->S\tCONST('" + this.argumentB + "');";
 	}
 
 	@Override
 	public InstructionEditable toConditionalSkipEditable(final ProgramAssembly assembly, final int start, final TokenInstruction.ConditionType compare, final ResultHandler store) {
-		
+
 		final InstructionEditable editable = compare.createEditable(this, store);
 		assembly.addInstruction(editable);
 		return editable;
@@ -104,19 +106,19 @@ public final class TKV_ZTLOAD_A_Cs extends TokenValue implements ModifierArgumen
 
 	@Override
 	public void toConditionalSkipSingleton(final ProgramAssembly assembly, final TokenInstruction.ConditionType compare, final int constant, final ResultHandler store) {
-		
+
 		assembly.addInstruction(compare.createSingleton(this, constant, store));
 	}
 
 	@Override
 	public ModifierArgument toDirectModifier() {
-		
+
 		return this;
 	}
 
 	@Override
 	public TokenInstruction toReferenceDelete() {
-		
+
 		return new TKV_ZTDELETE_A_Cs(this.argumentB);
 	}
 
@@ -126,7 +128,7 @@ public final class TKV_ZTLOAD_A_Cs extends TokenValue implements ModifierArgumen
 			final ModifierArgument argumentB,
 			final boolean needRead,
 			final boolean directAllowed) {
-		
+
 		/** inlined<code>
 		assembly.addInstruction( start, new InstructionA10( OperationsA10.LOAD,
 				null,
@@ -148,7 +150,7 @@ public final class TKV_ZTLOAD_A_Cs extends TokenValue implements ModifierArgumen
 			final ModifierArgument argumentB,
 			final ModifierArgument modifierValue,
 			final ResultHandler store) {
-		
+
 		assert argumentA == null;
 		assert argumentB == null;
 		assert modifierValue != null;
@@ -158,5 +160,20 @@ public final class TKV_ZTLOAD_A_Cs extends TokenValue implements ModifierArgumen
 						modifierValue,
 						0,
 						store));
+	}
+
+	@Override
+	public Instruction toReferenceWriteSkipAfterRead(//
+			final ProgramAssembly assembly,
+			final ModifierArgument argumentA,
+			final ModifierArgument argumentB,
+			final ResultHandler store//
+	) throws CompilationException {
+
+		/** zero operands */
+		assert argumentA == null;
+		assert argumentB == null;
+
+		return null;
 	}
 }

@@ -6,9 +6,11 @@ package ru.myx.ae3.eval.parse;
 
 import ru.myx.ae3.eval.tokens.TokenInstruction;
 import ru.myx.ae3.eval.tokens.TokenValue;
+import ru.myx.ae3.exec.Instruction;
 import ru.myx.ae3.exec.InstructionResult;
 import ru.myx.ae3.exec.ModifierArgument;
 import ru.myx.ae3.exec.ModifierArguments;
+import ru.myx.ae3.exec.OperationsA00;
 import ru.myx.ae3.exec.OperationsA2X;
 import ru.myx.ae3.exec.OperationsA3X;
 import ru.myx.ae3.exec.OperationsS2X;
@@ -25,11 +27,11 @@ import ru.myx.vm_vliw32_2010.OperationA3X;
 public final class TKV_ACCESS_BA_VV_S extends TokenValue {
 
 	private final TokenInstruction argumentA;
-	
+
 	private final TokenInstruction argumentB;
-	
+
 	private int visibility = 0;
-	
+
 	/** @param argumentA
 	 * @param argumentB */
 	public TKV_ACCESS_BA_VV_S(final TokenInstruction argumentA, final TokenInstruction argumentB) {
@@ -39,41 +41,41 @@ public final class TKV_ACCESS_BA_VV_S extends TokenValue {
 		this.argumentA = argumentA;
 		this.argumentB = argumentB;
 	}
-	
+
 	@Override
 	public final String getNotation() {
 
 		return this.argumentA.getNotationValue() + "[" + this.argumentB.getNotation() + "]";
 	}
-	
+
 	@Override
 	public final String getNotationValue() {
 
 		return this.argumentA.getNotationValue() + "[" + this.argumentB.getNotation() + "]";
 	}
-	
+
 	@Override
 	public final InstructionResult getResultType() {
 
 		return InstructionResult.OBJECT;
 	}
-	
+
 	@Override
 	public final boolean isAccessReference() {
 
 		return true;
 	}
-	
+
 	@Override
 	public void toAssembly(final ProgramAssembly assembly, final ModifierArgument argumentA, final ModifierArgument argumentB, final ResultHandlerBasic store) {
 
 		/** zero operands */
 		assert argumentA == null;
 		assert argumentB == null;
-		
+
 		/** valid store */
 		assert store != null;
-		
+
 		final ModifierArgument modifierA = this.argumentA.toDirectModifier();
 		final ModifierArgument modifierB = this.argumentB.toDirectModifier();
 		final boolean directA = modifierA == ModifierArguments.AA0RB;
@@ -111,45 +113,45 @@ public final class TKV_ACCESS_BA_VV_S extends TokenValue {
 											0,
 											store));
 	}
-	
+
 	@Override
 	public final String toCode() {
 
 		return "ACCESS\t0\tVV ->S\t[" + this.argumentA + ", " + this.argumentB + "];";
 	}
-	
+
 	@Override
 	public TokenInstruction toExecDetachableResult() {
 
 		this.visibility = 1;
 		return this;
 	}
-	
+
 	@Override
 	public TokenInstruction toExecNativeResult() {
 
 		this.visibility = 2;
 		return this;
 	}
-	
+
 	@Override
 	public TokenInstruction toReferenceDelete() {
 
 		return new TKV_DELETE_BA_VV_S(this.argumentA, this.argumentB);
 	}
-	
+
 	@Override
 	public TokenInstruction toReferenceObject() {
 
 		return this.argumentA;
 	}
-	
+
 	@Override
 	public TokenInstruction toReferenceProperty() {
 
 		return this.argumentB;
 	}
-	
+
 	@Override
 	public ModifierArgument toReferenceReadBeforeWrite(final ProgramAssembly assembly,
 			final ModifierArgument argumentA,
@@ -202,7 +204,7 @@ public final class TKV_ACCESS_BA_VV_S extends TokenValue {
 		}
 		return null;
 	}
-	
+
 	@Override
 	public void toReferenceWriteAfterRead(final ProgramAssembly assembly,
 			final ModifierArgument argumentA,
@@ -240,5 +242,29 @@ public final class TKV_ACCESS_BA_VV_S extends TokenValue {
 								modifierValue,
 								0,
 								store));
+	}
+
+	@Override
+	public Instruction toReferenceWriteSkipAfterRead(//
+			final ProgramAssembly assembly,
+			final ModifierArgument argumentA,
+			final ModifierArgument argumentB,
+			final ResultHandler store//
+	) {
+
+		assert argumentA == null;
+		assert argumentB == null;
+		final ModifierArgument modifierA = this.argumentA.toDirectModifier();
+		final ModifierArgument modifierB = this.argumentB.toDirectModifier();
+		if (modifierB == ModifierArguments.AA0RB) {
+			if (modifierA == ModifierArguments.AA0RB) {
+				return OperationsA00.XCVOID_P.instruction(2, store);
+			}
+			return OperationsA00.XCVOID_P.instruction(1, store);
+		}
+		if (modifierA == ModifierArguments.AA0RB) {
+			return OperationsA00.XCVOID_P.instruction(1, store);
+		}
+		return null;
 	}
 }

@@ -403,7 +403,7 @@ public final class ExpressionParser {
 					}
 					if (last instanceof TKV_FLOAD_A_Cs_S) {
 						/** used for named arguments parser */
-						precompiled.set(size - 1, new TKA_FSTORE_BA_SC_S(last.toContextPropertyName()));
+						precompiled.set(size - 1, new TKA_ASSIGN_FSTORE_BA_SC_S(last.toContextPropertyName()));
 						return;
 					}
 					if (last.isAccessReference()) {
@@ -639,6 +639,21 @@ public final class ExpressionParser {
 					}
 					throw new RuntimeException("Addressable value required!!");
 				}
+				if (length == 3) {
+					if (token.charAt(1) == '&' && token.charAt(2) == '=') {
+						/** &&= */
+						final int size = precompiled.size();
+						if (size == 0) {
+							throw new RuntimeException("Addressable value required!!");
+						}
+						final TokenInstruction last = precompiled.get(size - 1);
+						if (last.isAccessReference()) {
+							precompiled.add(ParseConstants.TKA_ASSIGN_ELAA_A_S_S);
+							return;
+						}
+						throw new RuntimeException("Invalid " + token + " operator usage, previous token type=" + last.getClass().getName() + "!");
+					}
+				}
 				break;
 			case '|' :
 				if (length == 1) {
@@ -662,6 +677,21 @@ public final class ExpressionParser {
 						throw new RuntimeException("Invalid = operator usage, previous token type=" + last.getClass().getName() + "!");
 					}
 					throw new RuntimeException("Addressable value required!!");
+				}
+				if (length == 3) {
+					if (token.charAt(1) == '|' && token.charAt(2) == '=') {
+						/** ||= */
+						final int size = precompiled.size();
+						if (size == 0) {
+							throw new RuntimeException("Addressable value required!!");
+						}
+						final TokenInstruction last = precompiled.get(size - 1);
+						if (last.isAccessReference()) {
+							precompiled.add(ParseConstants.TKA_ASSIGN_ELOA_A_S_S);
+							return;
+						}
+						throw new RuntimeException("Invalid " + token + " operator usage, previous token type=" + last.getClass().getName() + "!");
+					}
 				}
 				break;
 			case '^' :
@@ -937,9 +967,8 @@ public final class ExpressionParser {
 						}
 						final TokenInstruction last = precompiled.get(size - 1);
 						if (last.isAccessReference()) {
-							throw new RuntimeException("TKA_ASSIGN_ELNA is not yet supported!!");
-							// precompiled.add(ParseConstants.TKA_ASSIGN_ELNA);
-							// return;
+							precompiled.add(ParseConstants.TKA_ASSIGN_ELNA_A_S_S);
+							return;
 						}
 						throw new RuntimeException("Invalid " + token + " operator usage, previous token type=" + last.getClass().getName() + "!");
 					}
@@ -1286,11 +1315,11 @@ public final class ExpressionParser {
 					param++;
 				} else //
 				if (argumentStart) {
-					if (current instanceof TKA_FSTORE_BA_SC_S) {
+					if (current instanceof TKA_ASSIGN_FSTORE_BA_SC_S) {
 						if (nameToIndex == null) {
 							nameToIndex = Create.treeMap();
 						}
-						final String name = ((TKA_FSTORE_BA_SC_S) current).getName();
+						final String name = ((TKA_ASSIGN_FSTORE_BA_SC_S) current).getName();
 						nameToIndex.put(name, Reflect.getInteger(param));
 						callArguments.remove(i);
 						tokenCount--;
@@ -1341,11 +1370,11 @@ public final class ExpressionParser {
 					param++;
 				} else //
 				if (argumentStart) {
-					if (current instanceof TKA_FSTORE_BA_SC_S) {
+					if (current instanceof TKA_ASSIGN_FSTORE_BA_SC_S) {
 						if (nameToIndex == null) {
 							nameToIndex = Create.treeMap();
 						}
-						final String name = ((TKA_FSTORE_BA_SC_S) current).getName();
+						final String name = ((TKA_ASSIGN_FSTORE_BA_SC_S) current).getName();
 						nameToIndex.put(name, Reflect.getInteger(param));
 						callArguments.remove(i);
 						tokenCount--;
@@ -1402,11 +1431,11 @@ public final class ExpressionParser {
 					param++;
 				} else //
 				if (argumentStart) {
-					if (current instanceof TKA_FSTORE_BA_SC_S) {
+					if (current instanceof TKA_ASSIGN_FSTORE_BA_SC_S) {
 						if (nameToIndex == null) {
 							nameToIndex = Create.treeMap();
 						}
-						final String name = ((TKA_FSTORE_BA_SC_S) current).getName();
+						final String name = ((TKA_ASSIGN_FSTORE_BA_SC_S) current).getName();
 						nameToIndex.put(name, Reflect.getInteger(param));
 						callArguments.remove(i);
 						tokenCount--;
