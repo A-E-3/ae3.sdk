@@ -1953,6 +1953,16 @@ public final class ExpressionParser {
 										continue main;
 									}
 									break;
+								case 4 :
+									if ("void".equals(identifier)) {
+										identifier = null;
+										precompiled.add(ParseConstants.TKO_ZVOID_A_S);
+										current.append('(');
+										levelBrace++;
+										state = ExpressionParser.ST_CODE;
+										continue main;
+									}
+									break;
 								case 5 :
 									if ("await".equals(identifier)) {
 										identifier = null;
@@ -1966,7 +1976,7 @@ public final class ExpressionParser {
 								case 6 :
 									if ("typeof".equals(identifier)) {
 										identifier = null;
-										precompiled.add(ParseConstants.TKO_TYPEOF_A_S_S);
+										precompiled.add(ParseConstants.TKO_TYPEOF_A_S);
 										current.append('(');
 										levelBrace++;
 										state = ExpressionParser.ST_CODE;
@@ -2045,6 +2055,14 @@ public final class ExpressionParser {
 										continue main;
 									}
 									break;
+								case 4 :
+									if ("void".equals(identifier)) {
+										identifier = null;
+										precompiled.add(ParseConstants.TKO_ZVOID_A_S);
+										state = ExpressionParser.ST_WHITESPACE;
+										continue main;
+									}
+									break;
 								case 5 :
 									if ("await".equals(identifier)) {
 										identifier = null;
@@ -2056,7 +2074,7 @@ public final class ExpressionParser {
 								case 6 :
 									if ("typeof".equals(identifier)) {
 										identifier = null;
-										precompiled.add(ParseConstants.TKO_TYPEOF_A_S_S);
+										precompiled.add(ParseConstants.TKO_TYPEOF_A_S);
 										state = ExpressionParser.ST_WHITESPACE;
 										continue main;
 									}

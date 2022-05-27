@@ -144,7 +144,7 @@ final class ModifierArgumentFunctionTypeof extends BaseFunctionAbstract implemen
 	@Override
 	public final String toString() {
 		
-		return "SYSCALL::await";
+		return "SYSCALL::typeof";
 	}
 
 }
