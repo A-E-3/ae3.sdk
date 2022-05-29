@@ -19,22 +19,23 @@ import ru.myx.ae3.exec.ResultHandlerBasic;
 
 final class TKV_ACALLV_BA_VM_S extends TokenValue {
 	
-	private final ModifierArgument argumentA;
+	private final ModifierArgument accessObjectModifier;
 	
 	private final TokenInstruction argumentB;
 	
-	TKV_ACALLV_BA_VM_S(final ModifierArgument argumentA, final TokenInstruction argumentB) {
-		assert argumentA != null;
+	TKV_ACALLV_BA_VM_S(final ModifierArgument accessObjectModifier, final TokenInstruction argumentB) {
+		
+		assert accessObjectModifier != null;
 		assert argumentB.assertStackValue();
-		assert argumentA != ModifierArguments.AE21POP && argumentA != ModifierArguments.AA0RB;
-		this.argumentA = argumentA;
+		assert accessObjectModifier != ModifierArguments.AE21POP && accessObjectModifier != ModifierArguments.AA0RB;
+		this.accessObjectModifier = accessObjectModifier;
 		this.argumentB = argumentB;
 	}
 	
 	@Override
 	public final String getNotation() {
 		
-		return this.argumentA + "." + this.argumentB.getNotation() + "()";
+		return this.accessObjectModifier + "." + this.argumentB.getNotation() + "()";
 	}
 	
 	@Override
@@ -46,6 +47,7 @@ final class TKV_ACALLV_BA_VM_S extends TokenValue {
 	@Override
 	public void toAssembly(final ProgramAssembly assembly, final ModifierArgument argumentA, final ModifierArgument argumentB, final ResultHandlerBasic store) {
 		
+		/** zero operands */
 		assert argumentA == null;
 		assert argumentB == null;
 		
@@ -53,10 +55,11 @@ final class TKV_ACALLV_BA_VM_S extends TokenValue {
 		if (modifierB == ModifierArguments.AA0RB) {
 			this.argumentB.toAssembly(assembly, null, null, ResultHandler.FA_BNN_NXT);
 		}
-		assembly.addInstruction((this.argumentB.getResultType() == InstructionResult.STRING
-			? OperationsS2X.VACALLS_XS
-			: OperationsA2X.XACALLS)//
-					.instruction(this.argumentA, modifierB, 0, store));
+		assembly.addInstruction(
+				(this.argumentB.getResultType() == InstructionResult.STRING
+					? OperationsS2X.VACALLS_XS
+					: OperationsA2X.XACALLS)//
+							.instruction(this.accessObjectModifier, modifierB, 0, store));
 	}
 	
 	@Override

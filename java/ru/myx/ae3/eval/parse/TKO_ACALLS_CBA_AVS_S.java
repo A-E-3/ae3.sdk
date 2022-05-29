@@ -30,6 +30,7 @@ final class TKO_ACALLS_CBA_AVS_S extends TokenOperator {
 	private final int constant;
 
 	TKO_ACALLS_CBA_AVS_S(final TokenInstruction callPropertyName, final TokenInstruction arguments, final int constant) {
+
 		assert constant > 1 : constant == 0
 			? "Use " + TKO_ACALLV_BA_VS_S.class.getSimpleName() + " then"
 			: "Use " + TKO_ACALLO_CBA_AVS_S.class.getSimpleName() + " then";
@@ -96,16 +97,17 @@ final class TKO_ACALLS_CBA_AVS_S extends TokenOperator {
 			if (accessPropertyDirect) {
 				this.accessProperty.toAssembly(assembly, null, null, ResultHandler.FB_BSN_NXT);
 			}
-			assembly.addInstruction((this.accessProperty.getResultType() == InstructionResult.STRING
-				? OperationsS2X.VACCESS_DS
-				: OperationsA2X.XACCESS_D)//
-						.instruction(
-								ModifierArguments.AE22PEEK, //
-								accessPropertyDirect
-									? ModifierArguments.AE21POP
-									: accessPropertyModifier,
-								0,
-								ResultHandler.FB_BSN_NXT));
+			assembly.addInstruction(
+					(this.accessProperty.getResultType() == InstructionResult.STRING
+						? OperationsS2X.VACCESS_DS
+						: OperationsA2X.XACCESS_D)//
+								.instruction(
+										ModifierArguments.AE22PEEK, //
+										accessPropertyDirect
+											? ModifierArguments.AE21POP
+											: accessPropertyModifier,
+										0,
+										ResultHandler.FB_BSN_NXT));
 			this.arguments.toAssembly(assembly, null, null, ResultHandler.FB_BSN_NXT);
 			assembly.addInstruction(OperationsA01.XRCALLA.instruction(this.constant, store));
 			return;
@@ -117,29 +119,31 @@ final class TKO_ACALLS_CBA_AVS_S extends TokenOperator {
 			}
 			this.arguments.toAssembly(assembly, null, null, ResultHandler.FB_BSN_NXT);
 			assembly.addInstruction(OperationsA00.XCARRAY_N.instruction(this.constant, ResultHandler.FA_BNN_NXT));
-			assembly.addInstruction(OperationsA3X.XACALLM//
-					.instruction(
-							argumentA, //
-							accessPropertyDirect
-								? ModifierArguments.AE21POP
-								: accessPropertyModifier,
-							ModifierArguments.AA0RB,
-							0,
-							store));
+			assembly.addInstruction(
+					OperationsA3X.XACALLM//
+							.instruction(
+									argumentA, //
+									accessPropertyDirect
+										? ModifierArguments.AE21POP
+										: accessPropertyModifier,
+									ModifierArguments.AA0RB,
+									0,
+									store));
 			return;
 		}
 
 		if (accessPropertyDirect) {
 			this.arguments.toAssembly(assembly, null, null, ResultHandler.FB_BSN_NXT);
 			this.accessProperty.toAssembly(assembly, null, null, ResultHandler.FA_BNN_NXT);
-			assembly.addInstruction((this.accessProperty.getResultType() == InstructionResult.STRING
-				? OperationsS2X.VACALLS_XS
-				: OperationsA2X.XACALLS)//
-						.instruction(
-								argumentA, //
-								ModifierArguments.AA0RB,
-								this.constant,
-								store));
+			assembly.addInstruction(
+					(this.accessProperty.getResultType() == InstructionResult.STRING
+						? OperationsS2X.VACALLS_XS
+						: OperationsA2X.XACALLS)//
+								.instruction(
+										argumentA, //
+										ModifierArguments.AA0RB,
+										this.constant,
+										store));
 			return;
 		}
 
@@ -154,14 +158,15 @@ final class TKO_ACALLS_CBA_AVS_S extends TokenOperator {
 			useArgumentA = argumentA;
 		}
 
-		assembly.addInstruction((this.accessProperty.getResultType() == InstructionResult.STRING
-			? OperationsS2X.VACALLS_XS
-			: OperationsA2X.XACALLS)//
-					.instruction(
-							useArgumentA, //
-							accessPropertyModifier,
-							this.constant,
-							store));
+		assembly.addInstruction(
+				(this.accessProperty.getResultType() == InstructionResult.STRING
+					? OperationsS2X.VACALLS_XS
+					: OperationsA2X.XACALLS)//
+							.instruction(
+									useArgumentA, //
+									accessPropertyModifier,
+									this.constant,
+									store));
 		// assert false : "this=" + assembly.toProgram( start ).toCode();
 	}
 
@@ -177,8 +182,12 @@ final class TKO_ACALLS_CBA_AVS_S extends TokenOperator {
 	@Override
 	public TokenInstruction toStackValue(final ProgramAssembly assembly, final TokenInstruction argumentA, final boolean sideEffectsOnly) {
 
-		// assert false : "Wow! Waited for a long time, argumentA: " +
-		// argumentA;
-		return super.toStackValue(assembly, argumentA.toExecDetachableResult(), sideEffectsOnly);
+		if (argumentA.toDirectModifier() == ModifierArguments.AB4CT) {
+			return new TKV_ZTCALLS_BA_AV_S(this.accessProperty, this.arguments, this.constant);
+		}
+		if (argumentA.toDirectModifier() == ModifierArguments.AB7FV) {
+			return new TKV_FCALLS_BA_AV_S(this.accessProperty, this.arguments, this.constant);
+		}
+		return new TKV_ACALLS_CBA_AVV_S(argumentA.toExecDetachableResult(), this.accessProperty, this.arguments, this.constant);
 	}
 }

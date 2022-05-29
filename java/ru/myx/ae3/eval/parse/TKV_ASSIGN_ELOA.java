@@ -130,17 +130,15 @@ public final class TKV_ASSIGN_ELOA extends TokenValue {
 			final ModifierArgument modifierReferenced = this.tokenLeft.toReferenceReadBeforeWrite(assembly, null, null, true, true);
 			final Instruction cleanupOnSkip = this.tokenLeft.toReferenceWriteSkipAfterRead(assembly, null, null, store);
 			if (cleanupOnSkip == null) {
-				final InstructionEditable skip = modifierReferenced == ModifierArguments.AA0RB
-					? OperationsA01.XESKIPRB1_P.instructionCreate(0, store)
-					: OperationsA11.XESKIP1A_P.instructionCreate(modifierReferenced, 0, store);
-				assembly.addInstruction(skip);
-				final int rightStart = assembly.size();
+				assembly.addInstruction(
+						modifierReferenced == ModifierArguments.AA0RB
+							? OperationsA01.XESKIPRB0_P.instruction(0, store)
+							: OperationsA11.XESKIP0A_P.instruction(modifierReferenced, 0, store));
 				final ModifierArgument modifierValue = this.tokenRight.toDirectModifier();
 				if (modifierValue == ModifierArguments.AA0RB) {
 					this.tokenRight.toAssembly(assembly, null, null, ResultHandler.FA_BNN_NXT);
 				}
 				this.tokenLeft.toReferenceWriteAfterRead(assembly, null, null, modifierValue, store);
-				skip.setConstant(assembly.getInstructionCount(rightStart)).setFinished();
 				return;
 			}
 			{

@@ -18,16 +18,17 @@ import ru.myx.ae3.exec.ResultHandler;
 import ru.myx.ae3.exec.ResultHandlerBasic;
 
 final class TKV_ACALLS_CBA_AVM_S extends TokenValue {
-	
+
 	private final ModifierArgument accessObjectModifier;
-	
+
 	private final TokenInstruction accessProperty;
-	
+
 	private final TokenInstruction arguments;
-	
+
 	private final int constant;
-	
+
 	TKV_ACALLS_CBA_AVM_S(final ModifierArgument accessObjectModifier, final TokenInstruction argumentProperty, final TokenInstruction arguments, final int constant) {
+
 		assert accessObjectModifier != null;
 		assert argumentProperty.assertStackValue();
 		assert accessObjectModifier != ModifierArguments.AE21POP && accessObjectModifier != ModifierArguments.AA0RB;
@@ -42,45 +43,44 @@ final class TKV_ACALLS_CBA_AVM_S extends TokenValue {
 		this.arguments = arguments;
 		this.constant = constant;
 	}
-	
+
 	@Override
 	public final String getNotation() {
-		
+
 		return "" + this.accessObjectModifier + "." + this.accessProperty.getNotation() + "( " + this.arguments.getNotation() + " )";
 	}
-	
+
 	@Override
 	public final InstructionResult getResultType() {
-		
+
 		return InstructionResult.OBJECT;
 	}
-	
+
 	@Override
 	public void toAssembly(final ProgramAssembly assembly, final ModifierArgument argumentA, final ModifierArgument argumentB, final ResultHandlerBasic store) {
-		
+
 		assert argumentA == null;
 		assert argumentB == null;
-		
-		/**
-		 * Anyway in stack, constant is expected to be more than zero
-		 */
+
+		/** Anyway in stack, constant is expected to be more than zero */
 		this.arguments.toAssembly(assembly, null, null, ResultHandler.FB_BSN_NXT);
-		
+
 		final ModifierArgument modifierB = this.accessProperty.toDirectModifier();
 		final boolean directB = modifierB == ModifierArguments.AA0RB;
 		if (directB) {
 			this.accessProperty.toAssembly(assembly, null, null, ResultHandler.FA_BNN_NXT);
 		}
-		
-		assembly.addInstruction((this.accessProperty.getResultType() == InstructionResult.STRING
-			? OperationsS2X.VACALLS_XS
-			: OperationsA2X.XACALLS)//
-					.instruction(this.accessObjectModifier, modifierB, this.constant, store));
+
+		assembly.addInstruction(
+				(this.accessProperty.getResultType() == InstructionResult.STRING
+					? OperationsS2X.VACALLS_XS
+					: OperationsA2X.XACALLS)//
+							.instruction(this.accessObjectModifier, modifierB, this.constant, store));
 	}
-	
+
 	@Override
 	public final String toCode() {
-		
+
 		return (this.accessProperty.getResultType() == InstructionResult.STRING
 			? OperationsS2X.VACALLS_XS
 			: OperationsA2X.XACALLS)//

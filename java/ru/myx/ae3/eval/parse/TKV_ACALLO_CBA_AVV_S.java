@@ -25,6 +25,7 @@ final class TKV_ACALLO_CBA_AVV_S extends TokenValue {
 	private final TokenInstruction argument;
 	
 	TKV_ACALLO_CBA_AVV_S(final TokenInstruction accessObject, final TokenInstruction accessProperty, final TokenInstruction argument) {
+		
 		assert argument.assertStackValue();
 		assert accessObject.assertStackValue();
 		assert accessProperty.assertStackValue();
@@ -79,17 +80,18 @@ final class TKV_ACALLO_CBA_AVV_S extends TokenValue {
 			this.argument.toAssembly(assembly, null, null, ResultHandler.FA_BNN_NXT);
 		}
 		
-		assembly.addInstruction(OperationsA3X.XACALLO//
-				.instruction(
-						directA && (directB || directArgument)
-							? ModifierArguments.AE21POP
-							: modifierA, //
-						directB && directArgument
-							? ModifierArguments.AE21POP
-							: modifierB,
-						modifierArgument,
-						0,
-						store));
+		assembly.addInstruction(
+				OperationsA3X.XACALLO//
+						.instruction(
+								directA && (directB || directArgument)
+									? ModifierArguments.AE21POP
+									: modifierA, //
+								directB && directArgument
+									? ModifierArguments.AE21POP
+									: modifierB,
+								modifierArgument,
+								0,
+								store));
 	}
 	
 	@Override

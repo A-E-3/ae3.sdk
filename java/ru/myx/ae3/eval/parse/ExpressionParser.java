@@ -281,15 +281,19 @@ public final class ExpressionParser {
 	
 	private static final void addIdentifierRoot(final List<TokenInstruction> precompiled, final String token, final String expression) {
 		
-		final TokenValue known = TKV_FLOAD_A_Cs_S.getInstance(token, ExpressionParser.DEFAULT_VARIABLES);
-		if (known.toConstantValue() != ExpressionParser.RESERVED_OBJECT) {
-			precompiled.add(known);
-			return;
+		{
+			final TokenValue known = TKV_FLOAD_A_Cs_S.getInstance(token, ExpressionParser.DEFAULT_VARIABLES);
+			if (known.toConstantValue() != ExpressionParser.RESERVED_OBJECT) {
+				precompiled.add(known);
+				return;
+			}
 		}
-		if (Report.MODE_DEBUG) {
-			Report.warning("EVALUATE", "Reserved word: " + token + ", expression: " + expression);
+		{
+			if (Report.MODE_DEBUG) {
+				Report.warning("EVALUATE", "Reserved word: " + token + ", expression: " + expression);
+			}
+			precompiled.add(new TKV_FLOAD_A_Cs_S(Base.forString(token)));
 		}
-		precompiled.add(new TKV_FLOAD_A_Cs_S(Base.forString(token)));
 	}
 	
 	private static final void addNumber(final List<TokenInstruction> precompiled, final String token, final char type) {
@@ -2111,12 +2115,12 @@ public final class ExpressionParser {
 					continue main;
 				}
 				case ST_IDENTIFIER_ACCS : {
-					for (; i < length; ++i) {
+					identifierAccess : for (; i < length; ++i) {
 						final char c = expression[i];
 						if (c == '.') {
 							ExpressionParser.addIdentifierAccess(precompiled, current.toString());
 							current.setLength(0);
-							continue;
+							continue identifierAccess;
 						}
 						if (c == '(') {
 							functionLevel = ++levelBrace;
@@ -2126,6 +2130,9 @@ public final class ExpressionParser {
 							continue main;
 						}
 						if (ExpressionParser.isWhitespace(c)) {
+							if (current.length() == 0) {
+								continue identifierAccess;
+							}
 							ExpressionParser.addIdentifierAccess(precompiled, current.toString());
 							current.setLength(0);
 							state = ExpressionParser.ST_WHITESPACE;
@@ -2133,7 +2140,7 @@ public final class ExpressionParser {
 						}
 						if (ExpressionParser.isIdentifierPart(c)) {
 							current.append(c);
-							continue;
+							continue identifierAccess;
 						}
 						ExpressionParser.addIdentifierAccess(precompiled, current.toString());
 						current.setLength(0);
@@ -2700,9 +2707,16 @@ public final class ExpressionParser {
 						final char c = expression[i];
 						switch (c) {
 							case '.' : {
-								if (current.length() > 0) {
-									ExpressionParser.addOperator(assembly, precompiled, current.toString());
-									current.setLength(0);
+								final int codeCollected = current.length();
+								if (codeCollected > 0) {
+									if (current.charAt(codeCollected - 1) == '?') {
+										if (codeCollected > 1) {
+											ExpressionParser.addOperator(assembly, precompiled, current.substring(0, codeCollected - 1));
+										}
+										precompiled.add(ParseConstants.TKS_EOCO);
+										current.setLength(0);
+										continue code;
+									}
 								}
 								state = ExpressionParser.ST_IDENTIFIER_ACCS;
 								continue main;

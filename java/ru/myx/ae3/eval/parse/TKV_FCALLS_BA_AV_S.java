@@ -16,7 +16,7 @@ import ru.myx.ae3.exec.ProgramAssembly;
 import ru.myx.ae3.exec.ResultHandler;
 import ru.myx.ae3.exec.ResultHandlerBasic;
 
-final class TKV_FCALLS_BA_AV_S extends TokenValue {
+final class TKV_FCALLS_BA_AV_S extends TokenValue implements TokenValue.SyntacticallyFrameAccess {
 	
 	private final TokenInstruction argumentA;
 	
@@ -25,6 +25,7 @@ final class TKV_FCALLS_BA_AV_S extends TokenValue {
 	private final int constant;
 	
 	TKV_FCALLS_BA_AV_S(final TokenInstruction argumentA, final TokenInstruction argument, final int constant) {
+		
 		assert argumentA.assertStackValue();
 		assert argument.assertZeroStackOperands();
 		assert argument.getResultCount() == constant;
@@ -34,6 +35,25 @@ final class TKV_FCALLS_BA_AV_S extends TokenValue {
 		this.argumentA = argumentA;
 		this.argument = argument;
 		this.constant = constant;
+	}
+	
+	@Override
+	public TokenValue getDirectChainingAccessReplacement() {
+		
+		if (this.argumentA instanceof final TokenValue access && null != access.toContextPropertyName()) {
+			return new TKV_ACALLS_CBA_AVV_S(//
+					ParseConstants.TKV_DIRECT,
+					ParseConstants.getConstantValue(access.toContextPropertyName()),
+					this.argument,
+					this.constant//
+			);
+		}
+		return new TKV_ACALLS_CBA_AVV_S(//
+				ParseConstants.TKV_DIRECT,
+				this.argumentA,
+				this.argument,
+				this.constant//
+		);
 	}
 	
 	@Override
@@ -51,20 +71,14 @@ final class TKV_FCALLS_BA_AV_S extends TokenValue {
 	@Override
 	public void toAssembly(final ProgramAssembly assembly, final ModifierArgument argumentA, final ModifierArgument argumentB, final ResultHandlerBasic store) {
 		
-		/**
-		 * zero operands (both operands are already embedded in this token)
-		 */
+		/** zero operands (both operands are already embedded in this token) */
 		assert argumentA == null;
 		assert argumentB == null;
 		
-		/**
-		 * valid store
-		 */
+		/** valid store */
 		assert store != null;
 		
-		/**
-		 * Anyway in stack, constant is expected to be more than zero
-		 */
+		/** Anyway in stack, constant is expected to be more than zero */
 		this.argument.toAssembly(assembly, null, null, ResultHandler.FB_BSN_NXT);
 		
 		final ModifierArgument modifierB = this.argumentA.toDirectModifier();
@@ -77,8 +91,9 @@ final class TKV_FCALLS_BA_AV_S extends TokenValue {
 					ResultHandler.FA_BNN_NXT);
 		}
 		
-		assembly.addInstruction(OperationsA10.XFCALLS//
-				.instruction(modifierB, this.constant, store));
+		assembly.addInstruction(
+				OperationsA10.XFCALLS//
+						.instruction(modifierB, this.constant, store));
 	}
 	
 	@Override

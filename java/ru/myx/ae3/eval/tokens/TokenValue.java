@@ -13,6 +13,15 @@ import ru.myx.ae3.exec.ProgramAssembly;
 /** @author myx */
 public abstract class TokenValue implements TokenInstruction {
 
+	/** @author myx */
+	public static interface SyntacticallyFrameAccess {
+
+		/** condition to skip execution of right-hand side
+		 *
+		 * @return */
+		public TokenValue getDirectChainingAccessReplacement();
+	}
+
 	/** @param tokens
 	 * @return */
 	protected final static boolean assertAllValues(final TokenInstruction[] tokens) {

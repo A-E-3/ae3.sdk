@@ -16,19 +16,19 @@ final class TKS_EAND extends TokenSyntax implements TokenSyntax.ConditionalStack
 
 	@Override
 	public final String getNotation() {
-		
+
 		return "&&";
 	}
 
 	@Override
 	public final int getPriorityLeft() {
-		
+
 		return 250;
 	}
 
 	@Override
 	public final int getPriorityRight() {
-		
+
 		return 250;
 	}
 
@@ -40,14 +40,14 @@ final class TKS_EAND extends TokenSyntax implements TokenSyntax.ConditionalStack
 
 	@Override
 	public final boolean isConstantForArguments() {
-		
+
 		return true;
 	}
 
 	@Override
 	public final TokenInstruction toStackValue(final ProgramAssembly assembly, final TokenInstruction argumentA, final TokenInstruction argumentB, final boolean sideEffectsOnly)
 			throws Evaluate.CompilationException {
-		
+
 		return new TKV_EBAND(argumentA, argumentB);
 	}
 }

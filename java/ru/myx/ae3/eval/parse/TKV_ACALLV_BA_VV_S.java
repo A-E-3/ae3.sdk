@@ -15,33 +15,24 @@ import ru.myx.ae3.exec.ProgramAssembly;
 import ru.myx.ae3.exec.ResultHandler;
 import ru.myx.ae3.exec.ResultHandlerBasic;
 
-/**
- * @author myx
- *
- *         To change the template for this generated type comment go to
- *         Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
- */
-public final class TKV_ACALLV_BA_VV_S extends TokenValue {
+final class TKV_ACALLV_BA_VV_S extends TokenValue {
 	
-	private final TokenInstruction argumentA;
+	private final TokenInstruction accessObject;
 	
 	private final TokenInstruction argumentB;
 	
-	/**
-	 * @param argumentA
-	 * @param argumentB
-	 */
-	public TKV_ACALLV_BA_VV_S(final TokenInstruction argumentA, final TokenInstruction argumentB) {
-		assert argumentA.isStackValue();
+	TKV_ACALLV_BA_VV_S(final TokenInstruction accessObject, final TokenInstruction argumentB) {
+		
+		assert accessObject.isStackValue();
 		assert argumentB.isStackValue();
-		this.argumentA = argumentA;
+		this.accessObject = accessObject;
 		this.argumentB = argumentB;
 	}
 	
 	@Override
 	public final String getNotation() {
 		
-		return this.argumentA.getNotationValue() + "[" + this.argumentB.getNotation() + "]()";
+		return this.accessObject.getNotationValue() + "[" + this.argumentB.getNotation() + "]()";
 	}
 	
 	@Override
@@ -53,35 +44,37 @@ public final class TKV_ACALLV_BA_VV_S extends TokenValue {
 	@Override
 	public void toAssembly(final ProgramAssembly assembly, final ModifierArgument argumentA, final ModifierArgument argumentB, final ResultHandlerBasic store) {
 		
-		/**
-		 * zero operands
-		 */
+		/** zero operands */
 		assert argumentA == null;
 		assert argumentB == null;
 		
-		/**
-		 * valid store
-		 */
-		assert store != null;
-		
-		final ModifierArgument modifierA = this.argumentA.toDirectModifier();
+		final ModifierArgument modifierA = this.accessObject.toDirectModifier();
 		final ModifierArgument modifierB = this.argumentB.toDirectModifier();
 		final boolean directA = modifierA == ModifierArguments.AA0RB;
 		final boolean directB = modifierB == ModifierArguments.AA0RB;
 		if (directA) {
-			this.argumentA.toAssembly(assembly, null, null, directB
-				? ResultHandler.FB_BSN_NXT
-				: ResultHandler.FA_BNN_NXT);
+			this.accessObject.toAssembly(
+					assembly,
+					null,
+					null,
+					directB
+						? ResultHandler.FB_BSN_NXT
+						: ResultHandler.FA_BNN_NXT);
 		}
 		if (directB) {
 			this.argumentB.toAssembly(assembly, null, null, ResultHandler.FA_BNN_NXT);
 		}
-		assembly.addInstruction((this.argumentB.getResultType() == InstructionResult.STRING
-			? OperationsS2X.VACALLS_XS
-			: OperationsA2X.XACALLS)//
-					.instruction(directA && directB
-						? ModifierArguments.AE21POP
-						: modifierA, modifierB, 0, store));
+		assembly.addInstruction(
+				(this.argumentB.getResultType() == InstructionResult.STRING
+					? OperationsS2X.VACALLS_XS
+					: OperationsA2X.XACALLS)//
+							.instruction(
+									directA && directB
+										? ModifierArguments.AE21POP
+										: modifierA,
+									modifierB,
+									0,
+									store));
 	}
 	
 	@Override
@@ -90,6 +83,6 @@ public final class TKV_ACALLV_BA_VV_S extends TokenValue {
 		return (this.argumentB.getResultType() == InstructionResult.STRING
 			? OperationsS2X.VACALLS_XS
 			: OperationsA2X.XACALLS)//
-				+ "\t0\tVV ->S\t[" + this.argumentA + ", " + this.argumentB + "];";
+				+ "\t0\tVV ->S\t[" + this.accessObject + ", " + this.argumentB + "];";
 	}
 }

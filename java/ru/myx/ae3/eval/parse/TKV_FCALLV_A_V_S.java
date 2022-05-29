@@ -16,49 +16,56 @@ import ru.myx.ae3.exec.ProgramAssembly;
 import ru.myx.ae3.exec.ResultHandler;
 import ru.myx.ae3.exec.ResultHandlerBasic;
 
-final class TKV_FCALLV_A_V_S extends TokenValue {
+final class TKV_FCALLV_A_V_S extends TokenValue implements TokenValue.SyntacticallyFrameAccess {
 	
 	private final TokenInstruction argumentA;
-
+	
 	TKV_FCALLV_A_V_S(final TokenInstruction argumentA) {
+		
 		assert argumentA.assertStackValue();
 		this.argumentA = argumentA;
 	}
-
+	
+	@Override
+	public TokenValue getDirectChainingAccessReplacement() {
+		
+		if (this.argumentA instanceof final TokenValue access && null != access.toContextPropertyName()) {
+			return new TKV_ACALLV_BA_VV_S(ParseConstants.TKV_DIRECT, ParseConstants.getConstantValue(access.toContextPropertyName()));
+		}
+		return new TKV_ACALLV_BA_VV_S(ParseConstants.TKV_DIRECT, this.argumentA);
+	}
+	
 	@Override
 	public final String getNotation() {
 		
 		return this.argumentA.getNotation() + "()";
 	}
-
+	
 	@Override
 	public final InstructionResult getResultType() {
 		
 		return InstructionResult.OBJECT;
 	}
-
+	
 	@Override
 	public void toAssembly(final ProgramAssembly assembly, final ModifierArgument argumentA, final ModifierArgument argumentB, final ResultHandlerBasic store) {
 		
-		/**
-		 * zero operands (the only operand is already embedded in this token)
-		 */
+		/** zero operands (the only operand is already embedded in this token) */
 		assert argumentA == null;
 		assert argumentB == null;
-
-		/**
-		 * valid store
-		 */
+		
+		/** valid store */
 		assert store != null;
-
+		
 		final ModifierArgument modifierB = this.argumentA.toDirectModifier();
 		if (modifierB == ModifierArguments.AA0RB) {
 			this.argumentA.toAssembly(assembly, null, null, ResultHandler.FA_BNN_NXT);
 		}
-		assembly.addInstruction(OperationsA10.XFCALLS//
-				.instruction(modifierB, 0, store));
+		assembly.addInstruction(
+				OperationsA10.XFCALLS//
+						.instruction(modifierB, 0, store));
 	}
-
+	
 	@Override
 	public final String toCode() {
 		

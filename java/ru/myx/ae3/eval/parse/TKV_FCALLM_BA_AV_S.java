@@ -18,16 +18,16 @@ import ru.myx.ae3.exec.ResultHandler;
 import ru.myx.ae3.exec.ResultHandlerBasic;
 import ru.myx.vm_vliw32_2010.OperationA2X;
 
-final class TKV_FCALLM_BA_AV_S extends TokenValue {
+final class TKV_FCALLM_BA_AV_S extends TokenValue implements TokenValue.SyntacticallyFrameAccess {
 
 	private final TokenInstruction argumentA;
-	
+
 	private final TokenInstruction argument;
-	
+
 	private final Instruction carguments;
-	
+
 	TKV_FCALLM_BA_AV_S(final TokenInstruction argumentA, final TokenInstruction argument, final Instruction carguments) {
-		
+
 		/** function itself */
 		assert argumentA.assertStackValue();
 		/** not really a value, could have more than one result */
@@ -41,35 +41,54 @@ final class TKV_FCALLM_BA_AV_S extends TokenValue {
 		this.argument = argument;
 		this.carguments = carguments;
 	}
-	
+
+	@Override
+	public TokenValue getDirectChainingAccessReplacement() {
+
+		if (this.argumentA instanceof final TokenValue access && null != access.toContextPropertyName()) {
+			return new TKV_ACALLM_CBA_AVV_S(//
+					ParseConstants.TKV_DIRECT,
+					ParseConstants.getConstantValue(access.toContextPropertyName()),
+					this.argument,
+					this.carguments//
+			);
+		}
+		return new TKV_ACALLM_CBA_AVV_S(//
+				ParseConstants.TKV_DIRECT,
+				this.argumentA,
+				this.argument,
+				this.carguments//
+		);
+	}
+
 	@Override
 	public final String getNotation() {
 
 		return this.argumentA.getNotation() + "( " + this.argument.getNotation() + " )";
 	}
-	
+
 	@Override
 	public final InstructionResult getResultType() {
 
 		return InstructionResult.OBJECT;
 	}
-	
+
 	@Override
 	public void toAssembly(final ProgramAssembly assembly, final ModifierArgument argumentA, final ModifierArgument argumentB, final ResultHandlerBasic store) {
 
 		/** zero operands (both operands are already embedded in this token) */
 		assert argumentA == null;
 		assert argumentB == null;
-		
+
 		/** valid store */
 		assert store != null;
-		
+
 		final ModifierArgument modifierA = this.argumentA.toDirectModifier();
 		final boolean directA = modifierA == ModifierArguments.AA0RB;
 		if (directA) {
 			this.argumentA.toAssembly(assembly, null, null, ResultHandler.FB_BSN_NXT);
 		}
-		
+
 		this.argument.toAssembly(assembly, null, null, ResultHandler.FB_BSN_NXT);
 		assembly.addInstruction(this.carguments);
 		assembly.addInstruction(
@@ -81,7 +100,7 @@ final class TKV_FCALLM_BA_AV_S extends TokenValue {
 						0,
 						store));
 	}
-	
+
 	@Override
 	public final String toCode() {
 

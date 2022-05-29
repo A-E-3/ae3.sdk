@@ -18,18 +18,18 @@ import ru.myx.ae3.exec.ResultHandlerBasic;
 
 final class TKV_ACALLO_CBA_AVM_S extends TokenValue {
 	
-	private final ModifierArgument argumentA;
+	private final ModifierArgument accessObjectModifier;
 	
 	private final TokenInstruction argumentB;
 	
 	private final TokenInstruction argument;
 	
-	TKV_ACALLO_CBA_AVM_S(final ModifierArgument argumentA, final TokenInstruction argumentB, final TokenInstruction argument) {
+	TKV_ACALLO_CBA_AVM_S(final ModifierArgument accessObjectModifier, final TokenInstruction argumentB, final TokenInstruction argument) {
 		assert argument.assertStackValue();
-		assert argumentA != null;
+		assert accessObjectModifier != null;
 		assert argumentB.assertStackValue();
-		assert argumentA != ModifierArguments.AE21POP && argumentA != ModifierArguments.AA0RB;
-		this.argumentA = argumentA;
+		assert accessObjectModifier != ModifierArguments.AE21POP && accessObjectModifier != ModifierArguments.AA0RB;
+		this.accessObjectModifier = accessObjectModifier;
 		this.argumentB = argumentB;
 		this.argument = argument.toExecDetachableResult();
 	}
@@ -37,7 +37,7 @@ final class TKV_ACALLO_CBA_AVM_S extends TokenValue {
 	@Override
 	public final String getNotation() {
 		
-		return "" + this.argumentA + "." + this.argumentB.getNotation() + "( " + this.argument.getNotation() + " )";
+		return "" + this.accessObjectModifier + "." + this.argumentB.getNotation() + "( " + this.argument.getNotation() + " )";
 	}
 	
 	@Override
@@ -71,7 +71,7 @@ final class TKV_ACALLO_CBA_AVM_S extends TokenValue {
 		
 		assembly.addInstruction(OperationsA3X.XACALLO//
 				.instruction(
-						this.argumentA, //
+						this.accessObjectModifier, //
 						directB && directArgument
 							? ModifierArguments.AE21POP
 							: modifierB,

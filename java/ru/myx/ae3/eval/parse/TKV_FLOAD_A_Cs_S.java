@@ -26,7 +26,7 @@ import ru.myx.ae3.exec.ResultHandler;
 import ru.myx.ae3.exec.ResultHandlerBasic;
 
 /** @author myx */
-public final class TKV_FLOAD_A_Cs_S extends TokenValue implements ModifierArgument {
+public final class TKV_FLOAD_A_Cs_S extends TokenValue implements TokenValue.SyntacticallyFrameAccess, ModifierArgument {
 
 	/** @param key
 	 * @param keywords
@@ -83,6 +83,12 @@ public final class TKV_FLOAD_A_Cs_S extends TokenValue implements ModifierArgume
 	}
 
 	@Override
+	public TokenValue getDirectChainingAccessReplacement() {
+		
+		return new TKV_ACCESS_BA_VV_S(ParseConstants.TKV_DIRECT, ParseConstants.getConstantValue(this.argumentA));
+	}
+
+	@Override
 	public final String getNotation() {
 
 		return this.argumentA.toString();
@@ -105,7 +111,6 @@ public final class TKV_FLOAD_A_Cs_S extends TokenValue implements ModifierArgume
 
 		return true;
 	}
-
 	@Override
 	public void toAssembly(final ProgramAssembly assembly, final ModifierArgument argumentA, final ModifierArgument argumentB, final ResultHandlerBasic store) {
 
@@ -118,6 +123,7 @@ public final class TKV_FLOAD_A_Cs_S extends TokenValue implements ModifierArgume
 
 		assembly.addInstruction(OperationsA10.XFLOAD_P.instruction(this, 0, store));
 	}
+
 	@Override
 	public final String toCode() {
 
