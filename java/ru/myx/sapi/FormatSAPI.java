@@ -42,7 +42,7 @@ import ru.myx.util.Base58;
  *
  *         TODO: real impl with java types to help.Format (or help.Convert), here special
  *         ExecProcess/BaseObject methods for faster scripting (reflection)
- *
+ *		
  *         Window - Preferences - Java - Code Style - Code Templates */
 public class FormatSAPI {
 
@@ -601,7 +601,13 @@ public class FormatSAPI {
 		return true;
 	}
 
-	/** @param s
+	/** RFC 5890
+	 *
+	 * format: "A-Za-z0-9\-" first and last character, "A-Za-z0-9" middle characters
+	 *
+	 * lengths: >=1 and <=63
+	 *
+	 * @param s
 	 * @return */
 	public static final boolean isValidDnsLabel(final CharSequence s) {
 
@@ -611,6 +617,9 @@ public class FormatSAPI {
 		}
 		if (l > 63) {
 			return false;
+		}
+		if (l == 1) {
+			return FormatSAPI.isValidDnsLabelStart(s.charAt(0));
 		}
 		char c = s.charAt(0);
 		if (!FormatSAPI.isValidDnsLabelStart(c)) {
@@ -623,7 +632,8 @@ public class FormatSAPI {
 				return false;
 			}
 		}
-		return true;
+		
+		return FormatSAPI.isValidDnsLabelStart(s.charAt(l - 1));
 	}
 
 	/** @param c
