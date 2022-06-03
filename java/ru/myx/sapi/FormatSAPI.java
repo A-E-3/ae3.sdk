@@ -601,12 +601,12 @@ public class FormatSAPI {
 		return true;
 	}
 
-	/** RFC 5890
+	/** @see isValidDnsLabelStrict for RFC 5890
 	 *
-	 * format: "A-Za-z0-9\-" first and last character, "A-Za-z0-9" middle characters
-	 *
-	 * lengths: >=1 and <=63
-	 *
+	 *      format: [A-Za-z0-9] first character, [A-Za-z0-9\-] other characters
+	 * 		
+	 *      lengths: >=1 and <=63
+	 * 		
 	 * @param s
 	 * @return */
 	public static final boolean isValidDnsLabel(final CharSequence s) {
@@ -633,7 +633,7 @@ public class FormatSAPI {
 			}
 		}
 		
-		return FormatSAPI.isValidDnsLabelStart(s.charAt(l - 1));
+		return true;
 	}
 
 	/** @param c
@@ -666,6 +666,41 @@ public class FormatSAPI {
 			return false;
 		}
 		return true;
+	}
+
+	/** RFC 5890
+	 *
+	 * format: [A-Za-z0-9] first and last character, [A-Za-z0-9\-]" middle characters
+	 *
+	 * lengths: >=1 and <=63
+	 *
+	 * @param s
+	 * @return */
+	public static final boolean isValidDnsLabelStrict(final CharSequence s) {
+
+		final int l = s.length();
+		if (l < 1) {
+			return false;
+		}
+		if (l > 63) {
+			return false;
+		}
+		if (l == 1) {
+			return FormatSAPI.isValidDnsLabelStart(s.charAt(0));
+		}
+		char c = s.charAt(0);
+		if (!FormatSAPI.isValidDnsLabelStart(c)) {
+			return false;
+		}
+		int i = 1;
+		for (; i < l; ++i) {
+			c = s.charAt(i);
+			if (!FormatSAPI.isValidDnsLabelPart(c)) {
+				return false;
+			}
+		}
+		
+		return FormatSAPI.isValidDnsLabelStart(s.charAt(l - 1));
 	}
 
 	/** @param s
