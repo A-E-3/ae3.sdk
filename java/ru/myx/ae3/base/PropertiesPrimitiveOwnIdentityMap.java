@@ -115,6 +115,7 @@ final class PropertiesPrimitiveOwnIdentityMap //
 
 		/** Create new entry. */
 		Entry(final BasePrimitiveString k, final V v, final Entry<V> n) {
+
 			this.value = v;
 			this.next = n;
 			this.key = k;
@@ -210,6 +211,7 @@ final class PropertiesPrimitiveOwnIdentityMap //
 
 	@SuppressWarnings("unchecked")
 	PropertiesPrimitiveOwnIdentityMap(final BasePropertyData<BasePrimitiveString> first) {
+
 		this.loadFactor = PropertiesPrimitiveOwnIdentityMap.DEFAULT_LOAD_FACTOR;
 		this.threshold = (int) (PropertiesPrimitiveOwnIdentityMap.DEFAULT_INITIAL_CAPACITY * PropertiesPrimitiveOwnIdentityMap.DEFAULT_LOAD_FACTOR);
 		this.table = new Entry[PropertiesPrimitiveOwnIdentityMap.DEFAULT_INITIAL_CAPACITY];
@@ -226,6 +228,7 @@ final class PropertiesPrimitiveOwnIdentityMap //
 
 	@SuppressWarnings("unchecked")
 	PropertiesPrimitiveOwnIdentityMap(final BasePropertyData<BasePrimitiveString> first, final BasePropertyData<BasePrimitiveString> last) {
+
 		this.loadFactor = PropertiesPrimitiveOwnIdentityMap.DEFAULT_LOAD_FACTOR;
 		this.threshold = (int) (PropertiesPrimitiveOwnIdentityMap.DEFAULT_INITIAL_CAPACITY * PropertiesPrimitiveOwnIdentityMap.DEFAULT_LOAD_FACTOR);
 		this.table = new Entry[PropertiesPrimitiveOwnIdentityMap.DEFAULT_INITIAL_CAPACITY];
@@ -243,21 +246,25 @@ final class PropertiesPrimitiveOwnIdentityMap //
 	@Override
 	public BaseProperties<BasePrimitiveString> add(final BaseObject instance, final BasePrimitiveString name, final BaseProperty property, final short attributes) {
 
-		return this.add(name, Base.createPropertyPrimitive(
-				instance, //
+		return this.add(
 				name,
-				property,
-				attributes));
+				Base.createPropertyPrimitive(
+						instance, //
+						name,
+						property,
+						attributes));
 	}
 
 	@Override
 	public final BaseProperties<BasePrimitiveString> add(final BaseObject instance, final String name, final BaseProperty property, final short attributes) {
 
-		return this.add(name, Base.createPropertyPrimitive(
-				instance, //
-				Base.forString(name),
-				property,
-				attributes));
+		return this.add(
+				name,
+				Base.createPropertyPrimitive(
+						instance, //
+						Base.forString(name),
+						property,
+						attributes));
 	}
 
 	@Override
@@ -690,15 +697,17 @@ final class PropertiesPrimitiveOwnIdentityMap //
 		builder.append(this.getClass().getSimpleName());
 		for (final Iterator<BasePrimitiveString> iterator = this.iteratorAllAsPrimitive(); iterator.hasNext();) {
 			final BasePrimitiveString key = iterator.next();
-			builder.append(builder.length() == 0
-				? ": "
-				: ", ");
+			builder.append(
+					builder.length() == 0
+						? ": "
+						: ", ");
 			final BasePropertyData<BasePrimitiveString> data = this.find(key);
 			builder.append(key);
 			builder.append(" : ");
-			builder.append(data != null
-				? Format.Describe.toEcmaSource(data.propertyGet(null, key), "")
-				: "?");
+			builder.append(
+					data != null
+						? Format.Describe.toEcmaSource(data.propertyGet(null, key), "")
+						: "?");
 		}
 		return builder.append("#;").toString();
 	}

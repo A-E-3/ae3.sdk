@@ -23,6 +23,7 @@ final class PropertiesPrimitiveOwnIdentityMapOld //
 	private BasePropertyData<BasePrimitiveString> last;
 
 	PropertiesPrimitiveOwnIdentityMapOld(final BasePropertyData<BasePrimitiveString> first) {
+
 		super(16, 4.0f);
 		this.first = first;
 		this.last = first;
@@ -36,6 +37,7 @@ final class PropertiesPrimitiveOwnIdentityMapOld //
 	}
 
 	PropertiesPrimitiveOwnIdentityMapOld(final BasePropertyData<BasePrimitiveString> first, final BasePropertyData<BasePrimitiveString> last) {
+
 		super(16, 4.0f);
 		this.first = first;
 		this.last = last;
@@ -51,11 +53,13 @@ final class PropertiesPrimitiveOwnIdentityMapOld //
 	@Override
 	public BaseProperties<BasePrimitiveString> add(final BaseObject instance, final BasePrimitiveString name, final BaseProperty property, final short attributes) {
 
-		return this.add(name, Base.createPropertyPrimitive(
-				instance, //
+		return this.add(
 				name,
-				property,
-				attributes));
+				Base.createPropertyPrimitive(
+						instance, //
+						name,
+						property,
+						attributes));
 	}
 
 	@Override
@@ -265,15 +269,17 @@ final class PropertiesPrimitiveOwnIdentityMapOld //
 		builder.append(this.getClass().getSimpleName());
 		for (final Iterator<BasePrimitiveString> iterator = this.iteratorAllAsPrimitive(); iterator.hasNext();) {
 			final BasePrimitiveString key = iterator.next();
-			builder.append(builder.length() == 0
-				? ": "
-				: ", ");
+			builder.append(
+					builder.length() == 0
+						? ": "
+						: ", ");
 			final BasePropertyData<BasePrimitiveString> data = this.find(key);
 			builder.append(key);
 			builder.append(" : ");
-			builder.append(data != null
-				? Format.Describe.toEcmaSource(data.propertyGet(null, key), "")
-				: "?");
+			builder.append(
+					data != null
+						? Format.Describe.toEcmaSource(data.propertyGet(null, key), "")
+						: "?");
 		}
 		return builder.append("#;").toString();
 	}
