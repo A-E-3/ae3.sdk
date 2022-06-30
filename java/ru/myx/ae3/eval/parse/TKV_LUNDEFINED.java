@@ -33,13 +33,13 @@ final class TKV_LUNDEFINED extends TokenValue {
 	@Override
 	public final String getNotation() {
 		
-		return String.valueOf(BaseObject.UNDEFINED);
+		return "undefined";
 	}
-	
+
 	@Override
 	public final String getNotationValue() {
 		
-		return this.getNotation();
+		return "undefined";
 	}
 	
 	@Override
@@ -117,6 +117,12 @@ final class TKV_LUNDEFINED extends TokenValue {
 	public final BaseObject toConstantValue() {
 		
 		return BaseObject.UNDEFINED;
+	}
+	
+	@Override
+	public String toCreatePropertyName() {
+		
+		return "undefined";
 	}
 	
 	@Override

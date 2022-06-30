@@ -33,13 +33,13 @@ final class TKV_LTRUE extends TokenValue {
 	@Override
 	public final String getNotation() {
 		
-		return String.valueOf(true);
+		return "true";
 	}
 
 	@Override
 	public final String getNotationValue() {
 		
-		return this.getNotation();
+		return "true";
 	}
 
 	@Override
@@ -113,6 +113,12 @@ final class TKV_LTRUE extends TokenValue {
 	public final BaseObject toConstantValue() {
 		
 		return BaseObject.TRUE;
+	}
+
+	@Override
+	public String toCreatePropertyName() {
+		
+		return "true";
 	}
 
 	@Override

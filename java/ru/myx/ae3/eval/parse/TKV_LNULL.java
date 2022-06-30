@@ -23,34 +23,34 @@ import ru.myx.ae3.exec.ResultHandlerBasic;
 
 /** @author myx */
 final class TKV_LNULL extends TokenValue {
-
+	
 	/** @param value */
 	TKV_LNULL() {
-
+		
 		//
 	}
-
+	
 	@Override
 	public final String getNotation() {
-
-		return String.valueOf(BaseObject.NULL);
+		
+		return "null";
 	}
-
+	
 	@Override
 	public final String getNotationValue() {
-
-		return this.getNotation();
+		
+		return "null";
 	}
-
+	
 	@Override
 	public final InstructionResult getResultType() {
-
+		
 		return InstructionResult.NULL;
 	}
-
+	
 	@Override
 	public void toAssembly(final ProgramAssembly assembly, final ModifierArgument argumentA, final ModifierArgument argumentB, final ResultHandlerBasic store) {
-
+		
 		if (store == ResultHandler.FB_BSN_NXT) {
 			assembly.addInstruction(Instructions.INSTR_LOAD_NULL_SN_NEXT);
 			return;
@@ -63,26 +63,26 @@ final class TKV_LNULL extends TokenValue {
 			assembly.addInstruction(Instructions.INSTR_LOAD_NULL_NN_RETURN);
 			return;
 		}
-
+		
 		/** zero operands */
 		assert argumentA == null;
 		assert argumentB == null;
-
+		
 		/** valid store */
 		assert store != null;
-
+		
 		assembly.addInstruction(OperationsA10.XFLOAD_P.instruction(BaseObject.NULL, ModifierArguments.AC12NULL, 0, store));
 	}
-
+	
 	@Override
 	public final String toCode() {
-
+		
 		return "LOAD\t1\tC  ->S\tCONST(null);";
 	}
-
+	
 	@Override
 	public InstructionEditable toConditionalSkipEditable(final ProgramAssembly assembly, final int start, final TokenInstruction.ConditionType compare, final ResultHandler store) {
-
+		
 		switch (compare) {
 			case TRUISH_NOT :
 			case NULLISH_YES :
@@ -93,10 +93,10 @@ final class TKV_LNULL extends TokenValue {
 				return null;
 		}
 	}
-
+	
 	@Override
 	public void toConditionalSkipSingleton(final ProgramAssembly assembly, final TokenInstruction.ConditionType compare, final int constant, final ResultHandler store) {
-
+		
 		switch (compare) {
 			case TRUISH_NOT :
 			case NULLISH_YES :
@@ -109,19 +109,25 @@ final class TKV_LNULL extends TokenValue {
 
 	@Override
 	public final ModifierArgument toConstantModifier() {
-
+		
 		return ModifierArgumentA30IMM.NULL;
 	}
-
+	
 	@Override
 	public final BaseObject toConstantValue() {
-
+		
 		return BaseObject.NULL;
 	}
+	
+	@Override
+	public String toCreatePropertyName() {
 
+		return "null";
+	}
+	
 	@Override
 	public ModifierArgument toDirectModifier() {
-
+		
 		return ModifierArgumentA30IMM.NULL;
 	}
 }

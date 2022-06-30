@@ -29,7 +29,7 @@ final class TKV_LTHIS extends TokenValue {
 	@Override
 	public final String getNotationValue() {
 
-		return this.getNotation();
+		return "this";
 	}
 
 	@Override
@@ -74,6 +74,12 @@ final class TKV_LTHIS extends TokenValue {
 	public void toConditionalSkipSingleton(final ProgramAssembly assembly, final TokenInstruction.ConditionType compare, final int constant, final ResultHandler store) {
 
 		assembly.addInstruction(compare.createSingleton(ModifierArguments.AB4CT, constant, store));
+	}
+
+	@Override
+	public String toCreatePropertyName() {
+		
+		return "this";
 	}
 
 	@Override
