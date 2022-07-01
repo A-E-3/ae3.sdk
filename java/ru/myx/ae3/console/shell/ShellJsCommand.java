@@ -20,7 +20,7 @@ final class ShellJsCommand extends AbstractShellCommand {
 	private final BaseString<?> referenceBase;
 	
 	ShellJsCommand(final String name, final String reference) {
-		System.out.println(">>>>>> shell js command: reference: " + reference);
+		// System.out.println(">>> >>> shell js command: reference: " + reference);
 		
 		this.name = name;
 		this.reference = reference;
