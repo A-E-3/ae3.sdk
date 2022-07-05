@@ -215,6 +215,25 @@ public class FormatSAPI {
 
 	/** @param bytes
 	 * @param offset
+	 * @param length
+	 *            only 4 or 16 allowed
+	 * @return */
+	public static final CharSequence binaryAsInetAddress(final byte[] bytes, final int offset, final int length) {
+
+		switch (length) {
+			case 4 :
+				return FormatSAPI.binaryAsInetAddress4(bytes, offset);
+			case 16 :
+				return FormatSAPI.binaryAsInetAddress6(bytes, offset);
+			default :
+				throw new IllegalArgumentException("binaryAsInetAddress: only 4 or 16 is supported for length, got: " + length);
+		}
+	}
+
+	/** 4 bytes length, network order, to X.X.X.X string
+	 *
+	 * @param bytes
+	 * @param offset
 	 * @return */
 	public static final CharSequence binaryAsInetAddress4(final byte[] bytes, final int offset) {
 
@@ -222,7 +241,9 @@ public class FormatSAPI {
 		return (bytes[o++] & 0xFF) + "." + (bytes[o++] & 0xFF) + "." + (bytes[o++] & 0xFF) + "." + (bytes[o++] & 0xFF);
 	}
 
-	/** @param bytes
+	/** 16 bytes length, network order, to [X:X:X:X:X:X:X:X] string
+	 *
+	 * @param bytes
 	 * @param offset
 	 * @return */
 	public static final CharSequence binaryAsInetAddress6(final byte[] bytes, final int offset) {

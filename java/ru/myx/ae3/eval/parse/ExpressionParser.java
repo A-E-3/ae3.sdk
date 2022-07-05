@@ -1350,6 +1350,7 @@ public final class ExpressionParser {
 		}
 	}
 	
+	/** constructor call */
 	private static final TKV_COBJECT_NEW encodeCallAccessCXE(final ProgramAssembly assembly,
 			final TokenInstruction constructedClassAccess,
 			final TokenInstruction constructorPropertyName,
