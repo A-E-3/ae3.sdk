@@ -13,18 +13,18 @@ import ru.myx.vm_vliw32_2010.OperationA00;
 
 /** @author myx */
 public final class IAVV_VFDEBUG_C implements Instruction {
-	
-	private Object message;
 
+	private Object message;
+	
 	/** @param message */
 	public IAVV_VFDEBUG_C(final String message) {
-		
+
 		this.message = message;
 	}
-
+	
 	/** @param message */
 	public void addDebug(final String message) {
-		
+
 		if (message == null) {
 			return;
 		}
@@ -32,9 +32,9 @@ public final class IAVV_VFDEBUG_C implements Instruction {
 			this.message = message;
 			return;
 		}
-		if (this.message instanceof String) {
+		if (this.message instanceof final String messageString) {
 			final List<String> collection = new ArrayList<>();
-			collection.add((String) this.message);
+			collection.add(messageString);
 			collection.add(message);
 			this.message = message;
 			return;
@@ -47,10 +47,10 @@ public final class IAVV_VFDEBUG_C implements Instruction {
 			this.message = collection;
 		}
 	}
-
+	
 	@Override
 	public boolean equals(final Object obj) {
-		
+
 		if (this == obj) {
 			return true;
 		}
@@ -70,16 +70,16 @@ public final class IAVV_VFDEBUG_C implements Instruction {
 		}
 		return true;
 	}
-
+	
 	@Override
 	public final ExecStateCode execCall(final ExecProcess ctx) {
-		
+
 		return ctx.contextExecFDEBUG(this.message);
 	}
-
+	
 	/** @param other */
 	public void fillDebug(final IAVV_VFDEBUG_C other) {
-		
+
 		if (this.message == null) {
 			return;
 		}
@@ -96,37 +96,37 @@ public final class IAVV_VFDEBUG_C implements Instruction {
 			}
 		}
 	}
-
+	
 	/** @return debug */
 	public Object getDebug() {
-		
+
 		return this.message;
 	}
-
+	
 	@Override
 	public final int getOperandCount() {
-		
+
 		return 0;
 	}
-
+	
 	/** Nominal
 	 *
 	 * @return */
 	@SuppressWarnings("static-method")
 	public OperationA00 getOperation() {
-		
+
 		return OperationsA00.XFDEBUG_P;
 	}
-
+	
 	@Override
 	public final int getResultCount() {
-		
+
 		return 0;
 	}
-
+	
 	@Override
 	public int hashCode() {
-		
+
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + (this.message == null
@@ -134,10 +134,10 @@ public final class IAVV_VFDEBUG_C implements Instruction {
 			: this.message.hashCode());
 		return result;
 	}
-
+	
 	@Override
 	public final String toCode() {
-		
+
 		return Instruction.padOPCODE("FDEBUG") + "\t'" + this.message + "';";
 	}
 }

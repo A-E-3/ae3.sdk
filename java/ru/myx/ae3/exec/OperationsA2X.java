@@ -353,8 +353,8 @@ public enum OperationsA2X implements OperationA2X {
 
 			final Object rightHand = argumentB.baseValue();
 			/** Can be java class with no constructor, abstract one or even an interface. */
-			if (rightHand instanceof Class) {
-				if (((Class<?>) rightHand).isInstance(argumentA)) {
+			if (rightHand instanceof final Class<?> classObject) {
+				if (classObject.isInstance(argumentA)) {
 					return store.execReturnTrue(ctx);
 				}
 				final Object leftHand = argumentA.baseValue();
@@ -566,19 +566,19 @@ public enum OperationsA2X implements OperationA2X {
 					}
 					 * </code> */
 				}
-				if (argumentA instanceof ExecValueStack) {
+				if (argumentA instanceof final ExecValueStack<?> execValueStack) {
 					// TODO: check is it really needed? .baseValue()?!
 					argumentA.baseValue();
-					final BaseObject replacement = ((ExecValueStack<?>) argumentA).toNative();
+					final BaseObject replacement = execValueStack.toNative();
 					if (replacement != argumentA) {
 						argumentA = replacement;
 						continue loop;
 					}
 				}
-				if (argumentB instanceof ExecValueStack) {
+				if (argumentB instanceof final ExecValueStack<?> execValueStack) {
 					// TODO: check is it really needed? .baseValue()?!
 					argumentB.baseValue();
-					final BaseObject replacement = ((ExecValueStack<?>) argumentB).toNative();
+					final BaseObject replacement = execValueStack.toNative();
 					if (replacement != argumentB) {
 						argumentB = replacement;
 						continue loop;
@@ -1868,13 +1868,11 @@ public enum OperationsA2X implements OperationA2X {
 				return ctx.vmRaise("Not a function: key=" + argumentB.baseToString() + ", class=" + candidate.getClass().getName());
 			}
 
-			if (argumentC instanceof BaseArray) {
-				return callee.execCallPrepare(ctx, argumentA, store, false, (BaseArray) argumentC);
+			if (argumentC instanceof final BaseArray baseArray) {
+				return callee.execCallPrepare(ctx, argumentA, store, false, baseArray);
 			}
 
-			if (argumentC instanceof NamedToIndexMapper) {
-
-				final NamedToIndexMapper mapper = (NamedToIndexMapper) argumentC;
+			if (argumentC instanceof final NamedToIndexMapper mapper) {
 				return ctx.vmCallM(callee, argumentA, mapper, store);
 			}
 			return ctx.vmRaise(

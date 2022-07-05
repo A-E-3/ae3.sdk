@@ -27,6 +27,7 @@ import ru.myx.vm_vliw32_2010.OperationA10;
 
 /** @author myx */
 public enum OperationsA10 implements OperationA10 {
+
 	/**
 	 *
 	 */
@@ -141,8 +142,8 @@ public enum OperationsA10 implements OperationA10 {
 				for (int i = constant * 2; i > 0; i -= 2) {
 					final BaseObject key = stack[rASP - i - 1];
 					final BaseObject value = stack[rASP - i - 0];
-					if (key instanceof CharSequence) {
-						result.baseDefine((CharSequence) key, value, BaseProperty.ATTRS_MASK_WED);
+					if (key instanceof final CharSequence charSequence) {
+						result.baseDefine(charSequence, value, BaseProperty.ATTRS_MASK_WED);
 					} else {
 						result.baseDefine(key.baseToJavaString(), value, BaseProperty.ATTRS_MASK_WED);
 					}
@@ -185,8 +186,8 @@ public enum OperationsA10 implements OperationA10 {
 			for (int i = constant * 2; i > 0; i -= 2) {
 				final BaseObject key = stack[rASP - i - 1];
 				final BaseObject value = stack[rASP - i - 0];
-				if (key instanceof CharSequence) {
-					result.baseDefine((CharSequence) key, value, BaseProperty.ATTRS_MASK_WED);
+				if (key instanceof final CharSequence charSequence) {
+					result.baseDefine(charSequence, value, BaseProperty.ATTRS_MASK_WED);
 				} else {
 					result.baseDefine(key.baseToJavaString(), value, BaseProperty.ATTRS_MASK_WED);
 				}
@@ -330,7 +331,7 @@ public enum OperationsA10 implements OperationA10 {
 		public InstructionIA instruction(final BaseObject constantArgumentA, final ModifierArgument originalArgumentA, final int constant, final ResultHandler store) {
 			
 			assert constant == 0 //
-			: this.name() + " constant must be 0";
+					: this.name() + " constant must be 0";
 			
 			if (store == ResultHandler.FA_BNN_NXT) {
 				return new IA10_XLOAD_P_O_0_NN_NXT(constantArgumentA);
@@ -405,8 +406,7 @@ public enum OperationsA10 implements OperationA10 {
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentB, final int constant, final ResultHandler store) {
 			
 			final BasePrimitiveNumber result;
-			if (argumentB instanceof BasePrimitiveString) {
-				final BasePrimitiveString key = (BasePrimitiveString) argumentB;
+			if (argumentB instanceof final BasePrimitiveString key) {
 				final BasePrimitiveNumber leftHand = ctx.contextGetBindingValue(key, false).baseToNumber();
 				result = leftHand == BasePrimitiveNumber.NAN
 					? leftHand
@@ -457,8 +457,7 @@ public enum OperationsA10 implements OperationA10 {
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentB, final int constant, final ResultHandler store) {
 			
 			final BasePrimitiveNumber leftHand;
-			if (argumentB instanceof BasePrimitiveString) {
-				final BasePrimitiveString key = (BasePrimitiveString) argumentB;
+			if (argumentB instanceof final BasePrimitiveString key) {
 				leftHand = ctx.contextGetBindingValue(key, false).baseToNumber();
 				final BasePrimitiveNumber result = leftHand == BasePrimitiveNumber.NAN
 					? leftHand
@@ -648,15 +647,13 @@ public enum OperationsA10 implements OperationA10 {
 					ctx.ri11II = this.IMPL_BASE_ITERATOR_VALUE;
 					final Object order = argumentA.baseGet(this.ORDER, BaseObject.UNDEFINED).baseValue();
 					if (order != null) {
-						if (order instanceof Object[]) {
-							final Object[] array = (Object[]) order;
+						if (order instanceof final Object[] array) {
 							if (array.length + 1 == ((Map<?, ?>) baseValue).size()) {
 								ctx.ri13IV = Arrays.asList((Object[]) order).iterator();
 								return null;
 							}
 						} else //
-						if (order instanceof Collection<?>) {
-							final Collection<?> collection = (Collection<?>) order;
+						if (order instanceof final Collection<?> collection) {
 							if (collection.size() + 1 == ((Map<?, ?>) baseValue).size()) {
 								ctx.ri13IV = collection.iterator();
 								return null;
@@ -666,10 +663,10 @@ public enum OperationsA10 implements OperationA10 {
 					/** pass-through */
 				} else //
 				if (baseValue != null && baseValue != argumentA) {
-					if (baseValue instanceof Iterable<?>) {
+					if (baseValue instanceof final Iterable<?> iterable) {
 						/** only for ITRPREPV - collection values */
 						ctx.ri11II = this.IMPL_BASE_ITERATOR;
-						ctx.ri13IV = ((Iterable<?>) baseValue).iterator();
+						ctx.ri13IV = iterable.iterator();
 						return null;
 					}
 					if (baseValue instanceof Iterator) {
@@ -678,8 +675,8 @@ public enum OperationsA10 implements OperationA10 {
 						ctx.ri13IV = baseValue;
 						return null;
 					}
-					if (baseValue instanceof BaseObject) {
-						return this.execute(ctx, (BaseObject) baseValue, constant, store);
+					if (baseValue instanceof final BaseObject baseObject) {
+						return this.execute(ctx, baseObject, constant, store);
 					}
 					{
 						return this.executeJava(ctx, baseValue, constant, store);
@@ -704,26 +701,25 @@ public enum OperationsA10 implements OperationA10 {
 		
 		private final ExecStateCode executeJava(final ExecProcess ctx, final Object argumentA, final int constant, final ResultHandler store) {
 			
-			if (argumentA instanceof Object[]) {
+			if (argumentA instanceof final Object[] array) {
 				/** only for ITRPREPV - java array values */
 				ctx.ri11II = this.IMPL_BASE_ITERATOR;
-				ctx.ri13IV = Arrays.asList((Object[]) argumentA).iterator();
+				ctx.ri13IV = Arrays.asList(array).iterator();
 				return null;
 			}
-			if (argumentA instanceof Value<?>) {
-				final Object baseValue = ((Value<?>) argumentA).baseValue();
+			if (argumentA instanceof final Value<?> valueObject) {
+				final Object baseValue = valueObject.baseValue();
 				if (baseValue != null && baseValue != argumentA) {
-					if (baseValue instanceof BaseObject) {
-						return this.execute(ctx, (BaseObject) baseValue, constant, store);
+					if (baseValue instanceof final BaseObject baseObject) {
+						return this.execute(ctx, baseObject, constant, store);
 					}
-					if (baseValue instanceof Object[]) {
+					if (baseValue instanceof final Object[] array) {
 						/** only for ITRPREPV - java array values */
 						ctx.ri11II = this.IMPL_BASE_ITERATOR;
-						ctx.ri13IV = Arrays.asList((Object[]) baseValue).iterator();
+						ctx.ri13IV = Arrays.asList(array).iterator();
 						return null;
 					}
-					if (baseValue instanceof Map<?, ?>) {
-						final Map<?, ?> baseMap = (Map<?, ?>) baseValue;
+					if (baseValue instanceof final Map<?, ?> baseMap) {
 						// old ORDER implementation - must be supported here or
 						// on
 						// ObjectCreation stage
@@ -731,15 +727,13 @@ public enum OperationsA10 implements OperationA10 {
 						ctx.ri11II = this.IMPL_BASE_ITERATOR_VALUE;
 						final Object order = baseMap.get("$ORDER");
 						if (order != null) {
-							if (order instanceof Object[]) {
-								final Object[] array = (Object[]) order;
+							if (order instanceof final Object[] array) {
 								if (array.length + 1 == ((Map<?, ?>) baseValue).size()) {
 									ctx.ri13IV = Arrays.asList((Object[]) order).iterator();
 									return null;
 								}
 							} else //
-							if (order instanceof Collection<?>) {
-								final Collection<?> collection = (Collection<?>) order;
+							if (order instanceof final Collection<?> collection) {
 								if (collection.size() + 1 == ((Map<?, ?>) baseValue).size()) {
 									ctx.ri13IV = collection.iterator();
 									return null;
@@ -751,10 +745,10 @@ public enum OperationsA10 implements OperationA10 {
 							return null;
 						}
 					}
-					if (baseValue instanceof Iterable<?>) {
+					if (baseValue instanceof final Iterable<?> iterable) {
 						/** only for ITRPREPV - collection values */
 						ctx.ri11II = this.IMPL_BASE_ITERATOR;
-						ctx.ri13IV = ((Iterable<?>) baseValue).iterator();
+						ctx.ri13IV = iterable.iterator();
 						return null;
 					}
 				}
@@ -897,10 +891,10 @@ public enum OperationsA10 implements OperationA10 {
 			}
 			{
 				final Object baseValue = argumentA.baseValue();
-				if (baseValue instanceof Iterable<?>) {
+				if (baseValue instanceof final Iterable<?> iterable) {
 					/** only for ITRPREPV - collection values */
 					ctx.ri11II = this.IMPL_BASE_ITERATOR;
-					ctx.ri13IV = ((Iterable<?>) baseValue).iterator();
+					ctx.ri13IV = iterable.iterator();
 					return null;
 				}
 				if (baseValue instanceof Map<?, ?>) {
@@ -910,15 +904,13 @@ public enum OperationsA10 implements OperationA10 {
 					ctx.ri11II = this.IMPL_BASE_ITERATOR;
 					final Object order = argumentA.baseGet(this.ORDER, BaseObject.UNDEFINED).baseValue();
 					if (order != null) {
-						if (order instanceof Object[]) {
-							final Object[] array = (Object[]) order;
+						if (order instanceof final Object[] array) {
 							if (array.length + 1 == ((Map<?, ?>) baseValue).size()) {
 								ctx.ri13IV = Arrays.asList((Object[]) order).iterator();
 								return null;
 							}
 						} else //
-						if (order instanceof Collection<?>) {
-							final Collection<?> collection = (Collection<?>) order;
+						if (order instanceof final Collection<?> collection) {
 							if (collection.size() + 1 == ((Map<?, ?>) baseValue).size()) {
 								ctx.ri13IV = collection.iterator();
 								return null;

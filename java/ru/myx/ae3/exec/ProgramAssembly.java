@@ -215,17 +215,17 @@ public class ProgramAssembly {
 	public void addError(final Object error) {
 
 		if (this.reportErrors) {
-			if (error instanceof Throwable) {
-				Report.exception("ASSEMBLY", "Assembly error", (Throwable) error);
+			if (error instanceof final Throwable throwableObject) {
+				Report.exception("ASSEMBLY", "Assembly error", throwableObject);
 			} else {
 				final StringBuilder report = new StringBuilder();
 				if (this.assemblySize > 0) {
-					if (this.assemblyCode[0] instanceof IAVV_VFDEBUG_C) {
-						report.append(((IAVV_VFDEBUG_C) this.assemblyCode[0]).getDebug()).append("\r\n");
+					if (this.assemblyCode[0] instanceof final IAVV_VFDEBUG_C ivDebug) {
+						report.append(ivDebug.getDebug()).append("\r\n");
 					}
 					for (int i = this.assemblySize - 1; i > 0; --i) {
-						if (this.assemblyCode[i] instanceof IAVV_VFDEBUG_C) {
-							report.append(((IAVV_VFDEBUG_C) this.assemblyCode[i]).getDebug()).append("\r\n");
+						if (this.assemblyCode[i] instanceof final IAVV_VFDEBUG_C ivDebug) {
+							report.append(ivDebug.getDebug()).append("\r\n");
 							break;
 						}
 					}
@@ -248,8 +248,8 @@ public class ProgramAssembly {
 			this.errors = text;
 			return;
 		}
-		if (this.errors instanceof String) {
-			this.errors = new ListString((String) this.errors, text);
+		if (this.errors instanceof final String stringErrors) {
+			this.errors = new ListString(stringErrors, text);
 			return;
 		}
 		((ListString) this.errors).add(text);
@@ -262,9 +262,9 @@ public class ProgramAssembly {
 		if (instruction == null) {
 			throw new NullPointerException();
 		}
-		if (instruction instanceof TokenInstruction) {
+		if (instruction instanceof final TokenInstruction tokenInstruction) {
 			assert false;
-			((TokenInstruction) instruction).toAssembly(this, null, null, null);
+			tokenInstruction.toAssembly(this, null, null, null);
 			return;
 		}
 		if (this.assemblyCode == null) {
@@ -491,9 +491,9 @@ public class ProgramAssembly {
 		}
 		if (balanceType == BalanceType.DECLARATION) {
 			final TokenInstruction token1 = precompiled.get(0);
-			if (token1 instanceof TKA_ASSIGN_FSTORE_BA_SC_S) {
+			if (token1 instanceof final TKA_ASSIGN_FSTORE_BA_SC_S tknFStore) {
 				final TokenInstruction rightHand = this.compileExpression(precompiled.subList(1, exprLength), BalanceType.EXPRESSION);
-				return new TKV_FDECLARE_BA_VC_S(((TKA_ASSIGN_FSTORE_BA_SC_S) token1).getBaseName(), rightHand);
+				return new TKV_FDECLARE_BA_VC_S(tknFStore.getBaseName(), rightHand);
 			}
 			return ParseConstants.TKV_ERROR_DECLARATION_EXPECTED;
 		}
@@ -1113,8 +1113,7 @@ public class ProgramAssembly {
 		int i = offset;
 		for (Instruction current; i < this.assemblySize; ++i) {
 			current = assemblyCode[i];
-			if (current instanceof ProgramPart) {
-				final ProgramPart calc = (ProgramPart) current;
+			if (current instanceof final ProgramPart calc) {
 				final Instruction[] toInsert = calc.getInstructions();
 				if (toInsert == null) {
 					throw new NullPointerException();
@@ -1137,8 +1136,8 @@ public class ProgramAssembly {
 				continue;
 			}
 
-			if (current instanceof InstructionEditable) {
-				if (null != (current = ((InstructionEditable) current).getFinalIfReady())) {
+			if (current instanceof final InstructionEditable instructionEditable) {
+				if (null != (current = instructionEditable.getFinalIfReady())) {
 					assemblyCode[i] = current;
 				}
 				continue;
@@ -1159,8 +1158,8 @@ public class ProgramAssembly {
 		int counter = 0;
 		for (int i = offset; i < this.assemblySize; ++i) {
 			final Instruction instr = this.assemblyCode[i];
-			if (instr instanceof ProgramPart) {
-				counter += ((ProgramPart) instr).getInstructions().length;
+			if (instr instanceof final ProgramPart programPart) {
+				counter += programPart.getInstructions().length;
 			} else {
 				counter++;
 			}
