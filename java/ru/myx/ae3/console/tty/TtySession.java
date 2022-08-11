@@ -1,6 +1,7 @@
 package ru.myx.ae3.console.tty;
 
 import java.util.function.Function;
+
 import ru.myx.ae3.base.Base;
 import ru.myx.ae3.base.BaseList;
 import ru.myx.ae3.base.BaseObject;
@@ -16,6 +17,7 @@ final class TtySession implements Function<ExecProcess, Void> {
 	static final TtySession INSTANCE = new TtySession();
 	
 	private TtySession() {
+		
 		//
 	}
 	
@@ -23,8 +25,7 @@ final class TtySession implements Function<ExecProcess, Void> {
 	public Void apply(final ExecProcess ctx) {
 		
 		final Console console = ctx.getConsole();
-		console.sendMessage("# tty session, console class: "
-				+ console.getClass().getName());
+		console.sendMessage("# tty session, console class: " + console.getClass().getName());
 		console.flush();
 		try {
 			
@@ -45,19 +46,27 @@ final class TtySession implements Function<ExecProcess, Void> {
 				}
 				
 				final BaseList<Object> constants = BaseObject.createArray(4);
-				constants.add(Base.forString(
-						"ru.acmcms.internal/util/AuthAcmAnyControllerJail"));
+				constants.add(Base.forString("ru.acmcms.internal/util/AuthAcmAnyControllerJail"));
 				constants.add(Base.forString(loginString));
 				constants.add(Base.forString(passwordString));
 				constants.add(Base.forString("admin"));
 				
-				final boolean isAdmin = Evaluate
-						.evaluateBoolean("(function check(){"
-								+ "var A = require( @0 ), " + "a = new A(),"
-								+ "u = a.checkLoginPassword( @1, @2 ); "
-								+ "return a.checkMembership( u, @3 );"
+				final boolean isAdmin = Evaluate.evaluateBoolean(
+						"(function check(){" //
+								+ "var A, a, u;" //
+								+ "try{" //
+								+ "	A = require( @0 );" //
+								+ "	a = new A();"//
+								+ "}catch(e){" //
+								+ "	console.log('>>>>> console.tty: TtySession auth failed check skipped, error: %s', e.message || e);" //
+								+ "	return false;" //
+								+ "}" //
+								+ "u = a.checkLoginPassword( @1, @2 ); " //
+								+ "return a.checkMembership( u, @3 ); //"
 								// + "return a.checkAdmin( @1, @2 );"
-								+ "})()", ctx, constants);
+								+ "})()",
+						ctx,
+						constants);
 				if (isAdmin) {
 					console.sendMessage("# hi: " + loginString);
 					break;
@@ -78,15 +87,13 @@ final class TtySession implements Function<ExecProcess, Void> {
 				}));
 			} catch (final Throwable t) {
 				console.setStateError();
-				console.sendMessage("FATAL", Format.Throwable
-						.toText("unhandled tty session exception", t));
+				console.sendMessage("FATAL", Format.Throwable.toText("unhandled tty session exception", t));
 				console.setStateNormal();
 				console.sendMessage("bye.");
 			}
 		} catch (final Throwable t) {
 			console.setStateError();
-			console.sendMessage("FATAL", Format.Throwable
-					.toText("unhandled tty session exception", t));
+			console.sendMessage("FATAL", Format.Throwable.toText("unhandled tty session exception", t));
 			console.setStateNormal();
 			console.sendMessage("bye.");
 		}

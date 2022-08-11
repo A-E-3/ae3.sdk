@@ -13,7 +13,7 @@ import ru.myx.ae3.eval.tokens.TokenValue;
 import ru.myx.ae3.exec.ProgramAssembly;
 
 /** @author myx */
-final class TKS_EOCO extends TokenSyntax implements TokenSyntax.ConditionalStackValuable {
+final class TKS_EOCO extends TokenSyntax {
 
 	@Override
 	public final String getNotation() {
@@ -34,12 +34,6 @@ final class TKS_EOCO extends TokenSyntax implements TokenSyntax.ConditionalStack
 	}
 
 	@Override
-	public final ConditionType getSkipCondition() {
-
-		return TokenInstruction.ConditionType.NULLISH_YES;
-	}
-
-	@Override
 	public final boolean isConstantForArguments() {
 
 		/** ??? constant for constant arguments ??? false maybe: it could be anything on right-hand
@@ -50,6 +44,9 @@ final class TKS_EOCO extends TokenSyntax implements TokenSyntax.ConditionalStack
 	@Override
 	public final TokenInstruction toStackValue(final ProgramAssembly assembly, final TokenInstruction argumentA, final TokenInstruction argumentB, final boolean sideEffectsOnly)
 			throws Evaluate.CompilationException {
+
+		// System.out.println(">>> >>> TKS_EOCO TSV: a: " + argumentA + ", b: " + argumentB + ",
+		// effectsOnly: " + sideEffectsOnly + ", bClass: " + argumentB.getClass().getName());
 
 		if (argumentB instanceof TokenValue.SyntacticallyFrameAccess) {
 			return new TKV_EOCO(argumentA.toExecDetachableResult(), ((TokenValue.SyntacticallyFrameAccess) argumentB).getDirectChainingAccessReplacement());

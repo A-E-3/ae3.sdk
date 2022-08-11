@@ -6,6 +6,7 @@
  */
 package ru.myx.ae3.eval.parse;
 
+import ru.myx.ae3.base.BasePrimitiveString;
 import ru.myx.ae3.eval.tokens.TokenInstruction;
 import ru.myx.ae3.eval.tokens.TokenValue;
 import ru.myx.ae3.exec.InstructionResult;
@@ -29,10 +30,20 @@ final class TKV_FCALLV_A_V_S extends TokenValue implements TokenValue.Syntactica
 	@Override
 	public TokenValue getDirectChainingAccessReplacement() {
 		
-		if (this.argumentA instanceof final TokenValue access && null != access.toContextPropertyName()) {
-			return new TKV_ACALLV_BA_VV_S(ParseConstants.TKV_DIRECT, ParseConstants.getConstantValue(access.toContextPropertyName()));
+		/** Why do we need this, aint it the same? **/
+		if (this.argumentA instanceof final TokenValue access) {
+			final BasePrimitiveString contextPropertyName = access.toContextPropertyName();
+			if (null != contextPropertyName) {
+				return new TKV_ACALLV_BA_VV_S(//
+						ParseConstants.TKV_DIRECT,
+						ParseConstants.getConstantValue(contextPropertyName)//
+				);
+			}
 		}
-		return new TKV_ACALLV_BA_VV_S(ParseConstants.TKV_DIRECT, this.argumentA);
+		return new TKV_ACALLV_BA_VV_S(//
+				ParseConstants.TKV_DIRECT,
+				this.argumentA//
+		);
 	}
 	
 	@Override
