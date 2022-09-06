@@ -97,7 +97,7 @@ public final class Xml {
 				}
 				prevSpace = true;
 			} else //
-			if (!Format.Xml.isValidAttributeValueChar(string.charAt(i))) {
+			if (!Format.Xml.isValidAttributeValueChar(c)) {
 				return false;
 			} else {
 				prevSpace = false;
@@ -598,7 +598,7 @@ public final class Xml {
 			target.setAttribute("type", "empty");
 			return target;
 		}
-		if (value.length() < 80 && Xml.cleanStringReadable(value)) {
+		if (value.length() < 128 && Xml.cleanStringReadable(value)) {
 			target.setAttribute("type", "inner");
 			target.appendChild(doc.createTextNode(value));
 			return target;
