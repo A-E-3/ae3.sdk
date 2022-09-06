@@ -1436,14 +1436,17 @@ public final class Xml {
 			target.setAttribute("original", o.getClass().getName());
 			if (value.length() == 0) {
 				target.setAttribute("type", "empty");
-			} else //
-			if (value.length() < 128 && Format.Xml.isValidAttributeValue(value)) {
+				return target;
+			}
+			if (value.length() < 128 && Xml.cleanStringReadable(value)) {
 				target.setAttribute("type", "inner");
 				target.appendChild(doc.createTextNode(value));
-			} else {
-				Xml.createCData(doc, target, value);
+				return target;
 			}
-			return target;
+			{
+				Xml.createCData(doc, target, value);
+				return target;
+			}
 		}
 	}
 
@@ -1840,14 +1843,17 @@ public final class Xml {
 			target.setAttribute("original", o.getClass().getName());
 			if (value.length() == 0) {
 				target.setAttribute("type", "empty");
-			} else //
-			if (value.length() < 128 && Format.Xml.isValidAttributeValue(value)) {
+				return target;
+			}
+			if (value.length() < 128 && Xml.cleanStringReadable(value)) {
 				target.setAttribute("type", "inner");
 				target.appendChild(doc.createTextNode(value));
-			} else {
-				Xml.createCData(doc, target, value);
+				return target;
 			}
-			return target;
+			{
+				Xml.createCData(doc, target, value);
+				return target;
+			}
 		}
 	}
 
