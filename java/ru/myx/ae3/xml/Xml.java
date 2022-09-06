@@ -97,13 +97,18 @@ public final class Xml {
 				}
 				prevSpace = true;
 			} else //
-			if (c < 33 || c > 127
-			/** || c == 47 || c == 58 */
-					|| c == 34 || c == 38) {
+			if (!Format.Xml.isValidAttributeValueChar(string.charAt(i))) {
 				return false;
 			} else {
 				prevSpace = false;
 			}
+			/** <code>
+			if (c < 33 || c > 127 || c == 34 || c == 38) {
+				return false;
+			} else {
+				prevSpace = false;
+			}
+			</code> **/
 		}
 		return true;
 	}
@@ -576,26 +581,32 @@ public final class Xml {
 		if (readable) {
 			if (value.length() == 0) {
 				// empty
-			} else //
+				return target;
+			}
 			if (value.length() < Transfer.BUFFER_SMALL && Xml.cleanStringReadable(value)) {
 				target.appendChild(doc.createTextNode(value));
-			} else {
+				return target;
+			}
+			{
 				target.setAttribute("class", "string");
 				Xml.createCData(doc, target, value);
-			}
-		} else {
-			target.setAttribute("class", "string");
-			if (value.length() == 0) {
-				target.setAttribute("type", "empty");
-			} else //
-			if (value.length() < 80 && Format.Xml.isValidAttributeValue(value)) {
-				target.setAttribute("type", "inner");
-				target.appendChild(doc.createTextNode(value));
-			} else {
-				Xml.createCData(doc, target, value);
+				return target;
 			}
 		}
-		return target;
+		target.setAttribute("class", "string");
+		if (value.length() == 0) {
+			target.setAttribute("type", "empty");
+			return target;
+		}
+		if (value.length() < 80 && Xml.cleanStringReadable(value)) {
+			target.setAttribute("type", "inner");
+			target.appendChild(doc.createTextNode(value));
+			return target;
+		}
+		{
+			Xml.createCData(doc, target, value);
+			return target;
+		}
 	}
 
 	private static final Element toElement(//
