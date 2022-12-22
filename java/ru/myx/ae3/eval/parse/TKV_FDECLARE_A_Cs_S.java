@@ -117,7 +117,8 @@ public final class TKV_FDECLARE_A_Cs_S extends TokenValue implements ModifierArg
 			final ModifierArgument argumentA,
 			final ModifierArgument argumentB,
 			final boolean needRead,
-			final boolean directAllowed) {
+			final boolean directReadAllowed,
+			final boolean directWriteFollows) {
 
 		if (!needRead) {
 			return null;
@@ -131,6 +132,7 @@ public final class TKV_FDECLARE_A_Cs_S extends TokenValue implements ModifierArg
 			final ModifierArgument argumentA,
 			final ModifierArgument argumentB,
 			final ModifierArgument modifierValue,
+			final boolean directWrite,
 			final ResultHandler store) {
 
 		/** zero operands */
@@ -152,6 +154,7 @@ public final class TKV_FDECLARE_A_Cs_S extends TokenValue implements ModifierArg
 			final ProgramAssembly assembly,
 			final ModifierArgument argumentA,
 			final ModifierArgument argumentB,
+			final boolean directWrite,
 			final ResultHandler store//
 	) throws CompilationException {
 

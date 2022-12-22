@@ -15,71 +15,65 @@ import ru.myx.ae3.exec.ProgramAssembly;
 import ru.myx.ae3.exec.ResultHandler;
 import ru.myx.ae3.exec.ResultHandlerBasic;
 
-/**
- * @author myx
+/** @author myx
  *
  *         To change the template for this generated type comment go to
- *         Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
- */
+ *         Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments */
 public final class TKV_ASSIGN extends TokenValue {
-
+	
 	private final TokenInstruction reference;
-
+	
 	private final TokenInstruction value;
-
-	/**
-	 * @param reference
-	 * @param value
-	 */
+	
+	/** @param reference
+	 * @param value */
 	public TKV_ASSIGN(final TokenInstruction reference, final TokenInstruction value) {
+		
 		assert reference.assertStackValue();
 		assert reference.assertAccessReference();
 		assert value.assertStackValue();
 		this.reference = reference;
 		this.value = value.toExecDetachableResult();
 	}
-
+	
 	@Override
 	public final String getNotation() {
-
+		
 		return "(" + this.reference.getNotation() + " = " + this.value.getNotation() + ")";
 	}
-
+	
 	@Override
 	public final InstructionResult getResultType() {
-
+		
 		return this.value.getResultType();
 	}
-
+	
 	@Override
 	public void toAssembly(final ProgramAssembly assembly, final ModifierArgument argumentA, final ModifierArgument argumentB, final ResultHandlerBasic store) {
-
-		/**
-		 * zero operands (one operand is already embedded in this token)
-		 */
+		
+		/** zero operands (one operand is already embedded in this token) */
 		assert argumentA == null;
 		assert argumentB == null;
-
-		/**
-		 * valid store
-		 */
+		
+		/** valid store */
 		assert store != null;
-
-		final ModifierArgument modifierReference = this.reference.toReferenceReadBeforeWrite(assembly, null, null, false, true);
-
+		
+		final ModifierArgument modifierValue = this.value.toDirectModifier();
+		final boolean valueDirect = modifierValue == ModifierArguments.AA0RB;
+		
+		final ModifierArgument modifierReference = this.reference.toReferenceReadBeforeWrite(assembly, null, null, false, false, !valueDirect);
 		assert modifierReference == null;
 		// assert modifierReference != ModifierArguments.A21POP;
-
-		final ModifierArgument modifierValue = this.value.toDirectModifier();
-		if (modifierValue == ModifierArguments.AA0RB) {
+		
+		if (valueDirect) {
 			this.value.toAssembly(assembly, null, null, ResultHandler.FA_BNN_NXT);
 		}
-		this.reference.toReferenceWriteAfterRead(assembly, null, null, modifierValue, store);
+		this.reference.toReferenceWriteAfterRead(assembly, null, null, modifierValue, !valueDirect, store);
 	}
-
+	
 	@Override
 	public String toCode() {
-
+		
 		return "ASSIGN [" + this.reference + " = " + this.value + "];";
 	}
 }

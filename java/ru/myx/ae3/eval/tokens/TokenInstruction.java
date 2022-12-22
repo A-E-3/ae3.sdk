@@ -41,7 +41,7 @@ public interface TokenInstruction extends Instruction {
 
 				return TRUISH_NOT;
 			}
-			
+
 			@Override
 			public boolean matchConstant(final BaseObject constantValue) {
 
@@ -56,7 +56,7 @@ public interface TokenInstruction extends Instruction {
 
 				return TRUISH_YES;
 			}
-			
+
 			@Override
 			public boolean matchConstant(final BaseObject constantValue) {
 
@@ -74,7 +74,7 @@ public interface TokenInstruction extends Instruction {
 
 			@Override
 			public boolean matchConstant(final BaseObject constantValue) {
-				
+
 				return constantValue != BaseObject.UNDEFINED && constantValue != BaseObject.NULL;
 			}
 		},
@@ -89,7 +89,7 @@ public interface TokenInstruction extends Instruction {
 
 			@Override
 			public boolean matchConstant(final BaseObject constantValue) {
-				
+
 				return constantValue == BaseObject.UNDEFINED || constantValue == BaseObject.NULL;
 			}
 		},//
@@ -128,7 +128,7 @@ public interface TokenInstruction extends Instruction {
 		/** @param store
 		 * @return */
 		public final InstructionEditable createEditableDirect(final ResultHandler store) {
-			
+
 			return this.A01.instructionCreate(0, store);
 		}
 
@@ -164,12 +164,12 @@ public interface TokenInstruction extends Instruction {
 
 			return this.A11.instruction(ModifierArgument.forStore(direct), constant, store);
 		}
-		
+
 		/** Inverts condition
 		 *
 		 * @return */
 		public abstract ConditionType inverse();
-		
+
 		/** @param constantValue
 		 * @return */
 		public abstract boolean matchConstant(BaseObject constantValue);
@@ -458,14 +458,17 @@ public interface TokenInstruction extends Instruction {
 	 * @param argumentA
 	 * @param argumentB
 	 * @param needRead
-	 * @param directAllowed
+	 * @param directReadAllowed
+	 * @param directWriteFollows
+	 *            hint to use direct/stack store key
 	 * @return
 	 * @throws Evaluate.CompilationException */
 	default ModifierArgument toReferenceReadBeforeWrite(final ProgramAssembly assembly,
 			final ModifierArgument argumentA,
 			final ModifierArgument argumentB,
 			final boolean needRead,
-			final boolean directAllowed) throws Evaluate.CompilationException {
+			final boolean directReadAllowed,
+			final boolean directWriteFollows) throws Evaluate.CompilationException {
 
 		assert !this.isAccessReference() : "this method must be overridden for every class claims to support access reference interface, class=" + this.getClass().getName();
 		throw new UnsupportedOperationException("Not an access reference");
@@ -477,12 +480,15 @@ public interface TokenInstruction extends Instruction {
 	 * @param argumentA
 	 * @param argumentB
 	 * @param modifierValue
+	 * @param directWrite
+	 *            hint to use direct/stack store key
 	 * @param store
 	 * @throws Evaluate.CompilationException */
 	default void toReferenceWriteAfterRead(final ProgramAssembly assembly,
 			final ModifierArgument argumentA,
 			final ModifierArgument argumentB,
 			final ModifierArgument modifierValue,
+			final boolean directWrite,
 			final ResultHandler store) throws Evaluate.CompilationException {
 
 		assert !this.isAccessReference() : "this method must be overridden for every class claims to support access reference interface, class=" + this.getClass().getName();
@@ -494,11 +500,16 @@ public interface TokenInstruction extends Instruction {
 	 * @param assembly
 	 * @param argumentA
 	 * @param argumentB
+	 * @param directWrite
+	 *            hint to use direct/stack store key
 	 * @param store
-	 * @return TokenInstruction or NULL
+	 * @return TokenInstruction or NULL (regardless of `store` return NULL when nothing to clean)
 	 * @throws Evaluate.CompilationException */
-	default Instruction toReferenceWriteSkipAfterRead(final ProgramAssembly assembly, final ModifierArgument argumentA, final ModifierArgument argumentB, final ResultHandler store)
-			throws Evaluate.CompilationException {
+	default Instruction toReferenceWriteSkipAfterRead(final ProgramAssembly assembly,
+			final ModifierArgument argumentA,
+			final ModifierArgument argumentB,
+			final boolean directWrite,
+			final ResultHandler store) throws Evaluate.CompilationException {
 
 		assert !this.isAccessReference() : "this method must be overridden for every class claims to support access reference interface, class=" + this.getClass().getName();
 		throw new UnsupportedOperationException("Not an access reference");

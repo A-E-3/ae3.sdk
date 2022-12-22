@@ -67,18 +67,19 @@ public final class TKV_ASSIGN_ELAA extends TokenValue {
 		assert store != null;
 		
 		if (store == ResultHandler.FA_BNN_NXT || store == ResultHandler.FU_BNN_NXT) {
-			final ModifierArgument modifierReferenced = this.tokenLeft.toReferenceReadBeforeWrite(assembly, null, null, true, true);
+			final ModifierArgument modifierValue = this.tokenRight.toDirectModifier();
+			final boolean valueDirect = modifierValue == ModifierArguments.AA0RB;
+			final ModifierArgument modifierReferenced = this.tokenLeft.toReferenceReadBeforeWrite(assembly, null, null, true, true, false);
 			final InstructionEditable skip = modifierReferenced == ModifierArguments.AA0RB
 				? OperationsA01.XESKIPRB0_P.instructionCreate(0, ResultHandler.FA_BNN_NXT)
 				: OperationsA11.XESKIP0A_P.instructionCreate(modifierReferenced, 0, ResultHandler.FA_BNN_NXT);
 			assembly.addInstruction(skip);
 			final int rightStart = assembly.size();
-			final ModifierArgument modifierValue = this.tokenRight.toDirectModifier();
-			if (modifierValue == ModifierArguments.AA0RB) {
+			if (valueDirect) {
 				this.tokenRight.toAssembly(assembly, null, null, ResultHandler.FA_BNN_NXT);
 			}
-			this.tokenLeft.toReferenceWriteAfterRead(assembly, argumentA, argumentB, modifierValue, store);
-			final Instruction cleanupOnSkip = this.tokenLeft.toReferenceWriteSkipAfterRead(assembly, argumentA, argumentB, store);
+			this.tokenLeft.toReferenceWriteAfterRead(assembly, argumentA, argumentB, modifierValue, false, store);
+			final Instruction cleanupOnSkip = this.tokenLeft.toReferenceWriteSkipAfterRead(assembly, argumentA, argumentB, false, store);
 			if (cleanupOnSkip == null) {
 				skip.setConstant(assembly.getInstructionCount(rightStart)).setFinished();
 				return;
@@ -92,7 +93,9 @@ public final class TKV_ASSIGN_ELAA extends TokenValue {
 		}
 		
 		if (store instanceof ResultHandlerBasic.ExecutionContinue) {
-			final ModifierArgument modifierReferenced = this.tokenLeft.toReferenceReadBeforeWrite(assembly, null, null, true, true);
+			final ModifierArgument modifierValue = this.tokenRight.toDirectModifier();
+			final boolean valueDirect = modifierValue == ModifierArguments.AA0RB;
+			final ModifierArgument modifierReferenced = this.tokenLeft.toReferenceReadBeforeWrite(assembly, null, null, true, true, false);
 			
 			final ResultHandlerDirect direct = store.execDirectTransportType().handlerForStoreNext();
 			
@@ -108,12 +111,11 @@ public final class TKV_ASSIGN_ELAA extends TokenValue {
 				: OperationsA11.XESKIP0A_P.instructionCreate(modifierReferenced, 0, direct);
 			assembly.addInstruction(skip);
 			final int rightStart = assembly.size();
-			final ModifierArgument modifierValue = this.tokenRight.toDirectModifier();
-			if (modifierValue == ModifierArguments.AA0RB) {
+			if (valueDirect) {
 				this.tokenRight.toAssembly(assembly, null, null, ResultHandler.FA_BNN_NXT);
 			}
-			this.tokenLeft.toReferenceWriteAfterRead(assembly, argumentA, argumentB, modifierValue, store);
-			final Instruction cleanupOnSkip = this.tokenLeft.toReferenceWriteSkipAfterRead(assembly, argumentA, argumentB, store);
+			this.tokenLeft.toReferenceWriteAfterRead(assembly, argumentA, argumentB, modifierValue, false, store);
+			final Instruction cleanupOnSkip = this.tokenLeft.toReferenceWriteSkipAfterRead(assembly, argumentA, argumentB, false, store);
 			if (cleanupOnSkip == null) {
 				skip.setConstant(assembly.getInstructionCount(rightStart)).setFinished();
 				return;
@@ -127,19 +129,21 @@ public final class TKV_ASSIGN_ELAA extends TokenValue {
 		}
 		
 		{
-			final ModifierArgument modifierReferenced = this.tokenLeft.toReferenceReadBeforeWrite(assembly, null, null, true, true);
-			final Instruction cleanupOnSkip = this.tokenLeft.toReferenceWriteSkipAfterRead(assembly, argumentA, argumentB, store);
+			final ModifierArgument modifierValue = this.tokenRight.toDirectModifier();
+			final boolean valueDirect = modifierValue == ModifierArguments.AA0RB;
+			
+			final ModifierArgument modifierReferenced = this.tokenLeft.toReferenceReadBeforeWrite(assembly, null, null, true, true, false);
+			final Instruction cleanupOnSkip = this.tokenLeft.toReferenceWriteSkipAfterRead(assembly, argumentA, argumentB, false, store);
 			if (cleanupOnSkip == null) {
 				final InstructionEditable skip = modifierReferenced == ModifierArguments.AA0RB
 					? OperationsA01.XESKIPRB0_P.instructionCreate(0, store)
 					: OperationsA11.XESKIP0A_P.instructionCreate(modifierReferenced, 0, store);
 				assembly.addInstruction(skip);
 				final int rightStart = assembly.size();
-				final ModifierArgument modifierValue = this.tokenRight.toDirectModifier();
-				if (modifierValue == ModifierArguments.AA0RB) {
+				if (valueDirect) {
 					this.tokenRight.toAssembly(assembly, null, null, ResultHandler.FA_BNN_NXT);
 				}
-				this.tokenLeft.toReferenceWriteAfterRead(assembly, argumentA, argumentB, modifierValue, store);
+				this.tokenLeft.toReferenceWriteAfterRead(assembly, argumentA, argumentB, modifierValue, false, store);
 				skip.setConstant(assembly.getInstructionCount(rightStart)).setFinished();
 				return;
 			}
@@ -149,11 +153,10 @@ public final class TKV_ASSIGN_ELAA extends TokenValue {
 					: OperationsA11.XESKIP0A_P.instructionCreate(modifierReferenced, 0, ResultHandler.FA_BNN_NXT);
 				assembly.addInstruction(skip);
 				final int rightStart = assembly.size();
-				final ModifierArgument modifierValue = this.tokenRight.toDirectModifier();
-				if (modifierValue == ModifierArguments.AA0RB) {
+				if (valueDirect) {
 					this.tokenRight.toAssembly(assembly, null, null, ResultHandler.FA_BNN_NXT);
 				}
-				this.tokenLeft.toReferenceWriteAfterRead(assembly, argumentA, argumentB, modifierValue, store);
+				this.tokenLeft.toReferenceWriteAfterRead(assembly, argumentA, argumentB, modifierValue, false, store);
 				skip.setConstant(assembly.getInstructionCount(rightStart)).setFinished();
 				assembly.addInstruction(cleanupOnSkip);
 			}

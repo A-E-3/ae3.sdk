@@ -25,33 +25,33 @@ import ru.myx.ae3.exec.ResultHandlerDirect;
  *         To change the template for this generated type comment go to
  *         Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments */
 public final class TKV_ASSIGN_ELNA extends TokenValue {
-
+	
 	private final TokenInstruction tokenLeft;
-
+	
 	private final TokenInstruction tokenRight;
-
+	
 	/** @param reference
 	 * @param value */
 	public TKV_ASSIGN_ELNA(final TokenInstruction reference, final TokenInstruction value) {
-
+		
 		assert reference.assertStackValue();
 		assert value.assertStackValue();
 		this.tokenLeft = reference;
 		this.tokenRight = value;
 	}
-
+	
 	@Override
 	public final String getNotation() {
-
+		
 		return "(" + this.tokenLeft.getNotation() + " ??= " + this.tokenRight.getNotation() + ")";
 	}
-
+	
 	@Override
 	public final InstructionResult getResultType() {
-
+		
 		return this.tokenLeft.getResultType().merge(this.tokenRight.getResultType());
 	}
-
+	
 	@Override
 	public void toAssembly(//
 			final ProgramAssembly assembly,
@@ -59,26 +59,27 @@ public final class TKV_ASSIGN_ELNA extends TokenValue {
 			final ModifierArgument argumentB,
 			final ResultHandlerBasic store//
 	) {
-
+		
 		/** zero operands (two operand is already embedded in this token) */
 		assert argumentA == null;
 		assert argumentB == null;
 		/** valid store */
 		assert store != null;
-
+		
 		if (store == ResultHandler.FA_BNN_NXT || store == ResultHandler.FU_BNN_NXT) {
-			final ModifierArgument modifierReferenced = this.tokenLeft.toReferenceReadBeforeWrite(assembly, null, null, true, true);
+			final ModifierArgument modifierValue = this.tokenRight.toDirectModifier();
+			final boolean valueDirect = modifierValue == ModifierArguments.AA0RB;
+			final ModifierArgument modifierReferenced = this.tokenLeft.toReferenceReadBeforeWrite(assembly, null, null, true, true, false);
 			final InstructionEditable skip = modifierReferenced == ModifierArguments.AA0RB
 				? OperationsA01.XNSKIPRB1_P.instructionCreate(0, ResultHandler.FA_BNN_NXT)
 				: OperationsA11.XNSKIP1A_P.instructionCreate(modifierReferenced, 0, ResultHandler.FA_BNN_NXT);
 			assembly.addInstruction(skip);
 			final int rightStart = assembly.size();
-			final ModifierArgument modifierValue = this.tokenRight.toDirectModifier();
-			if (modifierValue == ModifierArguments.AA0RB) {
+			if (valueDirect) {
 				this.tokenRight.toAssembly(assembly, null, null, ResultHandler.FA_BNN_NXT);
 			}
-			this.tokenLeft.toReferenceWriteAfterRead(assembly, null, null, modifierValue, store);
-			final Instruction cleanupOnSkip = this.tokenLeft.toReferenceWriteSkipAfterRead(assembly, null, null, store);
+			this.tokenLeft.toReferenceWriteAfterRead(assembly, null, null, modifierValue, false, store);
+			final Instruction cleanupOnSkip = this.tokenLeft.toReferenceWriteSkipAfterRead(assembly, null, null, false, store);
 			if (cleanupOnSkip == null) {
 				skip.setConstant(assembly.getInstructionCount(rightStart)).setFinished();
 				return;
@@ -90,12 +91,12 @@ public final class TKV_ASSIGN_ELNA extends TokenValue {
 			}
 			return;
 		}
-
+		
 		if (store instanceof ResultHandlerBasic.ExecutionContinue) {
-			final ModifierArgument modifierReferenced = this.tokenLeft.toReferenceReadBeforeWrite(assembly, null, null, true, true);
-
+			final ModifierArgument modifierReferenced = this.tokenLeft.toReferenceReadBeforeWrite(assembly, null, null, true, true, false);
+			
 			final ResultHandlerDirect direct = store.execDirectTransportType().handlerForStoreNext();
-
+			
 			final ResultHandlerBasic onlyEffects = ((ResultHandlerBasic.ExecutionContinue) store).replaceEffectsOnly();
 			if (onlyEffects != null) {
 				assembly.addInstruction(
@@ -112,8 +113,8 @@ public final class TKV_ASSIGN_ELNA extends TokenValue {
 			if (modifierValue == ModifierArguments.AA0RB) {
 				this.tokenRight.toAssembly(assembly, null, null, ResultHandler.FA_BNN_NXT);
 			}
-			this.tokenLeft.toReferenceWriteAfterRead(assembly, null, null, modifierValue, store);
-			final Instruction cleanupOnSkip = this.tokenLeft.toReferenceWriteSkipAfterRead(assembly, null, null, store);
+			this.tokenLeft.toReferenceWriteAfterRead(assembly, null, null, modifierValue, false, store);
+			final Instruction cleanupOnSkip = this.tokenLeft.toReferenceWriteSkipAfterRead(assembly, null, null, false, store);
 			if (cleanupOnSkip == null) {
 				skip.setConstant(assembly.getInstructionCount(rightStart)).setFinished();
 				return;
@@ -125,10 +126,10 @@ public final class TKV_ASSIGN_ELNA extends TokenValue {
 			}
 			return;
 		}
-
+		
 		{
-			final ModifierArgument modifierReferenced = this.tokenLeft.toReferenceReadBeforeWrite(assembly, null, null, true, true);
-			final Instruction cleanupOnSkip = this.tokenLeft.toReferenceWriteSkipAfterRead(assembly, null, null, store);
+			final ModifierArgument modifierReferenced = this.tokenLeft.toReferenceReadBeforeWrite(assembly, null, null, true, true, false);
+			final Instruction cleanupOnSkip = this.tokenLeft.toReferenceWriteSkipAfterRead(assembly, null, null, false, store);
 			if (cleanupOnSkip == null) {
 				assembly.addInstruction(
 						modifierReferenced == ModifierArguments.AA0RB
@@ -138,7 +139,7 @@ public final class TKV_ASSIGN_ELNA extends TokenValue {
 				if (modifierValue == ModifierArguments.AA0RB) {
 					this.tokenRight.toAssembly(assembly, null, null, ResultHandler.FA_BNN_NXT);
 				}
-				this.tokenLeft.toReferenceWriteAfterRead(assembly, null, null, modifierValue, store);
+				this.tokenLeft.toReferenceWriteAfterRead(assembly, null, null, modifierValue, false, store);
 				return;
 			}
 			{
@@ -151,17 +152,17 @@ public final class TKV_ASSIGN_ELNA extends TokenValue {
 				if (modifierValue == ModifierArguments.AA0RB) {
 					this.tokenRight.toAssembly(assembly, null, null, ResultHandler.FA_BNN_NXT);
 				}
-				this.tokenLeft.toReferenceWriteAfterRead(assembly, null, null, modifierValue, store);
+				this.tokenLeft.toReferenceWriteAfterRead(assembly, null, null, modifierValue, false, store);
 				skip.setConstant(assembly.getInstructionCount(rightStart)).setFinished();
 				assembly.addInstruction(cleanupOnSkip);
 			}
 			return;
 		}
 	}
-
+	
 	@Override
 	public String toCode() {
-
+		
 		return "ASSIGN_ELNA [" + this.tokenLeft + " ??= " + this.tokenRight + "];";
 	}
 }

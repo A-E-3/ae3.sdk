@@ -123,7 +123,8 @@ public final class TKV_WRAP_TOKENS3 extends TokenValue {
 			final ModifierArgument argumentA,
 			final ModifierArgument argumentB,
 			final boolean needRead,
-			final boolean directAllowed) {
+			final boolean directReadAllowed,
+			final boolean directWriteFollows) {
 
 		/** zero operands (two operands are already embedded in this token) */
 		assert argumentA == null;
@@ -149,7 +150,8 @@ public final class TKV_WRAP_TOKENS3 extends TokenValue {
 					? ModifierArguments.AA0RB
 					: ModifierArguments.AE21POP,
 				needRead, //
-				directAllowed);
+				directReadAllowed,
+				directWriteFollows);
 	}
 
 	@Override
@@ -157,6 +159,7 @@ public final class TKV_WRAP_TOKENS3 extends TokenValue {
 			final ModifierArgument argumentA,
 			final ModifierArgument argumentB,
 			final ModifierArgument modifierValue,
+			final boolean directWrite,
 			final ResultHandler store) {
 
 		/** zero operands (two operands are already embedded in this token) */
@@ -173,6 +176,7 @@ public final class TKV_WRAP_TOKENS3 extends TokenValue {
 					? ModifierArguments.AA0RB
 					: ModifierArguments.AE21POP,
 				modifierValue,
+				directWrite,
 				store);
 	}
 
@@ -181,6 +185,7 @@ public final class TKV_WRAP_TOKENS3 extends TokenValue {
 			final ProgramAssembly assembly,
 			final ModifierArgument argumentA,
 			final ModifierArgument argumentB,
+			final boolean directWrite,
 			final ResultHandler store//
 	) throws CompilationException {
 

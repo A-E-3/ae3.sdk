@@ -16,18 +16,17 @@ import ru.myx.ae3.exec.ResultHandler;
 
 final class TokenStatementOutput extends TokenStatementAbstract {
 	
-	
 	private String expression;
-	
+
 	private TokenStatement token;
-	
+
 	TokenStatementOutput(final String identity, final int line) {
+		
 		super(identity, line);
 	}
-	
+
 	@Override
 	public final boolean addStatement(final TokenStatement statement) {
-		
 		
 		if (this.token == null) {
 			this.token = statement;
@@ -35,17 +34,15 @@ final class TokenStatementOutput extends TokenStatementAbstract {
 		}
 		return false;
 	}
-	
+
 	@Override
 	public final TokenStatement createStatement(final String identity, final int line) {
 		
-		
 		return new TokenStatementOutput(identity, line);
 	}
-	
+
 	@Override
 	public final void dump(final int level, final StringBuilder buffer) {
-		
 		
 		for (int i = level; i > 0; --i) {
 			buffer.append('\t');
@@ -60,59 +57,51 @@ final class TokenStatementOutput extends TokenStatementAbstract {
 			this.token.dump(level + 1, buffer);
 		}
 	}
-	
+
 	@Override
 	public final String getKeyword() {
 		
-		
 		return "output";
 	}
-	
+
 	@Override
 	public final boolean isIdentifierPossible() {
 		
-		
 		return false;
 	}
-	
+
 	@Override
 	public final boolean isIdentifierRequired() {
 		
-		
 		return false;
 	}
-	
+
 	@Override
 	public final boolean isKeywordExpectStatement() {
 		
-		
 		return true;
 	}
-	
+
 	@Override
 	public final boolean isLabelStatement() {
 		
-		
 		return false;
 	}
-	
+
 	@Override
 	public boolean isNextStatementFromScratch() {
 		
-		
 		return this.expression != null;
 	}
-	
+
 	@Override
 	public boolean isTotallyComplete() {
 		
-		
 		return this.token != null && this.expression != null;
 	}
-	
+
 	@Override
 	public final boolean setArguments(final String expression) {
-		
 		
 		if (this.expression == null) {
 			this.expression = expression.trim();
@@ -120,26 +109,23 @@ final class TokenStatementOutput extends TokenStatementAbstract {
 		}
 		return false;
 	}
-	
+
 	@Override
 	public final boolean setIdentifier(final String identifier) {
 		
-		
 		return false;
 	}
-	
+
 	@Override
 	public final boolean setLocals(final BaseObject locals) {
-		
 		
 		return this.parent == null
 			? false
 			: this.parent.setLocals(locals);
 	}
-	
+
 	@Override
 	public final void toAssembly(final ProgramAssembly assembly, final int startOffset) throws Exception {
-		
 		
 		this.addDebug(assembly, "$output( " + this.expression + " )");
 		if (this.expression == null) {
@@ -162,7 +148,7 @@ final class TokenStatementOutput extends TokenStatementAbstract {
 				assembly.addError("Reference (lvalue) required (or 'null' if output should be ignored)!");
 				return;
 			}
-			reference.toReferenceReadBeforeWrite(assembly, null, null, false, true);
+			reference.toReferenceReadBeforeWrite(assembly, null, null, false, false, false);
 			assembly.addInstruction(Instructions.INSTR_FOTBLDR_0_SN_NEXT);
 		}
 		final InstructionEditable frameStart = OperationsA01.XEENTRNONE_P.instructionCreate(0, ResultHandler.FA_BNN_NXT);
@@ -178,7 +164,7 @@ final class TokenStatementOutput extends TokenStatementAbstract {
 		assembly.addInstruction(Instructions.INSTR_ELEAVE_1_NN_NEXT);
 		assembly.addInstruction(Instructions.INSTR_FOTDONE_B_1_S_NN_NEXT);
 		if (reference != null) {
-			reference.toReferenceWriteAfterRead(assembly, null, null, ModifierArguments.AA0RB, ResultHandler.FA_BNN_NXT);
+			reference.toReferenceWriteAfterRead(assembly, null, null, ModifierArguments.AA0RB, false, ResultHandler.FA_BNN_NXT);
 		}
 	}
 }

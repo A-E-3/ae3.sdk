@@ -22,18 +22,18 @@ import ru.myx.ae3.exec.ResultHandlerBasic;
  *         To change the template for this generated type comment go to
  *         Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments */
 public final class TKV_ASSIGN_ARMW extends TokenValue {
-	
+
 	private final TokenInstruction reference;
-	
+
 	private final TokenInstruction operation;
-	
+
 	private final TokenInstruction value;
-	
+
 	/** @param reference
 	 * @param modify
 	 * @param write */
 	public TKV_ASSIGN_ARMW(final TokenInstruction reference, final TokenInstruction modify, final TokenInstruction write) {
-		
+
 		assert reference.assertStackValue();
 		assert modify.getOperandCount() == 2 : "NO WRAP_IMPL_ASSIGNMENT NEEDED THEN";
 		assert modify.getResultCount() == 1;
@@ -42,20 +42,20 @@ public final class TKV_ASSIGN_ARMW extends TokenValue {
 		this.operation = modify.toExecDetachableResult();
 		this.value = write;
 	}
-	
+
 	@Override
 	public final String getNotation() {
-		
+
 		return "(" + this.reference.getNotation() + " " + this.operation.getNotation() + " " + this.value.getNotation() + " /* ASSIGN1C, class="
 				+ this.operation.getClass().getName() + " */)";
 	}
-	
+
 	@Override
 	public final InstructionResult getResultType() {
-		
+
 		return this.value.getResultType();
 	}
-	
+
 	@Override
 	public void toAssembly(//
 			final ProgramAssembly assembly,
@@ -63,13 +63,13 @@ public final class TKV_ASSIGN_ARMW extends TokenValue {
 			final ModifierArgument argumentB,
 			final ResultHandlerBasic store//
 	) {
-		
+
 		/** zero operands (two operand is already embedded in this token) */
 		assert argumentA == null;
 		assert argumentB == null;
 		/** valid store */
 		assert store != null;
-		
+
 		final boolean directSupport = this.operation.isDirectSupported();
 		final ModifierArgument modifierValue = this.value.toDirectModifier();
 		final boolean directValue = modifierValue == ModifierArguments.AA0RB;
@@ -78,7 +78,8 @@ public final class TKV_ASSIGN_ARMW extends TokenValue {
 				argumentA,
 				argumentB,
 				true,
-				directSupport && !directValue//
+				directSupport && !directValue,
+				false //
 		);
 		if (directValue) {
 			this.value.toAssembly(
@@ -96,12 +97,12 @@ public final class TKV_ASSIGN_ARMW extends TokenValue {
 					? ModifierArguments.AE21POP
 					: modifierValue,
 				ResultHandler.FA_BNN_NXT);
-		this.reference.toReferenceWriteAfterRead(assembly, argumentA, argumentB, ModifierArguments.AA0RB, store);
+		this.reference.toReferenceWriteAfterRead(assembly, argumentA, argumentB, ModifierArguments.AA0RB, false, store);
 	}
-	
+
 	@Override
 	public String toCode() {
-		
+
 		return "ASSIGN_ARMW [" + this.value + ", " + this.operation + "];";
 	}
 }

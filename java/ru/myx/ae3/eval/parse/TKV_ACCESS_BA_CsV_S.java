@@ -24,56 +24,56 @@ import ru.myx.ae3.help.Format;
  *         To change the template for this generated type comment go to
  *         Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments */
 public final class TKV_ACCESS_BA_CsV_S extends TokenValue {
-
+	
 	private final TokenInstruction argumentA;
-
+	
 	private final BasePrimitiveString argumentB;
-
+	
 	private int visibility = 0;
-
+	
 	/** @param argumentA
 	 * @param argumentB */
 	public TKV_ACCESS_BA_CsV_S(final TokenInstruction argumentA, final BasePrimitiveString argumentB) {
-
+		
 		assert argumentA.isStackValue();
 		this.argumentA = argumentA;
 		this.argumentB = argumentB;
 	}
-
+	
 	@Override
 	public final String getNotation() {
-
+		
 		return this.argumentA.getNotationValue() + "[" + Format.Ecma.string(this.argumentB) + "]";
 	}
-
+	
 	@Override
 	public final String getNotationValue() {
-
+		
 		return this.argumentA.getNotationValue() + "[" + Format.Ecma.string(this.argumentB) + "]";
 	}
-
+	
 	@Override
 	public final InstructionResult getResultType() {
-
+		
 		return InstructionResult.OBJECT;
 	}
-
+	
 	@Override
 	public final boolean isAccessReference() {
-
+		
 		return true;
 	}
-
+	
 	@Override
 	public void toAssembly(final ProgramAssembly assembly, final ModifierArgument argumentA, final ModifierArgument argumentB, final ResultHandlerBasic store) {
-
+		
 		/** zero operands */
 		assert argumentA == null;
 		assert argumentB == null;
-
+		
 		/** valid store */
 		assert store != null;
-
+		
 		final ModifierArgument modifierA = this.argumentA.toDirectModifier();
 		final ModifierArgument modifierB = new TKV_LCONSTS(this.argumentB);
 		final boolean directA = modifierA == ModifierArguments.AA0RB;
@@ -100,61 +100,66 @@ public final class TKV_ACCESS_BA_CsV_S extends TokenValue {
 						)//
 		);
 	}
-
+	
 	@Override
 	public final String toCode() {
-
+		
 		return "ACCESS\t0\tVC ->S\t[" + this.argumentA + ", " + this.argumentB + "];";
 	}
-
+	
 	@Override
 	public TokenInstruction toExecDetachableResult() {
-
+		
 		this.visibility = 1;
 		return this;
 	}
-
+	
 	@Override
 	public TokenInstruction toExecNativeResult() {
-
+		
 		this.visibility = 2;
 		return this;
 	}
-
+	
 	@Override
 	public TokenInstruction toReferenceDelete() {
-
+		
 		return new TKV_DELETE_BA_VV_S(this.argumentA, ParseConstants.getConstantValue(this.argumentB));
 	}
-
+	
 	@Override
 	public TokenInstruction toReferenceObject() {
-
+		
 		return this.argumentA;
 	}
-
+	
 	@Override
 	public TokenInstruction toReferenceProperty() {
-
+		
 		return ParseConstants.getConstantValue(this.argumentB);
 	}
-
+	
 	@Override
 	public ModifierArgument toReferenceReadBeforeWrite(final ProgramAssembly assembly,
 			final ModifierArgument argumentA,
 			final ModifierArgument argumentB,
 			final boolean needRead,
-			final boolean directAllowed) {
-
+			final boolean directReadAllowed,
+			final boolean directWriteFollows) {
+		
 		assert argumentA == null;
 		assert argumentB == null;
+		
 		final ModifierArgument modifierA = this.argumentA.toDirectModifier();
-		final ModifierArgument modifierB = new TKV_LCONSTS(this.argumentB);
 		final boolean directA = modifierA == ModifierArguments.AA0RB;
-		if (directA) {
-			this.argumentA.toAssembly(assembly, null, null, ResultHandler.FB_BSN_NXT);
-		}
+		
 		if (needRead) {
+			assert !directWriteFollows;
+			if (directA) {
+				this.argumentA.toAssembly(assembly, null, null, ResultHandler.FB_BSN_NXT);
+			}
+			final ModifierArgument modifierB = new TKV_LCONSTS(this.argumentB);
+			assert !directWriteFollows;
 			assembly.addInstruction(
 					(this.visibility == 2
 						? OperationsS2X.VACCESS_NS
@@ -165,23 +170,34 @@ public final class TKV_ACCESS_BA_CsV_S extends TokenValue {
 											: modifierA, //
 										modifierB,
 										0,
-										directAllowed
+										directReadAllowed
 											? ResultHandler.FA_BNN_NXT
 											: ResultHandler.FB_BSN_NXT));
-			return directAllowed
+			return directReadAllowed
 				? ModifierArguments.AA0RB
 				: ModifierArguments.AE21POP;
 		}
+		assert !directReadAllowed;
+		if (directA) {
+			this.argumentA.toAssembly(
+					assembly,
+					null,
+					null,
+					directWriteFollows
+						? ResultHandler.FA_BNN_NXT
+						: ResultHandler.FB_BSN_NXT);
+		}
 		return null;
 	}
-
+	
 	@Override
 	public void toReferenceWriteAfterRead(final ProgramAssembly assembly,
 			final ModifierArgument argumentA,
 			final ModifierArgument argumentB,
 			final ModifierArgument modifierValue,
+			final boolean directWrite,
 			final ResultHandler store) {
-
+		
 		assert argumentA == null;
 		assert argumentB == null;
 		assert modifierValue != null;
@@ -192,26 +208,29 @@ public final class TKV_ACCESS_BA_CsV_S extends TokenValue {
 				OperationsS3X.VASTORE_NS//
 						.instruction(
 								directA
-									? ModifierArguments.AE21POP
+									? directWrite
+										? modifierA
+										: ModifierArguments.AE21POP
 									: modifierA, //
 								modifierB,
 								modifierValue,
 								0,
 								store));
 	}
-
+	
 	@Override
 	public Instruction toReferenceWriteSkipAfterRead(//
 			final ProgramAssembly assembly,
 			final ModifierArgument argumentA,
 			final ModifierArgument argumentB,
+			final boolean directWrite,
 			final ResultHandler store//
 	) {
-
+		
 		assert argumentA == null;
 		assert argumentB == null;
 		final ModifierArgument modifierA = this.argumentA.toDirectModifier();
-		if (modifierA == ModifierArguments.AA0RB) {
+		if (modifierA == ModifierArguments.AA0RB && !directWrite) {
 			return OperationsA00.XCVOID_P.instruction(
 					store.isStackPush()
 						? 2

@@ -49,12 +49,12 @@ class TKV_ACCESSPOSTDEC extends TokenValue {
 		/** valid store */
 		assert store != null;
 		
-		final ModifierArgument modifierReferenced = this.reference.toReferenceReadBeforeWrite(assembly, null, null, true, true);
+		final ModifierArgument modifierReferenced = this.reference.toReferenceReadBeforeWrite(assembly, null, null, true, true, false);
 		assembly.addInstruction(
 				modifierReferenced == ModifierArguments.AA0RB
 					? Instructions.INSTR_MSUB_D_BA_1R_V
 					: OperationsS2X.VMSUB_D.instruction(modifierReferenced, ModifierArgumentA30IMM.ONE, 0, ResultHandler.FA_BNN_NXT));
-		this.reference.toReferenceWriteAfterRead(assembly, null, null, ModifierArguments.AA0RB, ResultHandler.FA_BNN_NXT);
+		this.reference.toReferenceWriteAfterRead(assembly, null, null, ModifierArguments.AA0RB, false, ResultHandler.FA_BNN_NXT);
 		/** FIXME fucking cheat */
 		assembly.addInstruction(//
 				store == ResultHandler.FA_BNN_NXT
