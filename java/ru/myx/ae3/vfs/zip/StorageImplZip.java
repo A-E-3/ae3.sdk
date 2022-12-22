@@ -21,14 +21,14 @@ import ru.myx.ae3.report.Report;
 import ru.myx.ae3.vfs.TreeLinkType;
 import ru.myx.ae3.vfs.TreeReadType;
 import ru.myx.ae3.vfs.VfsDefaultLimitSortMatcher;
-import ru.myx.ae3.vfs.ars.AbstractStorageImplReadOnly;
+import ru.myx.ae3.vfs.ars.AbstractArsStorageReadOnly;
 import ru.myx.io.InputStreamNoCloseFilter;
 
 /**
  * @author myx
  * 
  */
-public final class StorageImplZip extends AbstractStorageImplReadOnly<RecordZip, ReferenceZip, ArrayZip> {
+public final class StorageImplZip extends AbstractArsStorageReadOnly<RecordZip, ReferenceZip, ArrayZip> {
 	
 	String													identity;
 	

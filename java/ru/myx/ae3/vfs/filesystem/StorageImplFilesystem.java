@@ -17,11 +17,14 @@ import ru.myx.ae3.know.Guid;
 import ru.myx.ae3.report.Report;
 import ru.myx.ae3.vfs.TreeLinkType;
 import ru.myx.ae3.vfs.TreeReadType;
-import ru.myx.ae3.vfs.ars.ArsStorageImpl;
+import ru.myx.ae3.vfs.ars.ArsStorage;
 import ru.myx.ae3.vfs.ars.ArsTransactionBuffered;
 
 /** @author myx */
-public final class StorageImplFilesystem implements ArsStorageImpl<RecordFilesystem, ReferenceFilesystem, ArrayFilesystem> {
+public final class StorageImplFilesystem //
+		implements
+			ArsStorage<RecordFilesystem, ReferenceFilesystem, ArrayFilesystem> //
+{
 
 	private static final byte[] HASH_SPACE_GUID_CRLF_ASCII_BYTES = "# GUID\r\n".getBytes(StandardCharsets.US_ASCII);
 

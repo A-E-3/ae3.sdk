@@ -12,10 +12,12 @@ import ru.myx.ae3.common.Value;
 import ru.myx.ae3.vfs.TreeLinkType;
 import ru.myx.ae3.vfs.TreeReadType;
 import ru.myx.ae3.vfs.VfsDefaultLimitSortMatcher;
-import ru.myx.ae3.vfs.ars.AbstractStorageImplReadOnly;
+import ru.myx.ae3.vfs.ars.AbstractArsStorageReadOnly;
 
 /** @author myx */
-public final class StorageImplResources extends AbstractStorageImplReadOnly<RecordResources, ReferenceResources, ArrayResources> {
+public final class StorageImplResources //
+		extends
+			AbstractArsStorageReadOnly<RecordResources, ReferenceResources, ArrayResources> {
 
 	private final Class<?> anchor;
 

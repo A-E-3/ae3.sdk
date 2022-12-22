@@ -10,10 +10,10 @@ import ru.myx.ae3.status.StatusProviderFiller;
 import ru.myx.ae3.vfs.TreeLinkType;
 import ru.myx.ae3.vfs.TreeReadType;
 import ru.myx.ae3.vfs.VfsDefaultLimitSortMatcher;
-import ru.myx.ae3.vfs.ars.AbstractStorageImplReadOnly;
+import ru.myx.ae3.vfs.ars.AbstractArsStorageReadOnly;
 
 /** @author myx */
-public class StorageImplStatus extends AbstractStorageImplReadOnly<RecordStatus, ReferenceStatus, ArrayStatus> {
+public class StorageImplStatus extends AbstractArsStorageReadOnly<RecordStatus, ReferenceStatus, ArrayStatus> {
 
 	private final StatusProvider provider;
 
