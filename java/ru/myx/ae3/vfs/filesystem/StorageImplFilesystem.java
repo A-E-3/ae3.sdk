@@ -104,12 +104,17 @@ public final class StorageImplFilesystem //
 
 	@Override
 	public Value<ReferenceFilesystem> doLinkDelete(final ReferenceFilesystem template, final RecordFilesystem object, final RecordFilesystem key, final TreeLinkType mode) {
-
-		if (template.target.file.exists()) {
-			template.target.file.delete();
+		
+		if (template != null) {
+			if (template.target.file.exists()) {
+				template.target.file.delete();
+			}
+			return template;
 		}
-		/** file deleted - nothing to do */
-		return template;
+		if (object != null && key != null) {
+			new File(object.file, key.getKeyString()).delete();
+		}
+		return Base.forNull();
 	}
 
 	@Override
