@@ -89,6 +89,8 @@ final class TKO_ACALLS_CBA_AVS_S extends TokenOperator {
 		/** argumentA is access source, this.argumentB is access key */
 		assert argumentA != null;
 		assert argumentB == null;
+		
+		assert argumentA != ModifierArguments.AA0RB;
 
 		final ModifierArgument accessPropertyModifier = this.accessProperty.toDirectModifier();
 		final boolean accessPropertyDirect = accessPropertyModifier == ModifierArguments.AA0RB;

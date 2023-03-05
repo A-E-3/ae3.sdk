@@ -9,7 +9,6 @@ package ru.myx.ae3.eval.parse;
 import ru.myx.ae3.eval.Evaluate;
 import ru.myx.ae3.eval.tokens.TokenInstruction;
 import ru.myx.ae3.eval.tokens.TokenSyntax;
-import ru.myx.ae3.eval.tokens.TokenValue;
 import ru.myx.ae3.exec.ProgramAssembly;
 
 /** @author myx */
@@ -48,9 +47,6 @@ final class TKS_EOCO extends TokenSyntax {
 		// System.out.println(">>> >>> TKS_EOCO TSV: a: " + argumentA + ", b: " + argumentB + ",
 		// effectsOnly: " + sideEffectsOnly + ", bClass: " + argumentB.getClass().getName());
 
-		if (argumentB instanceof TokenValue.SyntacticallyFrameAccess) {
-			return new TKV_EOCO(argumentA.toExecDetachableResult(), ((TokenValue.SyntacticallyFrameAccess) argumentB).getDirectChainingAccessReplacement());
-		}
 		return new TKV_EOCO(argumentA.toExecDetachableResult(), argumentB);
 	}
 }

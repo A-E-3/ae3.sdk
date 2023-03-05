@@ -9,6 +9,7 @@ package ru.myx.ae3.eval.parse;
 import ru.myx.ae3.eval.tokens.TokenInstruction;
 import ru.myx.ae3.eval.tokens.TokenValue;
 import ru.myx.ae3.exec.InstructionResult;
+import ru.myx.ae3.exec.Instructions;
 import ru.myx.ae3.exec.ModifierArgument;
 import ru.myx.ae3.exec.ModifierArguments;
 import ru.myx.ae3.exec.OperationsA2X;
@@ -51,15 +52,29 @@ final class TKV_ACALLV_BA_VM_S extends TokenValue {
 		assert argumentA == null;
 		assert argumentB == null;
 		
+		final ModifierArgument modifierA = this.accessObjectModifier;
+		final boolean directA = modifierA == ModifierArguments.AA0RB;
+
 		final ModifierArgument modifierB = this.argumentB.toDirectModifier();
-		if (modifierB == ModifierArguments.AA0RB) {
+		final boolean directB = modifierB == ModifierArguments.AA0RB;
+		
+		if (directA && directB) {
+			assembly.addInstruction(Instructions.INSTR_LOAD_1_R_SN_NEXT);
+		}
+		if (directB) {
 			this.argumentB.toAssembly(assembly, null, null, ResultHandler.FA_BNN_NXT);
 		}
 		assembly.addInstruction(
 				(this.argumentB.getResultType() == InstructionResult.STRING
 					? OperationsS2X.VACALLS_XS
 					: OperationsA2X.XACALLS)//
-							.instruction(this.accessObjectModifier, modifierB, 0, store));
+							.instruction(
+									directA && directB
+										? ModifierArguments.AE21POP
+										: modifierA,
+									modifierB,
+									0,
+									store));
 	}
 	
 	@Override

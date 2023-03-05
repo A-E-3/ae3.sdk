@@ -13,6 +13,35 @@ import ru.myx.vm_vliw32_2010.OperationA10;
 /** @author myx */
 public enum OperationsS10 implements OperationA10 {
 	
+	/** direct string */
+	VACALLTS_XS {
+
+		@Override
+
+		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final int constant, final ResultHandler store) {
+
+			/** sorry, no gain from knowing that argumentA instance of CHarSequence 8( **/
+			return ctx.vmCallTS(argumentA, constant, store);
+		}
+
+		@Override
+		public final InstructionResult getResultType() {
+
+			return InstructionResult.OBJECT;
+		}
+
+		@Override
+		public final int getStackInputCount(final int constant) {
+
+			return constant;
+		}
+
+		@Override
+		public final boolean isConstantForArguments() {
+
+			return false;
+		}
+	},
 	/** macro for: MADD 0, a */
 	VCVTN_D {
 		

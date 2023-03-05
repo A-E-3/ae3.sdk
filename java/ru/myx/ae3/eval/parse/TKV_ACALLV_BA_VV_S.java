@@ -50,8 +50,10 @@ final class TKV_ACALLV_BA_VV_S extends TokenValue {
 		
 		final ModifierArgument modifierA = this.accessObject.toDirectModifier();
 		final ModifierArgument modifierB = this.argumentB.toDirectModifier();
+		
 		final boolean directA = modifierA == ModifierArguments.AA0RB;
 		final boolean directB = modifierB == ModifierArguments.AA0RB;
+		
 		if (directA) {
 			this.accessObject.toAssembly(
 					assembly,

@@ -329,7 +329,7 @@ public class ProgramAssembly {
 	 * @return stack result count
 	 * @throws Exception */
 	public TokenInstruction compileExpression(final List<TokenInstruction> precompiled, final BalanceType balanceType) throws Exception {
-
+		
 		/** <code>
 		System.out.println( ">>>>> expression ("
 				+ balanceType
@@ -429,9 +429,14 @@ public class ProgramAssembly {
 						final TokenInstruction[] tokens = new TokenInstruction[found];
 						System.arraycopy(this.compilerTokens, operatorCount, tokens, 0, found);
 						this.compilerPointerOperator = operatorCount;
-						return tokens.length < 16
+						final int tokenCount = tokens.length;
+						if (tokenCount == 1) {
+							return new TKV_CARRAY1(tokens[0]);
+						}
+						return tokenCount < 16
 							? new TKV_CARRAYX_ON_STACK(tokens)
-							: new TKV_CARRAYX_BY_PUSH(tokens);
+							: new TKV_CARRAYX_BY_PUSH(tokens) //
+						;
 					}
 					if (balanceType == BalanceType.ARGUMENT_LIST) {
 						final TokenInstruction[] tokens = new TokenInstruction[found];
@@ -550,7 +555,7 @@ public class ProgramAssembly {
 						this.compilerPushOperator(token);
 						continue expression;
 					}
-
+					
 					final int length = ProgramAssembly.compilerSearchInSource(precompiled, exprLength, i, token.getPriorityRight());
 					final TokenInstruction rightHand = this.compileExpression(precompiled.subList(i + 1, length), BalanceType.EXPRESSION);
 					// System.out.println( ">>> >>> assign " + token +
@@ -582,7 +587,7 @@ public class ProgramAssembly {
 					System.out.println(">>>>>> syntax " + token);
 					</code> */
 					if (token instanceof TokenSyntax.ConditionalStackValuable) {
-
+						
 						final int length = ProgramAssembly.compilerSearchInSource(//
 								precompiled,
 								exprLength,
@@ -678,9 +683,9 @@ public class ProgramAssembly {
 							this.compilerPushValue(error);
 							break expression;
 						}
-
+						
 						final TokenInstruction leftHand = this.compilerPopValue(valueCount);
-
+						
 						if (length == i + 1) {
 							final TKV_ERROR_A_C_E error = new TKV_ERROR_A_C_E(token + ": rightHand side expected");
 							this.compilerTruncateAll(operatorCount, valueCount);
@@ -690,26 +695,13 @@ public class ProgramAssembly {
 						final List<TokenInstruction> subList;
 						{
 							final List<TokenInstruction> rightHandCode = precompiled.subList(i + 1, length);
-							final TokenInstruction firstToken = rightHandCode.get(0);
-							if (firstToken == ParseConstants.TKV_DIRECT) {
-								subList = rightHandCode;
-								// System.out.println(">>> >>> syntax TKS_EOCO#1 " + token + ", sub:
-								// " + subList);
-							} else if (firstToken instanceof final TokenValue.SyntacticallyFrameAccess firstTokenFrameAccess) {
-								subList = new ArrayList<>(length - i - 1);
-								subList.addAll(rightHandCode);
-								subList.set(0, firstTokenFrameAccess.getDirectChainingAccessReplacement());
-								// System.out.println(">>> >>> syntax TKS_EOCO#2 " + token + ", sub:
-								// " + subList);
-							} else {
-								subList = new ArrayList<>(length - i);
-								subList.add(ParseConstants.TKV_DIRECT);
-								subList.addAll(rightHandCode);
-								// System.out.println(">>> >>> syntax TKS_EOCO#3 " + token + ", sub:
-								// " + subList);
-							}
+							
+							subList = new ArrayList<>(length - i - 1);
+							subList.addAll(rightHandCode);
+							// System.out.println(">>> >>> syntax TKS_EOCO#0 " + token + ", sub: " +
+							// subList);
 						}
-
+						
 						final TokenInstruction rightHand = this.compileExpression(
 								subList,
 								balanceType != BalanceType.STATEMENT

@@ -32,23 +32,23 @@ public enum OperationsA10 implements OperationA10 {
 	 *
 	 */
 	XBCVT_N {
-		
+
 		@Override
-		
+
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final int constant, final ResultHandler store) {
-			
+
 			return store.execReturn(ctx, argumentA.baseToBoolean());
 		}
-		
+
 		@Override
 		public final InstructionResult getResultType() {
-			
+
 			return InstructionResult.BOOLEAN;
 		}
-		
+
 		@Override
 		public boolean isConstantForArguments() {
-			
+
 			return true;
 		}
 	},
@@ -56,23 +56,23 @@ public enum OperationsA10 implements OperationA10 {
 	 *
 	 */
 	XBNOT_N {
-		
+
 		@Override
-		
+
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final int constant, final ResultHandler store) {
-			
+
 			return store.execReturnBoolean(ctx, !argumentA.baseToJavaBoolean());
 		}
-		
+
 		@Override
 		public final InstructionResult getResultType() {
-			
+
 			return InstructionResult.BOOLEAN;
 		}
-		
+
 		@Override
 		public boolean isConstantForArguments() {
-			
+
 			return true;
 		}
 	},
@@ -80,33 +80,33 @@ public enum OperationsA10 implements OperationA10 {
 	 *
 	 */
 	XCARRAYX_N {
-		
+
 		@Override
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final int constant, final ResultHandler store) {
-			
+
 			return store.execReturn(
 					ctx,
 					constant == 1
 						? new BaseNativeArray(argumentA)
 						: new BaseNativeArray(constant, argumentA));
 		}
-		
+
 		@Override
 		public final InstructionResult getResultType() {
-			
+
 			return InstructionResult.ARRAY;
 		}
-		
+
 	},
 	/**
 	 *
 	 */
 	XCOBJECT_N {
-		
+
 		@Override
-		
+
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final int constant, final ResultHandler store) {
-			
+
 			if (argumentA == BaseObject.UNDEFINED) {
 				return ctx.vmRaise("Constructor is undefined!");
 			}
@@ -135,7 +135,7 @@ public enum OperationsA10 implements OperationA10 {
 					result.baseDefine(BaseString.STR_CONSTRUCTOR, BaseFunction.RETURN_UNDEFINED, BaseProperty.ATTRS_MASK_NNN);
 				}
 			}
-			
+
 			if (constant > 0) {
 				final BaseObject[] stack = ctx.stackRaw();
 				final int rASP = ctx.ri0ASP;
@@ -154,16 +154,16 @@ public enum OperationsA10 implements OperationA10 {
 			}
 			return store.execReturn(ctx, result);
 		}
-		
+
 		@Override
 		public final InstructionResult getResultType() {
-			
+
 			return InstructionResult.OBJECT;
 		}
-		
+
 		@Override
 		public final int getStackInputCount(final int constant) {
-			
+
 			return constant * 2;
 		}
 	},
@@ -171,11 +171,11 @@ public enum OperationsA10 implements OperationA10 {
 	 *
 	 */
 	XCSCOPE_N {
-		
+
 		@Override
-		
+
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final int constant, final ResultHandler store) {
-			
+
 			assert !argumentA.baseIsPrimitive() : "Must not be a primitive: " + Format.Describe.toEcmaSource(argumentA, "");
 			final BaseObject result = ctx.vmScopeCreateMixIn(argumentA);
 			if (constant == 0) {
@@ -197,28 +197,59 @@ public enum OperationsA10 implements OperationA10 {
 			ctx.ri0ASP -= constant * 2;
 			return store.execReturn(ctx, result);
 		}
-		
+
 		@Override
 		public final InstructionResult getResultType() {
-			
+
 			return InstructionResult.OBJECT;
 		}
-		
+
 		@Override
 		public final int getStackInputCount(final int constant) {
-			
+
 			return constant * 2;
+		}
+	},
+
+	/**
+	 *
+	 */
+	XACALLTS {
+
+		@Override
+
+		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final int constant, final ResultHandler store) {
+
+			return ctx.vmCallTS(argumentA, constant, store);
+		}
+
+		@Override
+		public final InstructionResult getResultType() {
+
+			return InstructionResult.OBJECT;
+		}
+
+		@Override
+		public final int getStackInputCount(final int constant) {
+
+			return constant;
+		}
+
+		@Override
+		public final boolean isConstantForArguments() {
+
+			return false;
 		}
 	},
 	/**
 	 *
 	 */
 	XFCALLS {
-		
+
 		@Override
-		
+
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final int constant, final ResultHandler store) {
-			
+
 			final BaseFunction callee = argumentA.baseCall();
 			if (callee == null) {
 				if (argumentA == BaseObject.UNDEFINED) {
@@ -228,32 +259,32 @@ public enum OperationsA10 implements OperationA10 {
 			}
 			return ctx.vmCallS(callee, ctx.contextImplicitThisValue(), constant, store);
 		}
-		
+
 		@Override
 		public final InstructionResult getResultType() {
-			
+
 			return InstructionResult.OBJECT;
 		}
-		
+
 		@Override
 		public final int getStackInputCount(final int constant) {
-			
+
 			return constant;
 		}
-		
+
 		@Override
 		public final boolean isConstantForArguments() {
-			
+
 			return false;
 		}
 	},
 	/** argument is either a local variable name either an array of variable names */
 	XFDECLARE_N {
-		
+
 		@Override
-		
+
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final int constant, final ResultHandler store) {
-			
+
 			if (argumentA instanceof CharSequence) {
 				ctx.contextCreateMutableBinding(argumentA.baseToString(), BaseObject.UNDEFINED, false);
 				return store.execReturnUndefined(ctx);
@@ -270,69 +301,69 @@ public enum OperationsA10 implements OperationA10 {
 			}
 			return ctx.vmRaise("Invalid argument type: class=" + argumentA.getClass().getName());
 		}
-		
+
 		@Override
 		public final InstructionResult getResultType() {
-			
+
 			return InstructionResult.UNDEFINED;
 		}
-		
+
 	},
 	/**
 	 *
 	 */
 	XFDELETE_N {
-		
+
 		@Override
-		
+
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final int constant, final ResultHandler store) {
-			
+
 			return store.execReturnBoolean(ctx, ctx.contextDeleteBinding(argumentA.baseToJavaString()));
 		}
-		
+
 		@Override
 		public final InstructionResult getResultType() {
-			
+
 			return InstructionResult.BOOLEAN;
 		}
-		
+
 	},
 	/**
 	 *
 	 */
 	XFLOAD_P {
-		
+
 		@Override
 		public OperationA10 execNativeResult() {
-			
+
 			return OperationsS10.VFLOAD_N;
 		}
-		
+
 		@Override
 		public OperationA10 execStackResult() {
-			
+
 			return OperationsS10.VFLOAD_D;
 		}
-		
+
 		@Override
-		
+
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final int constant, final ResultHandler store) {
-			
+
 			return store.execReturn(ctx, argumentA);
 		}
-		
+
 		@Override
 		public final InstructionResult getResultType() {
-			
+
 			return InstructionResult.OBJECT;
 		}
-		
+
 		@Override
 		public InstructionIA instruction(final BaseObject constantArgumentA, final ModifierArgument originalArgumentA, final int constant, final ResultHandler store) {
-			
+
 			assert constant == 0 //
 					: this.name() + " constant must be 0";
-			
+
 			if (store == ResultHandler.FA_BNN_NXT) {
 				return new IA10_XLOAD_P_O_0_NN_NXT(constantArgumentA);
 			}
@@ -344,10 +375,10 @@ public enum OperationsA10 implements OperationA10 {
 			}
 			return super.instruction(constantArgumentA, originalArgumentA, constant, store);
 		}
-		
+
 		@Override
 		public InstructionIA instruction(final ModifierArgument argumentA, final int constant, final ResultHandler store) {
-			
+
 			if (constant == 0) {
 				if (store == ResultHandler.FB_BSN_NXT) {
 					final BasePrimitiveString framePropertyName = argumentA.argumentAccessFramePropertyName();
@@ -364,10 +395,10 @@ public enum OperationsA10 implements OperationA10 {
 			}
 			return super.instruction(argumentA, constant, store);
 		}
-		
+
 		@Override
 		public boolean isConstantForArguments() {
-			
+
 			return true;
 		}
 	},
@@ -375,10 +406,10 @@ public enum OperationsA10 implements OperationA10 {
 	 *
 	 */
 	XFOTDONE {
-		
+
 		@Override
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final int constant, final ResultHandler store) {
-			
+
 			try {
 				final BaseFunction result = ctx.execOutputReplace(
 						argumentA == BaseObject.NULL
@@ -391,20 +422,20 @@ public enum OperationsA10 implements OperationA10 {
 				return ctx.vmRaise("Function object was expected, class: " + argumentA.getClass().getSimpleName());
 			}
 		}
-		
+
 		@Override
 		public final InstructionResult getResultType() {
-			
+
 			return InstructionResult.STRING;
 		}
 	},
 	/** add & store then get */
 	XFSADDGET_N {
-		
+
 		@Override
-		
+
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentB, final int constant, final ResultHandler store) {
-			
+
 			final BasePrimitiveNumber result;
 			if (argumentB instanceof final BasePrimitiveString key) {
 				final BasePrimitiveNumber leftHand = ctx.contextGetBindingValue(key, false).baseToNumber();
@@ -436,26 +467,26 @@ public enum OperationsA10 implements OperationA10 {
 			}
 			return store.execReturn(ctx, result);
 		}
-		
+
 		@Override
 		public final InstructionResult getResultType() {
-			
+
 			return InstructionResult.NUMBER;
 		}
-		
+
 		@Override
 		public final boolean isConstantForArguments() {
-			
+
 			return false;
 		}
 	},
 	/** get then add & store */
 	XFSGETADD_N {
-		
+
 		@Override
-		
+
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentB, final int constant, final ResultHandler store) {
-			
+
 			final BasePrimitiveNumber leftHand;
 			if (argumentB instanceof final BasePrimitiveString key) {
 				leftHand = ctx.contextGetBindingValue(key, false).baseToNumber();
@@ -487,16 +518,16 @@ public enum OperationsA10 implements OperationA10 {
 			}
 			return store.execReturn(ctx, leftHand);
 		}
-		
+
 		@Override
 		public final InstructionResult getResultType() {
-			
+
 			return InstructionResult.NUMBER;
 		}
-		
+
 		@Override
 		public final boolean isConstantForArguments() {
-			
+
 			return false;
 		}
 	},
@@ -504,11 +535,11 @@ public enum OperationsA10 implements OperationA10 {
 	 *
 	 */
 	XITRNEXT {
-		
+
 		@Override
-		
+
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final int constant, final ResultHandler store) {
-			
+
 			final IteratorImpl impl = ctx.ri11II;
 			if (impl == null || !impl.next(ctx, ctx.ri12IA, argumentA.baseToJavaString())) {
 				ctx.ri12IA = null;
@@ -518,24 +549,24 @@ public enum OperationsA10 implements OperationA10 {
 			}
 			return store.execReturnTrue(ctx);
 		}
-		
+
 		@Override
 		public final InstructionResult getResultType() {
-			
+
 			return InstructionResult.BOOLEAN;
 		}
 	},
 	/** TODO: check - ignores 'store' */
 	XITRPREPK {
-		
+
 		private final IteratorImpl IMPL_BASE_ARRAY_KEY = IteratorImplBaseArrayKey.INSTANCE;
-		
+
 		private final IteratorImpl IMPL_ITERATOR = IteratorImplIterator.INSTANCE;
-		
+
 		@Override
-		
+
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final int constant, final ResultHandler store) {
-			
+
 			if (argumentA == BaseObject.NULL || argumentA == BaseObject.UNDEFINED) {
 				ctx.ri12IA = BaseObject.NULL;
 				ctx.ri11II = null;
@@ -588,31 +619,31 @@ public enum OperationsA10 implements OperationA10 {
 				return null;
 			}
 		}
-		
+
 		@Override
 		public final InstructionResult getResultType() {
-			
+
 			return null;
 		}
 	},
 	/** TODO: check - ignores 'store' */
 	XITRPREPV {
-		
+
 		private final IteratorImpl IMPL_BASE_ARRAY_VALUE = IteratorImplBaseArrayValue.INSTANCE;
-		
+
 		private final IteratorImpl IMPL_BASE_ITERATOR = IteratorImplIterator.INSTANCE;
-		
+
 		private final IteratorImpl IMPL_BASE_ITERATOR_VALUE = IteratorImplBaseIteratorValue.INSTANCE;
-		
+
 		private final BasePrimitiveString ORDER = Base.forString("$ORDER");
-		
+
 		@SuppressWarnings("boxing")
 		private final Integer ZERO = 0;
-		
+
 		@Override
-		
+
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final int constant, final ResultHandler store) {
-			
+
 			if (argumentA == BaseObject.NULL || argumentA == BaseObject.UNDEFINED) {
 				ctx.ri12IA = BaseObject.NULL;
 				ctx.ri11II = null;
@@ -698,9 +729,9 @@ public enum OperationsA10 implements OperationA10 {
 				return null;
 			}
 		}
-		
+
 		private final ExecStateCode executeJava(final ExecProcess ctx, final Object argumentA, final int constant, final ResultHandler store) {
-			
+
 			if (argumentA instanceof final Object[] array) {
 				/** only for ITRPREPV - java array values */
 				ctx.ri11II = this.IMPL_BASE_ITERATOR;
@@ -760,31 +791,31 @@ public enum OperationsA10 implements OperationA10 {
 				return null;
 			}
 		}
-		
+
 		@Override
 		public final InstructionResult getResultType() {
-			
+
 			return null;
 		}
 	},
 	/** macro for: +a */
 	ZCVTN_T {
-		
+
 		@Override
 		public OperationA10 execNativeResult() {
-			
+
 			return OperationsS10.VCVTN_N;
 		}
-		
+
 		@Override
 		public OperationA10 execStackResult() {
-			
+
 			return OperationsS10.VCVTN_D;
 		}
-		
+
 		@Override
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final int constant, final ResultHandler store) {
-			
+
 			if (argumentA instanceof BaseNumber) {
 				return store.execReturn(ctx, argumentA);
 			}
@@ -795,37 +826,37 @@ public enum OperationsA10 implements OperationA10 {
 					: store.execReturnNumeric(ctx, primitive.doubleValue());
 			}
 		}
-		
+
 		@Override
 		public final InstructionResult getResultType() {
-			
+
 			return InstructionResult.NUMBER;
 		}
-		
+
 		@Override
 		public boolean isConstantForArguments() {
-			
+
 			return true;
 		}
 	},
 	/** macro for: MADD '', a */
 	ZCVTS_T {
-		
+
 		@Override
 		public OperationA10 execNativeResult() {
-			
+
 			return OperationsS10.VCVTS_N;
 		}
-		
+
 		@Override
 		public OperationA10 execStackResult() {
-			
+
 			return OperationsS10.VCVTS_D;
 		}
-		
+
 		@Override
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final int constant, final ResultHandler store) {
-			
+
 			if (argumentA instanceof BaseString) {
 				return store.execReturn(ctx, argumentA);
 			}
@@ -836,35 +867,35 @@ public enum OperationsA10 implements OperationA10 {
 					: store.execReturnString(ctx, primitive.stringValue());
 			}
 		}
-		
+
 		@Override
 		public final InstructionResult getResultType() {
-			
+
 			return InstructionResult.STRING;
 		}
-		
+
 		@Override
 		public boolean isConstantForArguments() {
-			
+
 			return true;
 		}
 	},
 	/** TODO: check - ignores 'store' */
 	ZITRPREP7 {
-		
+
 		private final IteratorImpl IMPL_BASE_ARRAY_VALUE = IteratorImplBaseArrayValue.INSTANCE;
-		
+
 		private final IteratorImpl IMPL_BASE_ITERATOR = IteratorImplIterator.INSTANCE;
-		
+
 		private final BasePrimitiveString ORDER = Base.forString("$ORDER");
-		
+
 		@SuppressWarnings("boxing")
 		private final Integer ZERO = 0;
-		
+
 		@Override
-		
+
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final int constant, final ResultHandler store) {
-			
+
 			if (argumentA == BaseObject.NULL || argumentA == BaseObject.UNDEFINED) {
 				ctx.ri12IA = BaseObject.NULL;
 				ctx.ri11II = null;
@@ -934,16 +965,16 @@ public enum OperationsA10 implements OperationA10 {
 				return null;
 			}
 		}
-		
+
 		@Override
 		public final InstructionResult getResultType() {
-			
+
 			return null;
 		}
-		
+
 		@Override
 		public final int getStackInputCount(final int constant) {
-			
+
 			return 0;
 		}
 	},
@@ -960,36 +991,36 @@ public enum OperationsA10 implements OperationA10 {
 	 * integer.<br>
 	 * 8. Return Result(7). */
 	ZMAND_T {
-		
+
 		@Override
 		public OperationA10 execNativeResult() {
-			
+
 			return OperationsS10.VMBAND_N;
 		}
-		
+
 		@Override
 		public OperationA10 execStackResult() {
-			
+
 			return OperationsS10.VMBAND_D;
 		}
-		
+
 		@Override
-		
+
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final int constant, final ResultHandler store) {
-			
+
 			final int valueA = argumentA.baseToJavaInteger();
 			return store.execReturnNumeric(ctx, valueA & constant);
 		}
-		
+
 		@Override
 		public final InstructionResult getResultType() {
-			
+
 			return InstructionResult.INTEGER;
 		}
-		
+
 		@Override
 		public final boolean isConstantForArguments() {
-			
+
 			return true;
 		}
 	},
@@ -1012,36 +1043,36 @@ public enum OperationsA10 implements OperationA10 {
 	 * 9. Return Result(8). <br>
 	 */
 	ZMSHL_T {
-		
+
 		@Override
 		public OperationA10 execNativeResult() {
-			
+
 			return OperationsS10.VMBSHL_N;
 		}
-		
+
 		@Override
 		public OperationA10 execStackResult() {
-			
+
 			return OperationsS10.VMBSHL_D;
 		}
-		
+
 		@Override
-		
+
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final int constant, final ResultHandler store) {
-			
+
 			final int shift = argumentA.baseToJavaInteger();
 			return store.execReturnNumeric(ctx, shift << (constant & 0x1F));
 		}
-		
+
 		@Override
 		public final InstructionResult getResultType() {
-			
+
 			return InstructionResult.INTEGER;
 		}
-		
+
 		@Override
 		public final boolean isConstantForArguments() {
-			
+
 			return true;
 		}
 	},
@@ -1065,36 +1096,36 @@ public enum OperationsA10 implements OperationA10 {
 	 * 9. Return Result(8). <br>
 	 */
 	ZMSHRS_T {
-		
+
 		@Override
 		public OperationA10 execNativeResult() {
-			
+
 			return OperationsS10.VMBSHRS_N;
 		}
-		
+
 		@Override
 		public OperationA10 execStackResult() {
-			
+
 			return OperationsS10.VMBSHRS_D;
 		}
-		
+
 		@Override
-		
+
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final int constant, final ResultHandler store) {
-			
+
 			final int shift = argumentA.baseToJavaInteger();
 			return store.execReturnNumeric(ctx, shift >> (constant & 0x1F));
 		}
-		
+
 		@Override
 		public final InstructionResult getResultType() {
-			
+
 			return InstructionResult.INTEGER;
 		}
-		
+
 		@Override
 		public final boolean isConstantForArguments() {
-			
+
 			return true;
 		}
 	},
@@ -1118,59 +1149,59 @@ public enum OperationsA10 implements OperationA10 {
 	 * 9. Return Result(8). <br>
 	 */
 	ZMSHRU_T {
-		
+
 		@Override
 		public OperationA10 execNativeResult() {
-			
+
 			return OperationsS10.VMBSHRU_N;
 		}
-		
+
 		@Override
 		public OperationA10 execStackResult() {
-			
+
 			return OperationsS10.VMBSHRU_D;
 		}
-		
+
 		@Override
-		
+
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final int constant, final ResultHandler store) {
-			
+
 			final int shift = argumentA.baseToJavaInteger();
 			return store.execReturnNumeric(ctx, shift >>> (constant & 0x1F));
 		}
-		
+
 		@Override
 		public final InstructionResult getResultType() {
-			
+
 			return InstructionResult.INTEGER;
 		}
-		
+
 		@Override
 		public final boolean isConstantForArguments() {
-			
+
 			return true;
 		}
 	},
 	/** macro for ACALLS RT, a, x */
 	ZTCALLS {
-		
+
 		@Override
-		
+
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentB, final int constant, final ResultHandler store) {
-			
+
 			final BaseObject argumentA = ctx.rb4CT;
-			
+
 			/** CANNOT BE USED WITH GETTERS, execution order is invalid, make RCALL <code>
 			final ExecStateCode access = argumentA.vmPropertyRead(ctx, argumentB, BaseObject.UNDEFINED, ResultHandler.FA_BNN_NXT);
 			if (access != null) {
 				// TODO: check if code should be analyzed
 				return access;
 			}
-			
+
 			final BaseObject candidate = ctx.ra0RB;
 			</code> */
 			final BaseObject candidate = argumentA.baseGet(argumentB, BaseObject.UNDEFINED);
-			
+
 			final BaseFunction callee = candidate.baseCall();
 			if (callee == null) {
 				if (candidate == BaseObject.UNDEFINED) {
@@ -1184,41 +1215,41 @@ public enum OperationsA10 implements OperationA10 {
 			}
 			return ctx.vmCallS(callee, argumentA, constant, store);
 		}
-		
+
 		@Override
 		public final InstructionResult getResultType() {
-			
+
 			return InstructionResult.OBJECT;
 		}
-		
+
 		@Override
 		public final int getStackInputCount(final int constant) {
-			
+
 			return constant;
 		}
-		
+
 		@Override
 		public final boolean isConstantForArguments() {
-			
+
 			return false;
 		}
-		
+
 	},
 	/** macro for ADELETE RT, a */
 	ZTDELETE_N {
-		
+
 		@Override
-		
+
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentB, final int constant, final ResultHandler store) {
-			
+
 			final BaseObject argumentA = ctx.rb4CT;
-			
+
 			return store.execReturnBoolean(ctx, argumentA.baseDelete(argumentB));
 		}
-		
+
 		@Override
 		public final InstructionResult getResultType() {
-			
+
 			return InstructionResult.BOOLEAN;
 		}
 	},
@@ -1226,55 +1257,55 @@ public enum OperationsA10 implements OperationA10 {
 	 *
 	 */
 	ZTLOAD_N {
-		
+
 		@Override
-		
+
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final int constant, final ResultHandler store) {
-			
+
 			return ctx.rb4CT.vmPropertyRead(ctx, argumentA, BaseObject.UNDEFINED, store);
 		}
-		
+
 		@Override
 		public final InstructionResult getResultType() {
-			
+
 			return InstructionResult.OBJECT;
 		}
-		
+
 		@Override
 		public boolean isConstantForArguments() {
-			
+
 			return false;
 		}
 	},;
-	
+
 	@Override
 	public OperationA10 execNativeResult() {
-		
+
 		return this;
 	}
-	
+
 	@Override
 	public OperationA10 execStackResult() {
-		
+
 		return this;
 	}
-	
+
 	/** For ae3-vm-info script
 	 *
 	 * @return */
 	public abstract InstructionResult getResultType();
-	
+
 	Instruction instructionCached(//
 			final ModifierArgument argumentA,
 			final int constant,
 			final ResultHandler store) {
-		
+
 		return InstructionA10.instructionCached(this.instruction(argumentA, constant, store));
 	}
-	
+
 	@Override
 	public boolean isConstantForArguments() {
-		
+
 		return false;
 	}
 }

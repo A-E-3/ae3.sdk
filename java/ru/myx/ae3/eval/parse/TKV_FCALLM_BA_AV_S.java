@@ -6,7 +6,6 @@
  */
 package ru.myx.ae3.eval.parse;
 
-import ru.myx.ae3.base.BasePrimitiveString;
 import ru.myx.ae3.eval.tokens.TokenInstruction;
 import ru.myx.ae3.eval.tokens.TokenValue;
 import ru.myx.ae3.exec.Instruction;
@@ -19,7 +18,7 @@ import ru.myx.ae3.exec.ResultHandler;
 import ru.myx.ae3.exec.ResultHandlerBasic;
 import ru.myx.vm_vliw32_2010.OperationA2X;
 
-final class TKV_FCALLM_BA_AV_S extends TokenValue implements TokenValue.SyntacticallyFrameAccess {
+final class TKV_FCALLM_BA_AV_S extends TokenValue {
 	
 	private final TokenInstruction argumentA;
 	
@@ -41,29 +40,6 @@ final class TKV_FCALLM_BA_AV_S extends TokenValue implements TokenValue.Syntacti
 		this.argumentA = argumentA;
 		this.argument = argument;
 		this.carguments = carguments;
-	}
-	
-	@Override
-	public TokenValue getDirectChainingAccessReplacement() {
-		
-		/** Why do we need this, aint it the same? **/
-		if (this.argumentA instanceof final TokenValue access) {
-			final BasePrimitiveString contextPropertyName = access.toContextPropertyName();
-			if (null != contextPropertyName) {
-				return new TKV_ACALLM_CBA_AVV_S(//
-						ParseConstants.TKV_DIRECT,
-						ParseConstants.getConstantValue(contextPropertyName),
-						this.argument,
-						this.carguments//
-				);
-			}
-		}
-		return new TKV_ACALLM_CBA_AVV_S(//
-				ParseConstants.TKV_DIRECT,
-				this.argumentA,
-				this.argument,
-				this.carguments//
-		);
 	}
 	
 	@Override

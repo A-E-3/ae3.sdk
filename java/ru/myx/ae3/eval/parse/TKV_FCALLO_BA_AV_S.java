@@ -6,7 +6,6 @@
  */
 package ru.myx.ae3.eval.parse;
 
-import ru.myx.ae3.base.BasePrimitiveString;
 import ru.myx.ae3.eval.tokens.TokenInstruction;
 import ru.myx.ae3.eval.tokens.TokenValue;
 import ru.myx.ae3.exec.InstructionResult;
@@ -18,63 +17,42 @@ import ru.myx.ae3.exec.ResultHandler;
 import ru.myx.ae3.exec.ResultHandlerBasic;
 import ru.myx.vm_vliw32_2010.OperationA2X;
 
-final class TKV_FCALLO_BA_AV_S extends TokenValue implements TokenValue.SyntacticallyFrameAccess {
-	
+final class TKV_FCALLO_BA_AV_S extends TokenValue {
+
 	private final TokenInstruction argumentA;
-	
+
 	private final TokenInstruction argumentB;
-	
+
 	TKV_FCALLO_BA_AV_S(final TokenInstruction argumentA, final TokenInstruction argumentB) {
-		
+
 		assert argumentB.assertStackValue();
 		assert argumentA.assertStackValue();
 		this.argumentA = argumentA;
 		this.argumentB = argumentB.toExecDetachableResult();
 	}
-	
-	@Override
-	public TokenValue getDirectChainingAccessReplacement() {
-		
-		/** Why do we need this, aint it the same? **/
-		if (this.argumentA instanceof final TokenValue access) {
-			final BasePrimitiveString contextPropertyName = access.toContextPropertyName();
-			if (null != contextPropertyName) {
-				return new TKV_ACALLO_CBA_AVV_S(//
-						ParseConstants.TKV_DIRECT,
-						ParseConstants.getConstantValue(contextPropertyName),
-						this.argumentB//
-				);
-			}
-		}
-		return new TKV_ACALLO_CBA_AVV_S(//
-				ParseConstants.TKV_DIRECT,
-				this.argumentA,
-				this.argumentB//
-		);
-	}
-	
+
 	@Override
 	public final String getNotation() {
-		
+
 		return this.argumentA.getNotation() + "( " + this.argumentB.getNotation() + " )";
 	}
-	
+
 	@Override
 	public final InstructionResult getResultType() {
-		
+
 		return InstructionResult.OBJECT;
 	}
-	
+
 	@Override
 	public void toAssembly(final ProgramAssembly assembly, final ModifierArgument argumentA, final ModifierArgument argumentB, final ResultHandlerBasic store) {
-		
+
 		/** zero operands (both operands are already embedded in this token) */
 		assert argumentA == null;
 		assert argumentB == null;
-		
+
 		/** valid store */
 		assert store != null;
-		
+
 		final ModifierArgument modifierArgument = this.argumentB.toDirectModifier();
 		final ModifierArgument modifierB = this.argumentA.toDirectModifier();
 		final boolean directArgument = modifierArgument == ModifierArguments.AA0RB;
@@ -91,7 +69,7 @@ final class TKV_FCALLO_BA_AV_S extends TokenValue implements TokenValue.Syntacti
 		if (directArgument) {
 			this.argumentB.toAssembly(assembly, null, null, ResultHandler.FA_BNN_NXT);
 		}
-		
+
 		assembly.addInstruction(
 				((OperationA2X) OperationsA2X.XFCALLO).instruction(
 						directB && directArgument
@@ -101,10 +79,10 @@ final class TKV_FCALLO_BA_AV_S extends TokenValue implements TokenValue.Syntacti
 						0,
 						store));
 	}
-	
+
 	@Override
 	public final String toCode() {
-		
+
 		return OperationsA2X.XFCALLO + "\t0\tAV->S;";
 	}
 }
