@@ -8,12 +8,12 @@ import java.util.Map;
 
 /** @author myx */
 public interface ControlCommandset extends List<ControlCommand<?>> {
-
+	
 	/** @param key
 	 * @return command */
 	default ControlCommand<?> getByKey(final String key) {
-
-		if (key == null || key.trim().length() == 0) {
+		
+		if (key == null || key.isBlank()) {
 			return null;
 		}
 		for (int i = this.size() - 1; i >= 0; --i) {
@@ -24,11 +24,11 @@ public interface ControlCommandset extends List<ControlCommand<?>> {
 		}
 		return null;
 	}
-
+	
 	/** @return */
 	default Map<String, Object> getData() {
-
+		
 		return null;
 	}
-
+	
 }

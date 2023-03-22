@@ -35,95 +35,95 @@ import ru.myx.ae3.status.StatusInfo;
 
 /** @author myx */
 public final class ExpressionParser {
-	
+
 	private static final BasePrimitiveString STRING_REGEXP_CONSTRUCTOR_NAME = Base.forString("RegExp");
-	
+
 	private static final byte[] CHARS = new byte[65536];
-	
+
 	private static final BaseObject RESERVED_OBJECT = new BaseNativeObject();
-	
+
 	private static final Map<String, TokenValue> DEFAULT_VARIABLES = new HashMap<>(256, 0.25f);
-	
+
 	private static final int ST_REGEXP_FLAGS = 30;
-	
+
 	private static final int ST_REGEXP_START = 29;
-	
+
 	private static final int ST_1STRING_FUNCTION_DECL = 28;
-	
+
 	private static final int ST_2STRING_FUNCTION_DECL = 27;
-	
+
 	private static final int ST_FUNCTION_DECL_BODY = 26;
-	
+
 	private static final int ST_FUNCTION_DECL_MORE = 25;
-	
+
 	private static final int ST_FUNCTION_DECL_ARGUMENT = 24;
-	
+
 	private static final int ST_FUNCTION_DECL_ARGS = 23;
-	
+
 	private static final int ST_FUNCTION_DECL_NAME = 22;
-	
+
 	private static final int ST_1STRING = 21;
-	
+
 	private static final int ST_1STRING_FUNCTION_ROOT = 20;
-	
+
 	private static final int ST_1STRING_FUNCTION_NEW = 19;
-	
+
 	private static final int ST_1STRING_FUNCTION_ACCS = 18;
-	
+
 	private static final int ST_2STRING = 17;
-	
+
 	private static final int ST_2STRING_FUNCTION_ROOT = 16;
-	
+
 	private static final int ST_2STRING_FUNCTION_NEW = 15;
-	
+
 	private static final int ST_2STRING_FUNCTION_ACCS = 14;
-	
+
 	private static final int ST_CODE = 13;
-	
+
 	private static final int ST_FUNCTION_NEW = 12;
-	
+
 	private static final int ST_FUNCTION_ROOT = 11;
-	
+
 	private static final int ST_FUNCTION_ACCS = 10;
-	
+
 	private static final int ST_IDENTIFIER_CONST = 9;
-	
+
 	private static final int ST_IDENTIFIER_NEW = 8;
-	
+
 	private static final int ST_IDENTIFIER_NEW_ACCS = 7;
-	
+
 	private static final int ST_IDENTIFIER_ROOT = 6;
-	
+
 	private static final int ST_IDENTIFIER_ACCS = 5;
-	
+
 	private static final int ST_NUMBER = 4;
-	
+
 	private static final int ST_NUMBER_WITH_EXP = 3;
-	
+
 	private static final int ST_NUMBER_FLOAT = 2;
-	
+
 	private static final int ST_NUMBER_HEX = 1;
-	
+
 	private static final int ST_NUMBER_OCT = 31;
-	
+
 	private static final int ST_NUMBER_BIN = 32;
-	
+
 	private static final int ST_WHITESPACE = 0;
-	
+
 	private static final TokenValue MA_CONSTRUCTOR = ParseConstants.getConstantValue(Base.forString("constructor"));
-	
+
 	private static final Map<String, TokenInstruction> ACCESS_SOURCES = Create.privateMap(512);
-	
+
 	private static int EXPR_BUILTIN_HITS = 0;
-	
+
 	private static int EXPR_PUBLIC_COUNT = 0;
-	
+
 	private static int EXPR_PRIVATE_COUNT = 0;
-	
+
 	private static int ERROR_COUNT = 0;
-	
+
 	private static int EXCEPTION_COUNT = 0;
-	
+
 	static {
 		for (int i = 65535; i >= 0; --i) {
 			final char c = (char) i;
@@ -145,7 +145,7 @@ public final class ExpressionParser {
 					+ 0);
 		}
 	}
-	
+
 	static {
 		for (final String key : new String[]{ //
 				"abstract", //
@@ -255,13 +255,13 @@ public final class ExpressionParser {
 		ExpressionParser.DEFAULT_VARIABLES.put("Infinity", ParseConstants.TKV_NUMBER_PINFINITY);
 		ExpressionParser.DEFAULT_VARIABLES.put("+Infinity", ParseConstants.TKV_NUMBER_PINFINITY);
 		ExpressionParser.DEFAULT_VARIABLES.put("-Infinity", ParseConstants.TKV_NUMBER_NINFINITY);
-		
+
 		ExpressionParser.DEFAULT_VARIABLES.put("[]", TKV_CARRAY0.INSTANCE);
 		ExpressionParser.DEFAULT_VARIABLES.put("{}", TKV_COBJECT_EMPTY.INSTANCE);
 	}
-	
+
 	private static final void addIdentifierAccess(final List<TokenInstruction> precompiled, final String fieldName) {
-		
+
 		TokenInstruction result = ExpressionParser.ACCESS_SOURCES.get(fieldName);
 		if (result == null) {
 			synchronized (ExpressionParser.ACCESS_SOURCES) {
@@ -275,14 +275,14 @@ public final class ExpressionParser {
 		// ", list: " + precompiled + ", field: " + fieldName);
 		precompiled.add(result);
 	}
-	
+
 	private static final void addIdentifierConst(final ProgramAssembly assembly, final List<TokenInstruction> precompiled, final String token) {
-		
+
 		precompiled.add(assembly.constantToken(Integer.parseInt(token)));
 	}
-	
+
 	private static final void addIdentifierRoot(final List<TokenInstruction> precompiled, final String token, final String expression) {
-		
+
 		final int precompiledSize = precompiled.size();
 		if (precompiledSize > 0) {
 			final TokenInstruction last = precompiled.get(precompiledSize - 1);
@@ -295,7 +295,7 @@ public final class ExpressionParser {
 				return;
 			}
 		}
-		
+
 		{
 			final TokenValue known = TKV_FLOAD_A_Cs_S.getInstance(token, ExpressionParser.DEFAULT_VARIABLES);
 			if (known.toConstantValue() != ExpressionParser.RESERVED_OBJECT) {
@@ -310,9 +310,9 @@ public final class ExpressionParser {
 			precompiled.add(new TKV_FLOAD_A_Cs_S(Base.forString(token)));
 		}
 	}
-	
+
 	private static final void addNumber(final List<TokenInstruction> precompiled, final String token, final char type) {
-		
+
 		try {
 			final long number = Long.parseLong(token);
 			final int size = precompiled.size();
@@ -337,9 +337,9 @@ public final class ExpressionParser {
 			throw new RuntimeException("Not a valid numeric constant: " + token);
 		}
 	}
-	
+
 	private static final void addNumberBin(final List<TokenInstruction> precompiled, final String token, final char type) {
-		
+
 		if (token.length() == 0) {
 			throw new RuntimeException("Illegal binary constant: 0x" + token);
 		}
@@ -367,9 +367,9 @@ public final class ExpressionParser {
 			throw new RuntimeException("Not a valid binary integer: " + token);
 		}
 	}
-	
+
 	private static final void addNumberFloat(final List<TokenInstruction> precompiled, final String token, final char type) {
-		
+
 		try {
 			final int size = precompiled.size();
 			if (size > 0 && precompiled.get(size - 1) == ParseConstants.TKO_MSUB_BA_S0) {
@@ -391,9 +391,9 @@ public final class ExpressionParser {
 			throw new RuntimeException("Not a valid numeric constant: " + token);
 		}
 	}
-	
+
 	private static final void addNumberHex(final List<TokenInstruction> precompiled, final String token, final char type) {
-		
+
 		if (token.length() == 0) {
 			throw new RuntimeException("Illegal hexadecimal constant: 0x" + token);
 		}
@@ -421,9 +421,9 @@ public final class ExpressionParser {
 			throw new RuntimeException("Not a valid hexadecimal integer: " + token);
 		}
 	}
-	
+
 	private static final void addNumberOct(final List<TokenInstruction> precompiled, final String token, final char type) {
-		
+
 		if (token.length() == 0) {
 			throw new RuntimeException("Illegal octal constant: 0x" + token);
 		}
@@ -451,9 +451,9 @@ public final class ExpressionParser {
 			throw new RuntimeException("Not a valid octal integer: " + token);
 		}
 	}
-	
+
 	private static final void addOperator(final ProgramAssembly assembly, final List<TokenInstruction> precompiled, final String token) throws Throwable {
-		
+
 		final int length = token.length();
 		switch (token.charAt(0)) {
 			case '=' : {
@@ -1088,9 +1088,9 @@ public final class ExpressionParser {
 						: ", code=" + Integer.toString(token.charAt(0))) + ") encountered!");
 		}
 	}
-	
+
 	private static void addRegExp(final ProgramAssembly assembly, final List<TokenInstruction> precompiled, final String regexp, final String flags) throws Throwable {
-		
+
 		final TokenInstruction constructor = TKV_FLOAD_A_Cs_S.getInstance(ExpressionParser.STRING_REGEXP_CONSTRUCTOR_NAME, ExpressionParser.DEFAULT_VARIABLES);
 		final TokenInstruction pattern = ParseConstants.getConstantValue(Base.forString(regexp));
 		final List<TokenInstruction> sub = flags.length() == 0
@@ -1101,13 +1101,13 @@ public final class ExpressionParser {
 		final TokenInstruction call = ExpressionParser.encodeCallAccessCXE(assembly, constructor, ExpressionParser.MA_CONSTRUCTOR, sub);
 		precompiled.add(call);
 	}
-	
+
 	/** @param assembly
 	 * @param precompiled
 	 * @return false - stop on error, true - continue
 	 * @throws Throwable */
 	private static final boolean closeBrace(final ProgramAssembly assembly, final List<TokenInstruction> precompiled) throws Throwable {
-		
+
 		final int preparedPosition = precompiled.lastIndexOf(ParseConstants.TKS_BRACE_OPEN);
 		if (preparedPosition == -1) {
 			precompiled.clear();
@@ -1144,12 +1144,12 @@ public final class ExpressionParser {
 			// sub));
 			return true;
 		}
-		
+
 		if (!last.isParseValueRight()) {
 			precompiled.add(assembly.compileExpression(sub, BalanceType.EXPRESSION));
 			return true;
 		}
-		
+
 		/** DEBUG<code>
 			</code> */
 		if (last.isAccessReference()) {
@@ -1189,7 +1189,7 @@ public final class ExpressionParser {
 			);
 			return true;
 		}
-		
+
 		if (last == ParseConstants.TKV_DIRECT) {
 			System.out.println(">>>>>> CLOSEBRACE L RR: leftHand: " + precompiled + ", sub: " + sub);
 			precompiled.set( //
@@ -1202,7 +1202,7 @@ public final class ExpressionParser {
 			);
 			return true;
 		}
-		
+
 		{
 			// System.out.println(">>> >>> CLOSEBRACE L FV: last: " + last + ", leftHand: " +
 			// precompiled + ", sub: " + sub);
@@ -1221,13 +1221,13 @@ public final class ExpressionParser {
 			return true;
 		}
 	}
-	
+
 	/** @param assembly
 	 * @param precompiled
 	 * @return false - stop on error, true - continue
 	 * @throws Exception */
 	private static final boolean closeCreate(final ProgramAssembly assembly, final List<TokenInstruction> precompiled) throws Exception {
-		
+
 		final int preparedPosition = precompiled.lastIndexOf(ParseConstants.TKS_CREATE_OPEN);
 		if (preparedPosition == -1) {
 			precompiled.clear();
@@ -1244,7 +1244,7 @@ public final class ExpressionParser {
 		while (precompiledSize > preparedPosition) {
 			precompiled.remove(--precompiledSize);
 		}
-		
+
 		final int size = assembly.size();
 		if (precompiledSize != 0 && precompiled.get(precompiledSize - 1).isParseValueRight()) {
 			final TokenInstruction error = Report.MODE_ASSERT || Report.MODE_DEBUG
@@ -1254,10 +1254,10 @@ public final class ExpressionParser {
 			precompiled.add(error);
 			return false;
 		}
-		
+
 		List<BasePrimitiveString> propertyNames = null;
 		List<TokenInstruction> propertyValues = null;
-		
+
 		for (int i = 0;;) {
 			if (i == subSize) {
 				if (propertyNames == null) {
@@ -1302,12 +1302,12 @@ public final class ExpressionParser {
 						precompiled.add(ParseConstants.TKV_ERROR_EXPRESSION_EXPECTED);
 						return false;
 					}
-					
+
 					if (propertyNames == null) {
 						propertyNames = new ArrayList<>();
 						propertyValues = new ArrayList<>();
 					}
-					
+
 					assert propertyValues != null;
 					propertyNames.add(Base.forString(name));
 					propertyValues.add(
@@ -1323,13 +1323,13 @@ public final class ExpressionParser {
 			}
 		}
 	}
-	
+
 	/** @param assembly
 	 * @param precompiled
 	 * @return false - stop on error, true - continue
 	 * @throws Exception */
 	private static final boolean closeIndex(final ProgramAssembly assembly, final List<TokenInstruction> precompiled) throws Exception {
-		
+
 		final int preparedPosition = precompiled.lastIndexOf(ParseConstants.TKS_INDEX_OPEN);
 		if (preparedPosition == -1) {
 			precompiled.clear();
@@ -1369,13 +1369,13 @@ public final class ExpressionParser {
 		precompiled.add(assembly.compileExpression(sub, BalanceType.ARRAY_LITERAL));
 		return true;
 	}
-	
+
 	/** @param assembly
 	 * @param precompiled
 	 * @return false - stop on error, true - continue
 	 * @throws Exception */
 	private static final boolean closeTernary(final ProgramAssembly assembly, final List<TokenInstruction> precompiled) throws Exception {
-		
+
 		int precompiledSize = precompiled.size();
 		if (precompiledSize > 1) {
 			final TokenInstruction check = precompiled.get(precompiledSize - 2);
@@ -1418,13 +1418,13 @@ public final class ExpressionParser {
 			return false;
 		}
 	}
-	
+
 	/** constructor call */
 	private static final TKV_COBJECT_NEW encodeCallAccessCXE(final ProgramAssembly assembly,
 			final TokenInstruction constructedClassAccess,
 			final TokenInstruction constructorPropertyName,
 			final List<TokenInstruction> callArguments) throws Exception {
-		
+
 		assert constructorPropertyName != null;
 		assert constructorPropertyName.assertStackValue();
 		if (callArguments == null || callArguments.size() == 0) {
@@ -1475,11 +1475,11 @@ public final class ExpressionParser {
 			return new TKV_COBJECT_NEW(constructedClassAccess, new TKO_ACALLM_CBA_AVS_S(constructorPropertyName, arguments, carguments));
 		}
 	}
-	
+
 	/** DIRECT (r7RR) */
 	private static final TokenInstruction encodeCallAccessDXE(final ProgramAssembly assembly, final TokenInstruction accessProperty, final List<TokenInstruction> callArguments)
 			throws Exception {
-		
+
 		assert accessProperty != null;
 		assert accessProperty.assertStackValue();
 		if (callArguments == null || callArguments.size() == 0) {
@@ -1530,24 +1530,24 @@ public final class ExpressionParser {
 			return new TKO_ACALLM_CBA_AVS_S(accessProperty, arguments, carguments);
 		}
 	}
-	
+
 	private static final TokenValue encodeCallAccessXXE(final ProgramAssembly assembly,
 			final ModifierArgument accessObjectModifier,
 			final TokenInstruction accessProperty,
 			final List<TokenInstruction> callArguments) throws Exception {
-		
+
 		assert accessObjectModifier != ModifierArguments.AE21POP && accessObjectModifier != ModifierArguments.AA0RB && accessObjectModifier != null //
 				: "unexpected accessObjectModifier: " + accessObjectModifier;
-		
+
 		assert accessProperty != null //
 				: "accessProperty is NULL";
-		
+
 		assert accessProperty.assertStackValue();
-		
+
 		if (callArguments == null || callArguments.size() == 0) {
 			// System.out.println(">>> >>> CALLXXE_V, callee: " + accessObjectModifier + ", prop: "
 			// + accessProperty);
-			
+
 			return accessObjectModifier == ModifierArguments.AB7FV
 				? new TKV_FCALLV_A_V_S(accessProperty)
 				: accessObjectModifier == ModifierArguments.AB4CT
@@ -1581,7 +1581,7 @@ public final class ExpressionParser {
 				callArguments.remove(tokenCount - 1);
 			}
 		}
-		
+
 		ExpressionParser.EXPR_PRIVATE_COUNT++;
 		final TokenInstruction arguments = assembly.compileExpression(callArguments, BalanceType.ARGUMENT_LIST);
 		final int paramCount = arguments.getResultCount();
@@ -1612,7 +1612,7 @@ public final class ExpressionParser {
 								paramCount);
 			}
 		}
-		
+
 		/** nameToIndex != null && paramCount > 0 */
 		final Instruction carguments = new IAVV_ARGS_CREATEN_X_X_R(paramCount, nameToIndex);
 		return accessObjectModifier == ModifierArguments.AB7FV
@@ -1621,28 +1621,28 @@ public final class ExpressionParser {
 				? new TKV_ZTCALLM_BA_AV_S(accessProperty, arguments, carguments)
 				: new TKV_ACALLM_CBA_AVM_S(accessObjectModifier, accessProperty, arguments, carguments);
 	}
-	
+
 	private static final boolean isIdentifierPart(final char c) {
-		
+
 		return (ExpressionParser.CHARS[c] & 0x04) != 0;
 	}
-	
+
 	private static final boolean isIdentifierStart(final char c) {
-		
+
 		return (ExpressionParser.CHARS[c] & 0x02) != 0;
 	}
-	
+
 	private static final boolean isWhitespace(final char c) {
-		
+
 		return (ExpressionParser.CHARS[c] & 0x01) != 0;
 	}
-	
+
 	/** @param assembly
 	 * @param expression
 	 * @param balanceType
 	 * @return */
 	public static TokenInstruction parseExpression(final ProgramAssembly assembly, final String expression, final BalanceType balanceType) {
-		
+
 		ExpressionParser.EXPR_PUBLIC_COUNT++;
 		final String expr = expression.trim();
 		try {
@@ -1675,7 +1675,7 @@ public final class ExpressionParser {
 					return new TKV_FLOAD_A_Cs_S(Base.forString(expr));
 				}
 			}
-			
+
 			/**
 			 *
 			 */
@@ -1706,7 +1706,7 @@ public final class ExpressionParser {
 							if (subToken != null) {
 								subStatements.add(subToken);
 							}
-							
+
 							final int size = subStatements.size();
 							switch (size) {
 								case 1 :
@@ -1735,9 +1735,9 @@ public final class ExpressionParser {
 			throw new RuntimeException("Error while compiling: " + expr, t);
 		}
 	}
-	
+
 	private static final List<TokenInstruction> prepare(final ProgramAssembly assembly, final String expressionString) throws Throwable {
-		
+
 		final List<TokenInstruction> precompiled = new ArrayList<>(16);
 		final StringBuilder current = new StringBuilder(32);
 		/** for intermediate collected identifier such as functionName, accessName,
@@ -2963,7 +2963,7 @@ public final class ExpressionParser {
 									? TKV_FLOAD_A_Cs_S.getInstance(identifier.trim(), ExpressionParser.DEFAULT_VARIABLES)
 									: precompiled.remove(precompiled.size() - 1);
 								final String parameters = current.toString().trim();
-								final List<TokenInstruction> sub = parameters.trim().length() == 0
+								final List<TokenInstruction> sub = parameters.isBlank()
 									? null
 									: ExpressionParser.prepare(assembly, parameters);
 								{
@@ -3004,15 +3004,15 @@ public final class ExpressionParser {
 							if (levelBrace-- == functionLevel) {
 								assert identifier != null : "function name expected!";
 								final String parameters = current.toString().trim();
-								
-								final List<TokenInstruction> sub = parameters.trim().length() == 0
+
+								final List<TokenInstruction> sub = parameters.isBlank()
 									? null
 									: ExpressionParser.prepare(assembly, parameters);
-								
+
 								final int precompiledSize = precompiled.size();
-								
+
 								final TokenInstruction argumentB;
-								
+
 								if (precompiledSize > 0 && precompiled.get(precompiledSize - 1) == ParseConstants.TKV_DIRECT) {
 									argumentB = new TKV_LCONSTS(Base.forString(identifier.trim()));
 									precompiled.add( //
@@ -3029,10 +3029,10 @@ public final class ExpressionParser {
 													argumentB,
 													sub));
 								}
-								
+
 								// System.out.println(">>> >>> PREPARE 2 ')', leftHand: " +
 								// precompiled + ", argB: " + argumentB);
-								
+
 								identifier = null;
 								current.setLength(0);
 								state = ExpressionParser.ST_WHITESPACE;
@@ -3077,7 +3077,7 @@ public final class ExpressionParser {
 								assert identifier != null : "function name expected!";
 								final String parameters = current.toString().trim();
 								final TokenInstruction accessProperty = ParseConstants.getConstantValue(Base.forString(identifier.trim()));
-								final List<TokenInstruction> sub = parameters.trim().length() == 0
+								final List<TokenInstruction> sub = parameters.isBlank()
 									? null
 									: ExpressionParser.prepare(assembly, parameters);
 								precompiled.add( //
@@ -3092,10 +3092,10 @@ public final class ExpressionParser {
 													accessProperty,
 													sub) //
 								);
-								
+
 								// System.out.println(">>> >>> PREPARE 1 ')', leftHand: " +
 								// precompiled + ", argB: " + accessProperty);
-								
+
 								identifier = null;
 								current.setLength(0);
 								state = ExpressionParser.ST_WHITESPACE;
@@ -3655,10 +3655,10 @@ public final class ExpressionParser {
 		precompiled.add(new TKV_ERROR_A_C_E("Unknown parser state(" + state + "): " + expressionString));
 		return precompiled;
 	}
-	
+
 	/** @param data */
 	public static final void statusFill(final StatusInfo data) {
-		
+
 		data.put("CALC: expessions (public)", Format.Compact.toDecimal(ExpressionParser.EXPR_PUBLIC_COUNT));
 		data.put("CALC: builtin hit count", Format.Compact.toDecimal(ExpressionParser.EXPR_BUILTIN_HITS));
 		data.put("CALC: expessions (private)", Format.Compact.toDecimal(ExpressionParser.EXPR_PRIVATE_COUNT));
