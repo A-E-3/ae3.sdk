@@ -26,22 +26,18 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 import ru.myx.ae3.Engine;
-import java.util.function.Function;
 import ru.myx.ae3.help.Convert;
 import ru.myx.file_watcher.FileWatcher;
 
-/**
- * @author barachta
+/** @author barachta
  *
- * myx - barachta 
- *         "typecomment": Window>Preferences>Java>Templates. To enable and
- *         disable the creation of type comments go to
- *         Window>Preferences>Java>Code Generation.
- */
+ *         myx - barachta "typecomment": Window>Preferences>Java>Templates. To enable and disable
+ *         the creation of type comments go to Window>Preferences>Java>Code Generation. */
 public class IpGeography {
-
+	
 	private static final String[] COUNTRIES = {
 			null, "**", "US", "RU", "CA", "LV", "SP", "IT", "UK", "DE", "IR", "ES", "SE", "LU", "BG", "UA", "GR", "BA", "NO", "NL", "HR", "PL", "HU", "AT", "TR", "CZ", "IL", "CH",
 			"FR", "TM", "SL", "BE", "LI", "IE", "FI", "MT", "AE", "DK", "RO", "IS", "LT", "GE", "EU", "SK", "JO", "EG", "PT", "NG", "AM", "GA", "SI", "EE", "PS", "YU", "ML", "CY",
@@ -103,7 +99,7 @@ public class IpGeography {
 					}
 					return null;
 				}
-
+				
 				@Override
 				public String toString() {
 					
@@ -116,7 +112,7 @@ public class IpGeography {
 	}
 	
 	private static void checkDB() throws IOException {
-
+		
 		if (!IpGeography.FOLDER.exists() && !IpGeography.FOLDER.mkdirs()) {
 			throw new RuntimeException("IP -> GEO, cannot create: " + IpGeography.FOLDER.getAbsolutePath());
 		}
@@ -185,42 +181,54 @@ public class IpGeography {
 		}
 	}
 	
-	/**
+	/** This one is for IPv4 only
+	 *
 	 * @param address
-	 * @return string
-	 */
+	 * @return string */
 	public static final String getCountryCode(final InetAddress address) {
-
+		
+		if (address == null) {
+			return null;
+		}
 		final byte[] bytes = address.getAddress();
-		return IpGeography.COUNTRIES[IpGeography.database.get(((bytes[0] & 0xFF) << 16) + ((bytes[1] & 0xFF) << 8) + (bytes[2] & 0xFF)) & 0xFF];
+		switch (bytes.length) {
+			case 4 :
+				return IpGeography.COUNTRIES[IpGeography.database.get(((bytes[0] & 0xFF) << 16) + ((bytes[1] & 0xFF) << 8) + (bytes[2] & 0xFF)) & 0xFF];
+			case 16 :
+				return null;
+			default :
+				return null;
+		}
 	}
 	
-	/**
+	/** This one is for IPv4 only
+	 *
 	 * @param address
-	 * @return string
-	 */
+	 * @return string */
 	public static final String getCountryCode(final long address) {
-
+		
 		return IpGeography.COUNTRIES[IpGeography.database.get((int) (address >> 8 & 0x00FFFFFF)) & 0xFF];
 	}
 	
-	/**
-	 * @param address
+	/** @param address
 	 * @return string
-	 * @throws UnknownHostException
-	 */
+	 * @throws UnknownHostException */
 	public static final String getCountryCode(final String address) throws UnknownHostException {
-
+		
+		if (address == null || address.isBlank()) {
+			return null;
+		}
 		return IpGeography.getCountryCode(InetAddress.getByName(address));
 	}
 	
-	/**
-	 * @param address
+	/** @param address
 	 * @param def
-	 * @return string
-	 */
+	 * @return string */
 	public static final String getCountryCode(final String address, final String def) {
-
+		
+		if (address == null || address.isBlank()) {
+			return def;
+		}
 		try {
 			final String result = IpGeography.getCountryCode(InetAddress.getByName(address));
 			if (result == null) {
@@ -232,14 +240,15 @@ public class IpGeography {
 		}
 	}
 	
-	/**
-	 * @param address
+	/** @param address
 	 * @param def
 	 * @param local
-	 * @return string
-	 */
+	 * @return string */
 	public static final String getCountryCode(final String address, final String def, final String local) {
-
+		
+		if (address == null || address.isBlank()) {
+			return def;
+		}
 		try {
 			final String result = IpGeography.getCountryCode(InetAddress.getByName(address));
 			if (result == null) {
@@ -255,7 +264,7 @@ public class IpGeography {
 	}
 	
 	static void index(final Reader file) throws IOException {
-
+		
 		System.out.println("IP_GEOGRAPHY: import launched.");
 		final StringBuilder c_country = new StringBuilder();
 		final StringBuilder c_proto = new StringBuilder();
@@ -332,12 +341,10 @@ public class IpGeography {
 		System.out.println("IP_GEOGRAPHY: import finished.");
 	}
 	
-	/**
-	 * @param args
-	 * @throws Exception
-	 */
+	/** @param args
+	 * @throws Exception */
 	public static void main(final String[] args) throws Exception {
-
+		
 		for (final String element : args) {
 			IpGeography.index(new FileReader(new File(element)));
 		}
