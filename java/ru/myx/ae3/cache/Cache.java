@@ -4,65 +4,55 @@ import ru.myx.ae3.AbstractSAPI;
 import ru.myx.ae3.base.BaseFunction;
 import ru.myx.ae3.base.BaseObject;
 
-/**
- * @author myx
- * 
- */
+/** @author myx */
 public class Cache extends AbstractSAPI {
-	private static final AbstractCacheImpl	BASE_IMPL;
+	
+	private static final AbstractCacheImpl BASE_IMPL;
 	
 	static {
-		/**
-		 * this block should go last
-		 */
+		/** this block should go last **/
 		{
-			BASE_IMPL = AbstractSAPI.createObject( "ru.myx.ae3.cache.ImplementCache" );
+			BASE_IMPL = AbstractSAPI.createObject("ru.myx.ae3.cache.ImplementCache");
 		}
 	}
 	
-	/**
-	 * 
-	 * @param function
+	/** @param function
 	 * @param thisValue
-	 * @return
-	 */
-	public static final CreationHandlerObject<Object, BaseObject> createBaseFactory(
-			final BaseFunction function,
-			final BaseObject thisValue) {
-		return new BaseFunctionCreationHandler( thisValue, function );
+	 * @return */
+	public static final CreationHandlerObject<Object, BaseObject> createBaseFactory(final BaseFunction function, final BaseObject thisValue) {
+		
+		return new BaseFunctionCreationHandler(thisValue, function);
 	}
 	
-	/**
-	 * @param <V>
+	/** @param <V>
 	 * @param key
 	 * @param cacheType
-	 * @return cache
-	 */
+	 * @return cache */
 	public static final <V> CacheL1<V> createL1(final String key, final CacheType cacheType) {
-		return Cache.BASE_IMPL.createL1( key, cacheType );
+		
+		return Cache.BASE_IMPL.createL1(key, cacheType);
 	}
 	
-	/**
-	 * @param <V>
+	/** @param <V>
 	 * @param title
 	 * @param type
-	 * @return cache
-	 */
+	 * @return cache */
 	public static final <V> CacheL2<V> createL2(final String title, final CacheType type) {
-		return Cache.BASE_IMPL.createL2( "", title, type );
+		
+		return Cache.BASE_IMPL.createL2("", title, type);
 	}
 	
-	/**
-	 * @param <V>
+	/** @param <V>
 	 * @param key
 	 * @param title
-	 * @return cache
-	 */
+	 * @return cache */
 	public static final <V> CacheL2<V> createL2(final String key, final String title) {
-		return Cache.BASE_IMPL.createL2( key, title, CacheType.NORMAL_JAVA_SOFT );
+		
+		return Cache.BASE_IMPL.createL2(key, title, CacheType.NORMAL_JAVA_SOFT);
 	}
 	
 	private Cache() {
+		
 		//
 	}
 }

@@ -1279,7 +1279,7 @@ public final class ExpressionParser {
 				if (name == null) {
 					assembly.truncate(size);
 					precompiled.clear();
-					precompiled.add(new TKV_ERROR_A_C_E("Property name should be identifier or literal!"));
+					precompiled.add(new TKV_ERROR_A_C_E("Property name should be identifier or literal! Property token: " + token));
 					return false;
 				}
 			}

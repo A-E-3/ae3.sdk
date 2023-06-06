@@ -17,11 +17,15 @@ public class BaseFunctionCreationHandler extends BaseFunctionAbstract implements
 	
 	private final BaseFunction function;
 	
+	private final long cacheTtl;
+	
 	/** @param thisObject
 	 * @param function */
 	public BaseFunctionCreationHandler(final BaseObject thisObject, final BaseFunction function) {
+
 		this.thisObject = thisObject;
 		this.function = function;
+		this.cacheTtl = Base.getInt(function, "TTL", 15000);
 		final ExecCallable itself = function;
 		if (itself.execArgumentsMinimal() > 2) {
 			throw new IllegalArgumentException("fn with maximum 2 arguments expected: callback(attachment, key), given: " + function);
@@ -69,7 +73,7 @@ public class BaseFunctionCreationHandler extends BaseFunctionAbstract implements
 	@Override
 	public long getTTL() {
 		
-		return Base.getInt(this.function, "TTL", 15000);
+		return this.cacheTtl;
 	}
 	
 	@Override
