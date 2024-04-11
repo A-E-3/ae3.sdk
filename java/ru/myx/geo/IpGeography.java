@@ -56,7 +56,7 @@ public class IpGeography {
 	
 	static final FileFilter DB_FILTER = new FilterDB();
 	
-	private static final File FOLDER = new File(new File(Engine.PATH_PROTECTED, "settings"), "ip_geography");
+	private static final File DB_FOLDER = new File(new File(Engine.PATH_PRIVATE, "settings"), "ip_geography");
 	
 	private static final boolean USE_MEMORY_MAPPING = Convert.MapEntry.toBoolean(System.getProperties(), "ae2.use_memory_mapping", true);
 	
@@ -70,7 +70,7 @@ public class IpGeography {
 	
 	static {
 		try {
-			IpGeography.checkDB();
+			IpGeography.checkFiles();
 		} catch (final IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -111,12 +111,12 @@ public class IpGeography {
 		}
 	}
 	
-	private static void checkDB() throws IOException {
+	private static void checkFiles() throws IOException {
 		
-		if (!IpGeography.FOLDER.exists() && !IpGeography.FOLDER.mkdirs()) {
-			throw new RuntimeException("IP -> GEO, cannot create: " + IpGeography.FOLDER.getAbsolutePath());
+		if (!IpGeography.DB_FOLDER.exists() && !IpGeography.DB_FOLDER.mkdirs()) {
+			throw new RuntimeException("IP -> GEO, cannot create: " + IpGeography.DB_FOLDER.getAbsolutePath());
 		}
-		final File[] files = IpGeography.FOLDER.listFiles(IpGeography.DB_FILTER);
+		final File[] files = IpGeography.DB_FOLDER.listFiles(IpGeography.DB_FILTER);
 		File last = null;
 		if (files != null) {
 			for (int i = files.length - 1; i >= 0; --i) {
@@ -132,14 +132,14 @@ public class IpGeography {
 		if (IpGeography.USE_MEMORY_MAPPING) {
 			if (last == null) {
 				final long ctm = System.currentTimeMillis();
-				last = new File(IpGeography.FOLDER, ctm + ".24db");
+				last = new File(IpGeography.DB_FOLDER, ctm + ".24db");
 				try (final RandomAccessFile file = new RandomAccessFile(last, "rw")) {
 					IpGeography.database = file.getChannel().map(FileChannel.MapMode.READ_WRITE, IpGeography.MIN, IpGeography.MAX);
 					IpGeography.database.limit(IpGeography.MAX);
 				}
 				
 				{
-					final File countries = new File(IpGeography.FOLDER, ctm + ".txt");
+					final File countries = new File(IpGeography.DB_FOLDER, ctm + ".txt");
 					try (final PrintWriter pw = new PrintWriter(new FileWriter(countries))) {
 						for (int i = 0; i < IpGeography.COUNTRIES.length; ++i) {
 							pw.println(i + " - " + IpGeography.COUNTRIES[i]);
@@ -155,7 +155,7 @@ public class IpGeography {
 			System.out.println("IP_GEORGAPHY: Warning, NOT using memory mapping, additional 16M of RAM will be used!");
 			if (last == null) {
 				final long ctm = System.currentTimeMillis();
-				last = new File(IpGeography.FOLDER, ctm + ".24db");
+				last = new File(IpGeography.DB_FOLDER, ctm + ".24db");
 				try (final RandomAccessFile file = new RandomAccessFile(last, "rw")) {
 					file.setLength(IpGeography.MAX);
 					final byte[] bytes = new byte[(int) file.length()];
@@ -164,7 +164,7 @@ public class IpGeography {
 				}
 				
 				{
-					final File countries = new File(IpGeography.FOLDER, ctm + ".txt");
+					final File countries = new File(IpGeography.DB_FOLDER, ctm + ".txt");
 					try (final PrintWriter pw = new PrintWriter(new FileWriter(countries))) {
 						for (int i = 0; i < IpGeography.COUNTRIES.length; ++i) {
 							pw.println(i + " - " + IpGeography.COUNTRIES[i]);
