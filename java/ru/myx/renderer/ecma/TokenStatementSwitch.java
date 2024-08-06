@@ -190,7 +190,7 @@ final class TokenStatementSwitch extends TokenStatementAbstract {
 			for (final TokenStatement statement : statements) {
 				
 				/** 'case' label of the switch **/
-				if (statement instanceof final TokenStatementCase) {
+				if (statement instanceof TokenStatementCase) {
 					if (hasDefault) {
 						assembly.addError("switch label after default case!");
 						return;
