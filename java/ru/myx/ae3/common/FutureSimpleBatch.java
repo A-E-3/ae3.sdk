@@ -2,6 +2,7 @@ package ru.myx.ae3.common;
 
 import ru.myx.ae3.Engine;
 import ru.myx.ae3.act.Act;
+import ru.myx.ae3.base.BaseFuture;
 import ru.myx.ae3.base.BaseFutureAbstract;
 import ru.myx.ae3.base.BaseList;
 import ru.myx.ae3.base.BaseObject;
@@ -15,40 +16,64 @@ import ru.myx.util.FifoQueueLinked;
  *
  * @param <V> */
 @ReflectionManual
-public class FutureSimpleBatch<V> extends BaseFutureAbstract<BaseList<V>> {
-	
-	static {
-		Reflect.classToBasePrototype(FutureSimpleBatch.class);
-	}
+public class FutureSimpleBatch<V> extends BaseFutureAbstract<BaseList<V>> implements BaseFuture.Completable<BaseList<V>> {
+
+	static BaseObject PROTOTYPE = Reflect.classToBasePrototype(FutureSimpleBatch.class);
 	
 	@SuppressWarnings("unchecked")
 	private final static <T> T castToAny(final Object any) {
-		
+
 		return (T) any;
 	}
-	
+
 	private volatile Object error = null;
-	
-	private volatile boolean loadDone = false;
-	
+
 	private long hashCode = 0xF000000000000000L;
-	
+
+	private volatile boolean loadDone = false;
+
 	private final FifoQueueLinked<FutureValue<V>> queue = new FifoQueueLinked<>();
-	
+
 	private volatile BaseList<V> result;
-	
+
 	/**
 	 *
 	 */
 	@ReflectionExplicit
 	public FutureSimpleBatch() {
-		
+
 		this.result = BaseObject.createArray();
 	}
-	
+
+	private final int createHashCode() {
+
+		final Object o = this.baseValue();
+		if (o == null) {
+			return 0;
+		}
+		return (int) (this.hashCode = o.hashCode());
+	}
+
+	/** Adds task to batch
+	 *
+	 * @param future */
+	public void addTask(final FutureValue<V> future) {
+
+		synchronized (future) {
+			if (future.isDone()) {
+				this.result.add(future.baseValue());
+				return;
+			}
+		}
+		synchronized (this) {
+			this.loadDone = false;
+			this.queue.offerLast(future);
+		}
+	}
+
 	@Override
 	public final Throwable baseError() {
-		
+
 		if (this.loadDone) {
 			if (this.error != null) {
 				return FutureValue.throwTaskFailedError(this.error, this);
@@ -61,10 +86,16 @@ public class FutureSimpleBatch<V> extends BaseFutureAbstract<BaseList<V>> {
 		}
 		return null;
 	}
-	
+
+	@Override
+	public BaseObject baseFutureType() {
+
+		return FutureSimpleBatch.PROTOTYPE;
+	}
+
 	@Override
 	public final BaseList<V> baseValue() {
-		
+
 		if (this.loadDone) {
 			if (this.error != null) {
 				throw FutureValue.throwTaskFailedError(this.error, this);
@@ -77,24 +108,58 @@ public class FutureSimpleBatch<V> extends BaseFutureAbstract<BaseList<V>> {
 		}
 		return this.result;
 	}
-	
-	private final int createHashCode() {
-		
-		final Object o = this.baseValue();
-		if (o == null) {
-			return 0;
-		}
-		return (int) (this.hashCode = o.hashCode());
-	}
-	
+
 	@Override
 	public final boolean equals(final Object anotherObject) {
-		
+
 		return anotherObject == this || anotherObject != null && anotherObject.equals(this.baseValue());
 	}
-	
+
+	@Override
+	public final int hashCode() {
+
+		return this.hashCode == 0xF000000000000000L
+			? this.createHashCode()
+			: (int) this.hashCode;
+	}
+
+	@Override
+	public final boolean isDone() {
+
+		return this.loadDone;
+	}
+
+	@Override
+	public boolean isFailed() {
+
+		return this.loadDone && this.error != null;
+	}
+
+	/** @param result */
+	@Override
+	@ReflectionExplicit
+	public void setError(final Object result) {
+
+		assert result != null : "Error shouldn't be null";
+		this.error = result;
+		this.loadDone = true;
+		/** TODO: is there a point? Why not just inline? */
+		Act.launchNotifyAll(this);
+	}
+
+	/** @param result */
+	@Override
+	@ReflectionExplicit
+	public void setResult(final BaseList<V> result) {
+
+		this.result = result;
+		this.loadDone = true;
+		/** TODO: is there a point? Why not just inline? */
+		Act.launchNotifyAll(this);
+	}
+
 	final FutureSimpleBatch<V> getReference() {
-		
+
 		if (this.loadDone) {
 			return this;
 		}
@@ -139,35 +204,15 @@ public class FutureSimpleBatch<V> extends BaseFutureAbstract<BaseList<V>> {
 			return this;
 		}
 	}
-	
-	@Override
-	public final int hashCode() {
-		
-		return this.hashCode == 0xF000000000000000L
-			? this.createHashCode()
-			: (int) this.hashCode;
-	}
-	
-	@Override
-	public final boolean isDone() {
-		
-		return this.loadDone;
-	}
-	
-	@Override
-	public boolean isFailed() {
-		
-		return this.loadDone && this.error != null;
-	}
-	
+
 	/** @param ctx
 	 * @param futureObject */
 	@ReflectionExplicit
-	public void push(final ExecProcess ctx, final BaseObject futureObject) {
-		
+	void push(final ExecProcess ctx, final BaseObject futureObject) {
+
 		if (futureObject instanceof FutureValue<?>) {
 			final FutureValue<V> future = FutureSimpleBatch.castToAny(futureObject);
-			this.push(future);
+			this.addTask(future);
 			return;
 		}
 		final Object valueObject = futureObject.baseValue();
@@ -178,7 +223,7 @@ public class FutureSimpleBatch<V> extends BaseFutureAbstract<BaseList<V>> {
 		}
 		if (valueObject instanceof FutureValue<?>) {
 			final FutureValue<V> future = FutureSimpleBatch.castToAny(valueObject);
-			this.push(future);
+			this.addTask(future);
 			return;
 		}
 		{
@@ -186,41 +231,5 @@ public class FutureSimpleBatch<V> extends BaseFutureAbstract<BaseList<V>> {
 			this.result.add(object);
 			return;
 		}
-	}
-	
-	/** @param future */
-	@ReflectionExplicit
-	public void push(final FutureValue<V> future) {
-		
-		synchronized (future) {
-			if (future.isDone()) {
-				this.result.add(future.baseValue());
-				return;
-			}
-		}
-		synchronized (this) {
-			this.queue.offerLast(future);
-		}
-	}
-	
-	/** @param result */
-	@ReflectionExplicit
-	public void setError(final Object result) {
-		
-		assert result != null : "Error shouldn't be null";
-		this.error = result;
-		this.loadDone = true;
-		/** TODO: is there a point? Why not just inline? */
-		Act.launchNotifyAll(this);
-	}
-	
-	/** @param result */
-	@ReflectionExplicit
-	public void setResult(final BaseList<V> result) {
-		
-		this.result = result;
-		this.loadDone = true;
-		/** TODO: is there a point? Why not just inline? */
-		Act.launchNotifyAll(this);
 	}
 }
