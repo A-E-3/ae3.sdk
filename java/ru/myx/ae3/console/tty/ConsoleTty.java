@@ -18,13 +18,13 @@ import ru.myx.util.QueueStackRecord;
 
 /** @author myx */
 public abstract class ConsoleTty extends AbstractCharacterConsole {
-	
-	private static final byte[] CRLF = "\r\n".getBytes(StandardCharsets.US_ASCII);
-	
-	private static final byte[] MSG_WELCOME;
-	
-	private static final byte[] NULL_BYTES = "null".getBytes(StandardCharsets.US_ASCII);
 
+	private static final byte[] CRLF = "\r\n".getBytes(StandardCharsets.US_ASCII);
+
+	private static final byte[] MSG_WELCOME;
+
+	private static final byte[] NULL_BYTES = "null".getBytes(StandardCharsets.US_ASCII);
+	
 	private static final byte[] STATE_ATTENTION = new byte[]{
 			(byte) 27, // ESCAPE
 			(byte) '[', (byte) '0', // reset
@@ -33,7 +33,7 @@ public abstract class ConsoleTty extends AbstractCharacterConsole {
 			(byte) '7', (byte) 'm',
 			//
 	};
-	
+
 	private static final byte[] STATE_ERROR = new byte[]{
 			(byte) 7, // BEEP
 			(byte) 27, // ESCAPE
@@ -43,22 +43,22 @@ public abstract class ConsoleTty extends AbstractCharacterConsole {
 			(byte) '1', (byte) 'm',
 			//
 	};
-	
+
 	private static final byte[] STATE_NORMAL = new byte[]{
 			(byte) 27, // ESCAPE
 			(byte) '[', (byte) '0', // reset
 			(byte) 'm',
 			//
 	};
-	
-	private static final byte[] TELNET_DETECTED = "# telnet detected\r\n".getBytes(StandardCharsets.US_ASCII);
 
+	private static final byte[] TELNET_DETECTED = "# telnet detected\r\n".getBytes(StandardCharsets.US_ASCII);
+	
 	private static final byte[] TELNET_PING = new byte[]{
 			//
 			// DO SUPPRESS GO AHEAD
 			(byte) 255, (byte) 253, (byte) 3,
 	};
-	
+
 	private static final byte[] TELNET_SETUP = new byte[]{
 			//
 			// DO SUPPRESS GO AHEAD
@@ -95,15 +95,15 @@ public abstract class ConsoleTty extends AbstractCharacterConsole {
 			(byte) 255, (byte) 254, (byte) 37,
 			// end
 	};
-	
-	private static final byte[] TERMINAL_ANSI_DETECTED = "# ansi detected\r\n".getBytes(StandardCharsets.US_ASCII);
 
+	private static final byte[] TERMINAL_ANSI_DETECTED = "# ansi detected\r\n".getBytes(StandardCharsets.US_ASCII);
+	
 	private static final byte[] TERMINAL_PING = new byte[]{
 			//
 			// WHAT ARE YOU
 			(byte) 27, (byte) '[', (byte) 'c',
 	};
-	
+
 	private static final byte[] TERMINAL_SETUP = new byte[]{
 			//
 			/** <code>
@@ -127,7 +127,7 @@ public abstract class ConsoleTty extends AbstractCharacterConsole {
 			</code> */
 			// end
 	};
-	
+
 	static {
 		{
 			final TransferCollector collector = Transfer.createCollector();
@@ -148,50 +148,50 @@ public abstract class ConsoleTty extends AbstractCharacterConsole {
 			/** Human friendly message */
 			collector.getTarget()
 					.absorbBuffer(Transfer.wrapBuffer((" Welcome to " + Engine.HOST_NAME + " running " + Engine.VERSION_STRING + "\r\n").getBytes(StandardCharsets.US_ASCII)));
-
+			
 			MSG_WELCOME = collector.toBinary().nextDirectArray();
 		}
 	}
-	
+
 	private AnsiState ansiState;
-	
+
 	private boolean ansiDetected;
-	
+
 	private final StringBuilder builder = new StringBuilder();
-	
+
 	private final TransferCollector collector = Transfer.createCollector();
-	
+
 	private int consoleHeight;
-	
+
 	private ConsoleTtyState consoleState;
-	
+
 	private int consoleWidth;
-	
+
 	private ConsoleState stateCurrent;
-	
+
 	private ConsoleState stateRequested;
-	
+
 	private ConsoleTtyTask<?> task;
-	
+
 	private TelnetState telnetState;
-	
+
 	private boolean telnetDetected;
-	
+
 	private final QueueStackRecord<ConsoleTtyTask<?>> todo = new QueueStackRecord<>();
-	
+
 	/**
 	 *
 	 */
 	protected ConsoleTty() {
-
+		
 		this.consoleDestroy();
 	}
-	
+
 	/**
 	 *
 	 */
 	private void ansiHideCursor() {
-		
+
 		if (this.ansiDetected) {
 			/** HIDE CURSOR */
 			final TransferTarget target = this.collector.getTarget();
@@ -203,12 +203,12 @@ public abstract class ConsoleTty extends AbstractCharacterConsole {
 			target.absorb('l');
 		}
 	}
-	
+
 	/**
 	 *
 	 */
 	private void ansiShowCursor() {
-		
+
 		if (this.ansiDetected) {
 			/** SHOW CURSOR */
 			final TransferTarget target = this.collector.getTarget();
@@ -220,80 +220,9 @@ public abstract class ConsoleTty extends AbstractCharacterConsole {
 			target.absorb('h');
 		}
 	}
-	
-	@Override
-	public void checkUpdateClient() {
-		
-		/** DO NOT use checkState from Tasks! */
-		synchronized (this) {
-			if (this.ansiDetected) {
-				/** TERMINAL: WHAT ARE YOU */
-				final TransferTarget target = this.collector.getTarget();
-				target.absorb(27);
-				target.absorb('[');
-				target.absorb('c');
-			}
-		}
-		/** no flush intentionally */
-		// this.flush();
-	}
-	
-	/** Use this to release resources associated current tty console session */
-	protected void consoleDestroy() {
-		
-		this.consoleState = ConsoleTtyState.INITIAL;
-		this.ansiState = AnsiState.UNDETECTED;
-		this.ansiDetected = false;
-		this.telnetState = TelnetState.UNDETECTED;
-		this.telnetDetected = false;
-		this.stateCurrent = ConsoleState.NORMAL;
-		this.stateRequested = ConsoleState.NORMAL;
-		this.consoleWidth = 79;
-		this.consoleHeight = 24;
-		this.builder.setLength(0);
-		this.todo.clear();
-		this.collector.reset();
-		if (this.task != null) {
-			this.task.setResult(null);
-			this.task = null;
-		}
-	}
-	
-	/** @return */
-	protected abstract String consolePeerIdentity();
-	
-	/** Use this to start a new tty console session */
-	protected void consoleStart() {
-		
-		final String peerIdentity = this.consolePeerIdentity();
-		this.consoleState = ConsoleTtyState.HANDSHAKE;
-		final TransferTarget target = this.collector.getTarget();
-		target.absorbBuffer(Transfer.wrapBuffer(ConsoleTty.MSG_WELCOME));
-		target.absorbBuffer(Transfer.wrapBuffer(("# your address is: " + peerIdentity + "\r\n").getBytes(StandardCharsets.US_ASCII)));
-		this.consumeFromClientWanted(true);
-		this.flush();
-		final ExecProcess ctx = Exec.createProcess(null, "TTY Session: " + peerIdentity);
-		ctx.setConsole(this);
-		Act.later(ctx, TtySession.INSTANCE, ctx, 1000L);
-	}
-	
-	/** @param b
-	 * @return */
-	protected boolean consumeFromClient(final int b) {
-		
-		return this.nextTelnet(b);
-	}
-	
-	/** @param flag
-	 * @return */
-	protected abstract boolean consumeFromClientWanted(final boolean flag);
-	
-	/** @param buffer
-	 * @return */
-	protected abstract boolean consumeFromServer(final TransferBuffer buffer);
-	
+
 	private final boolean consumeNextPayload(final int b) {
-		
+
 		final ConsoleTtyTask<?> task;
 		flush : {
 			sync : synchronized (this) {
@@ -317,9 +246,9 @@ public abstract class ConsoleTty extends AbstractCharacterConsole {
 			}
 			this.flush();
 		}
-		
+
 		final ConsoleTtyTask<?> replacement = task.consumeNext(this, b);
-		
+
 		if (task != replacement) {
 			hide : {
 				sync : synchronized (this) {
@@ -342,26 +271,10 @@ public abstract class ConsoleTty extends AbstractCharacterConsole {
 		this.flush();
 		return true;
 	}
-	
-	@Override
-	public void flush() {
-		
-		final TransferBuffer buffer;
-		synchronized (this) {
-			/** collector is reset ready to collect new messages after that */
-			buffer = this.collector.toBinary().nextCopy();
-		}
-		assert buffer != null : "NULL buffer";
-		if (buffer.hasRemaining()) {
-			if (!this.consumeFromServer(buffer)) {
-				throw new RuntimeException("Connection reset");
-			}
-		}
-	}
-	
+
 	/** @return */
 	private TransferTarget internCheckPrepareMessage() {
-		
+
 		final TransferTarget target = this.collector.getTarget();
 		if (this.task != null) {
 			if (this.telnetDetected) {
@@ -384,9 +297,9 @@ public abstract class ConsoleTty extends AbstractCharacterConsole {
 		this.internCheckStatus();
 		return target;
 	}
-	
+
 	private void internCheckStatus() {
-		
+
 		if (this.stateCurrent != this.stateRequested) {
 			if (this.ansiDetected) {
 				if (this.stateRequested == ConsoleState.NORMAL) {
@@ -402,30 +315,9 @@ public abstract class ConsoleTty extends AbstractCharacterConsole {
 			this.stateCurrent = this.stateRequested;
 		}
 	}
-	
-	boolean internEcho(final int b) {
-		
-		if (this.telnetDetected) {
-			this.internCheckStatus();
-			final TransferTarget target = this.collector.getTarget();
-			if (this.ansiDetected && b == 8) {
-				target.absorbBuffer(Transfer.wrapBuffer(new byte[]{
-						(byte) 22, (byte) (b & 0x7F)
-				}));
-				this.flush();
-				return true;
-			}
-			/** if ((this.ansiState != AnsiState.UNDETECTED) && ((b & 0x80) != 0)) {
-			 * this.consumeFromServer( Transfer.wrapBuffer( new byte[] { (byte) 22, (byte) (b &
-			 * 0x7F) } ) ); return; } */
-			target.absorbBuffer(Transfer.singletonBuffer((byte) b));
-			this.flush();
-		}
-		return true;
-	}
-	
-	private final void internSendMessageIdent(final String message, final int index) {
 
+	private final void internSendMessageIdent(final String message, final int index) {
+		
 		boolean ident = true;
 		final TransferTarget target = this.collector.getTarget();
 		for (final char c : message.toCharArray()) {
@@ -449,21 +341,9 @@ public abstract class ConsoleTty extends AbstractCharacterConsole {
 		target.absorb('\n');
 		this.flush();
 	}
-	
-	/** @return */
-	public boolean isAnsiDetected() {
-		
-		return this.ansiDetected;
-	}
-	
-	/** @return */
-	public boolean isTelnetDetected() {
-		
-		return this.telnetDetected;
-	}
-	
+
 	private final boolean nextTelnet(final int i) {
-		
+
 		switch (this.telnetState) {
 			case UNDETECTED : {
 				if (i != 255 || this.consoleState != ConsoleTtyState.HANDSHAKE) {
@@ -472,7 +352,7 @@ public abstract class ConsoleTty extends AbstractCharacterConsole {
 					}
 					return this.nextTerminal(i);
 				}
-				
+
 				final TransferTarget target = this.collector.getTarget();
 				target.absorbBuffer(Transfer.wrapBuffer(ConsoleTty.TELNET_DETECTED));
 				target.absorbBuffer(Transfer.wrapBuffer(ConsoleTty.TELNET_SETUP));
@@ -601,9 +481,9 @@ public abstract class ConsoleTty extends AbstractCharacterConsole {
 		}
 		return false;
 	}
-	
+
 	private final boolean nextTerminal(final int i) {
-		
+
 		switch (this.ansiState) {
 			case UNDETECTED : {
 				if (i != 27 || this.consoleState != ConsoleTtyState.HANDSHAKE) {
@@ -685,137 +565,9 @@ public abstract class ConsoleTty extends AbstractCharacterConsole {
 		}
 		return false;
 	}
-	
-	/** Override this method with a proper trigger.
-	 *
-	 * Called not more than once per session. */
-	protected void onDetectAnsi() {
-		
-		// empty
-	}
-	
-	/** Override this method with a proper trigger.
-	 *
-	 * Called not more than once per session. */
-	protected void onDetectTelnet() {
-		
-		// empty
-		
-	}
-	
-	@Override
-	public Value<Boolean> readBoolean(final String title) {
-		
-		final ConsoleTtyTask<Boolean> task = this.telnetDetected
-			? new TaskReadBooleanCharacter(title, null)
-			: new TaskReadBooleanString(title, null);
-		this.todo(task);
-		return task;
-	}
-	
-	@Override
-	public Value<Boolean> readBoolean(final String title, final boolean defaultValue) {
 
-		final ConsoleTtyTask<Boolean> task = this.telnetDetected
-			? new TaskReadBooleanCharacter(
-					title,
-					defaultValue
-						? Boolean.TRUE
-						: Boolean.FALSE)
-			: new TaskReadBooleanString(
-					title,
-					defaultValue
-						? Boolean.TRUE
-						: Boolean.FALSE);
-		this.todo(task);
-		return task;
-	}
-	
-	@Override
-	public Value<?> readContinue(final String title) {
-		
-		final ConsoleTtyTask<?> task = new TaskReadContinue(title);
-		this.todo(task);
-		return task;
-	}
-	
-	@Override
-	public Value<Number> readInteger(final String title) {
-		
-		final ConsoleTtyTask<Number> task = new TaskReadNumber(title, null);
-		this.todo(task);
-		return task;
-	}
-	
-	@Override
-	public Value<Number> readInteger(final String title, final int defaultValue) {
-
-		final ConsoleTtyTask<Number> task = new TaskReadNumber(title, Integer.valueOf(defaultValue));
-		this.todo(task);
-		return task;
-	}
-	
-	@Override
-	protected Value<String> readPasswordImpl(final String title) {
-		
-		final ConsoleTtyTask<String> task = new TaskReadPassword(title);
-		this.todo(task);
-		return task;
-	}
-	
-	@Override
-	protected Value<String> readStringImpl(final String title, final String defaultValue) {
-
-		final ConsoleTtyTask<String> task = new TaskReadString(title, defaultValue);
-		this.todo(task);
-		return task;
-	}
-	
-	@Override
-	protected boolean sendMessageImpl(final String message) {
-		
-		final TransferTarget target = this.internCheckPrepareMessage();
-		final byte[] bytes = message == null
-			? ConsoleTty.NULL_BYTES
-			: message.getBytes(StandardCharsets.UTF_8);
-		target.absorbArray(bytes, 0, bytes.length);
-		target.absorb('\r');
-		target.absorb('\n');
-		/** DO NOT use sendMessage from Tasks! */
-		if (this.task != null) {
-			this.task.onTaskInit(this);
-		}
-		return true;
-	}
-	
-	@Override
-	protected boolean sendMessageImpl(final String title, final String body) {
-		
-		final TransferTarget target = this.internCheckPrepareMessage();
-		target.absorbBuffer(Transfer.wrapBuffer(title.getBytes(StandardCharsets.UTF_8)));
-		target.absorbBuffer(Transfer.wrapBuffer(ConsoleTty.CRLF));
-		this.internSendMessageIdent(body, 1);
-		/** DO NOT use sendMessage from Tasks! */
-		if (this.task != null) {
-			this.task.onTaskInit(this);
-		}
-		return true;
-	}
-	
-	void sendStatus(final String message) {
-		
-		this.internCheckStatus();
-		this.collector.getTarget().absorbBuffer(Transfer.wrapBuffer(message.getBytes(StandardCharsets.UTF_8)));
-	}
-	
-	@Override
-	public void setState(final ConsoleState state) {
-		
-		this.stateRequested = state;
-	}
-	
 	private void todo(final ConsoleTtyTask<?> task) {
-		
+
 		boolean flush = false;
 		synchronized (this) {
 			if (this.task == null) {
@@ -832,10 +584,231 @@ public abstract class ConsoleTty extends AbstractCharacterConsole {
 			this.flush();
 		}
 	}
-	
+
+	@Override
+	public void checkUpdateClient() {
+
+		/** DO NOT use checkState from Tasks! */
+		synchronized (this) {
+			if (this.ansiDetected) {
+				/** TERMINAL: WHAT ARE YOU */
+				final TransferTarget target = this.collector.getTarget();
+				target.absorb(27);
+				target.absorb('[');
+				target.absorb('c');
+			}
+		}
+		/** no flush intentionally */
+		// this.flush();
+	}
+
+	@Override
+	public void flush() {
+
+		final TransferBuffer buffer;
+		synchronized (this) {
+			/** collector is reset ready to collect new messages after that */
+			buffer = this.collector.toBinary().nextCopy();
+		}
+		assert buffer != null : "NULL buffer";
+		if (buffer.hasRemaining()) {
+			if (!this.consumeFromServer(buffer)) {
+				throw new RuntimeException("Connection reset");
+			}
+		}
+	}
+
+	/** @return */
+	public boolean isAnsiDetected() {
+
+		return this.ansiDetected;
+	}
+
+	/** @return */
+	public boolean isTelnetDetected() {
+
+		return this.telnetDetected;
+	}
+
+	@Override
+	public Value<Boolean> readBoolean(final String title) {
+
+		final ConsoleTtyTask<Boolean> task = this.telnetDetected
+			? new TaskReadBooleanCharacter(title, null)
+			: new TaskReadBooleanString(title, null);
+		this.todo(task);
+		return task;
+	}
+
+	@Override
+	public Value<Boolean> readBoolean(final String title, final boolean defaultValue) {
+		
+		final ConsoleTtyTask<Boolean> task = this.telnetDetected
+			? new TaskReadBooleanCharacter(
+					title,
+					defaultValue
+						? Boolean.TRUE
+						: Boolean.FALSE)
+			: new TaskReadBooleanString(
+					title,
+					defaultValue
+						? Boolean.TRUE
+						: Boolean.FALSE);
+		this.todo(task);
+		return task;
+	}
+
+	@Override
+	public Value<?> readContinue(final String title) {
+
+		final ConsoleTtyTask<?> task = new TaskReadContinue(title);
+		this.todo(task);
+		return task;
+	}
+
+	@Override
+	public Value<Number> readInteger(final String title) {
+
+		final ConsoleTtyTask<Number> task = new TaskReadNumber(title, null);
+		this.todo(task);
+		return task;
+	}
+
+	@Override
+	public Value<Number> readInteger(final String title, final int defaultValue) {
+		
+		final ConsoleTtyTask<Number> task = new TaskReadNumber(title, Integer.valueOf(defaultValue));
+		this.todo(task);
+		return task;
+	}
+
+	@Override
+	public void setState(final ConsoleState state) {
+
+		this.stateRequested = state;
+	}
+
+	/** Use this to release resources associated current tty console session */
+	protected void consoleDestroy() {
+
+		this.consoleState = ConsoleTtyState.INITIAL;
+		this.ansiState = AnsiState.UNDETECTED;
+		this.ansiDetected = false;
+		this.telnetState = TelnetState.UNDETECTED;
+		this.telnetDetected = false;
+		this.stateCurrent = ConsoleState.NORMAL;
+		this.stateRequested = ConsoleState.NORMAL;
+		this.consoleWidth = 79;
+		this.consoleHeight = 24;
+		this.builder.setLength(0);
+		this.todo.clear();
+		this.collector.reset();
+		if (this.task != null) {
+			this.task.setResult(null);
+			this.task = null;
+		}
+	}
+
+	/** @return */
+	protected abstract String consolePeerIdentity();
+
+	/** Use this to start a new tty console session */
+	protected void consoleStart() {
+
+		final String peerIdentity = this.consolePeerIdentity();
+		this.consoleState = ConsoleTtyState.HANDSHAKE;
+		final TransferTarget target = this.collector.getTarget();
+		target.absorbBuffer(Transfer.wrapBuffer(ConsoleTty.MSG_WELCOME));
+		target.absorbBuffer(Transfer.wrapBuffer(("# your address is: " + peerIdentity + "\r\n").getBytes(StandardCharsets.US_ASCII)));
+		this.consumeFromClientWanted(true);
+		this.flush();
+		final ExecProcess ctx = Exec.createProcess(null, "TTY Session: " + peerIdentity);
+		ctx.setConsole(this);
+		Act.later(ctx, TtySession.INSTANCE, ctx, 1_000L);
+	}
+
+	/** @param b
+	 * @return */
+	protected boolean consumeFromClient(final int b) {
+
+		return this.nextTelnet(b);
+	}
+
+	/** @param flag
+	 * @return */
+	protected abstract boolean consumeFromClientWanted(final boolean flag);
+
+	/** @param buffer
+	 * @return */
+	protected abstract boolean consumeFromServer(final TransferBuffer buffer);
+
+	/** Override this method with a proper trigger.
+	 *
+	 * Called not more than once per session. */
+	protected void onDetectAnsi() {
+
+		// empty
+	}
+
+	/** Override this method with a proper trigger.
+	 *
+	 * Called not more than once per session. */
+	protected void onDetectTelnet() {
+
+		// empty
+
+	}
+
+	@Override
+	protected Value<String> readPasswordImpl(final String title) {
+
+		final ConsoleTtyTask<String> task = new TaskReadPassword(title);
+		this.todo(task);
+		return task;
+	}
+
+	@Override
+	protected Value<String> readStringImpl(final String title, final String defaultValue) {
+		
+		final ConsoleTtyTask<String> task = new TaskReadString(title, defaultValue);
+		this.todo(task);
+		return task;
+	}
+
+	@Override
+	protected boolean sendMessageImpl(final String message) {
+
+		final TransferTarget target = this.internCheckPrepareMessage();
+		final byte[] bytes = message == null
+			? ConsoleTty.NULL_BYTES
+			: message.getBytes(StandardCharsets.UTF_8);
+		target.absorbArray(bytes, 0, bytes.length);
+		target.absorb('\r');
+		target.absorb('\n');
+		/** DO NOT use sendMessage from Tasks! */
+		if (this.task != null) {
+			this.task.onTaskInit(this);
+		}
+		return true;
+	}
+
+	@Override
+	protected boolean sendMessageImpl(final String title, final String body) {
+
+		final TransferTarget target = this.internCheckPrepareMessage();
+		target.absorbBuffer(Transfer.wrapBuffer(title.getBytes(StandardCharsets.UTF_8)));
+		target.absorbBuffer(Transfer.wrapBuffer(ConsoleTty.CRLF));
+		this.internSendMessageIdent(body, 1);
+		/** DO NOT use sendMessage from Tasks! */
+		if (this.task != null) {
+			this.task.onTaskInit(this);
+		}
+		return true;
+	}
+
 	/** @return */
 	protected boolean tryPingClient() {
-		
+
 		if (this.telnetDetected) {
 			final TransferTarget target = this.collector.getTarget();
 			target.absorbBuffer(Transfer.wrapBuffer(ConsoleTty.TELNET_PING));
@@ -850,16 +823,43 @@ public abstract class ConsoleTty extends AbstractCharacterConsole {
 		}
 		return false;
 	}
-	
+
 	@Override
 	protected boolean write(final int c) {
-		
+
 		return this.collector.getTarget().absorb(c);
 	}
-	
+
 	@Override
 	protected boolean write(final String text) {
-		
+
 		return this.collector.getTarget().absorbBuffer(Transfer.wrapBuffer(text.getBytes(StandardCharsets.UTF_8)));
+	}
+
+	boolean internEcho(final int b) {
+
+		if (this.telnetDetected) {
+			this.internCheckStatus();
+			final TransferTarget target = this.collector.getTarget();
+			if (this.ansiDetected && b == 8) {
+				target.absorbBuffer(Transfer.wrapBuffer(new byte[]{
+						(byte) 22, (byte) (b & 0x7F)
+				}));
+				this.flush();
+				return true;
+			}
+			/** if ((this.ansiState != AnsiState.UNDETECTED) && ((b & 0x80) != 0)) {
+			 * this.consumeFromServer( Transfer.wrapBuffer( new byte[] { (byte) 22, (byte) (b &
+			 * 0x7F) } ) ); return; } */
+			target.absorbBuffer(Transfer.singletonBuffer((byte) b));
+			this.flush();
+		}
+		return true;
+	}
+
+	void sendStatus(final String message) {
+
+		this.internCheckStatus();
+		this.collector.getTarget().absorbBuffer(Transfer.wrapBuffer(message.getBytes(StandardCharsets.UTF_8)));
 	}
 }

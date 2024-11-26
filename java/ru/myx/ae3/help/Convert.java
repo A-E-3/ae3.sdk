@@ -25,12 +25,12 @@ import ru.myx.ae3.common.Value;
  *         myx - barachta "typecomment": Window>Preferences>Java>Templates. To enable and disable
  *         the creation of type comments go to Window>Preferences>Java>Code Generation. */
 public class Convert {
-	
+
 	/** Fast - all methods are implemented without any code reuse. */
 	public static class Any {
-		
+
 		private static final long parseInt(final String s, final int radix) {
-			
+
 			int result = 0;
 			boolean negative = false;
 			int i = 0;
@@ -38,7 +38,7 @@ public class Convert {
 			int limit;
 			int multmin;
 			int digit;
-
+			
 			if (max > 0) {
 				if (s.charAt(0) == '-') {
 					negative = true;
@@ -81,9 +81,9 @@ public class Convert {
 			}
 			return -result;
 		}
-
+		
 		private static final double parseLong(final String s, final int radix) throws NumberFormatException {
-			
+
 			long result = 0;
 			boolean negative = false;
 			int i = 0;
@@ -91,7 +91,7 @@ public class Convert {
 			long limit;
 			long multmin;
 			int digit;
-
+			
 			if (max > 0) {
 				if (s.charAt(0) == '-') {
 					negative = true;
@@ -134,23 +134,47 @@ public class Convert {
 			}
 			return -result;
 		}
+		
+		/** Safely converts any object to String without any NullPointerException errors. Returns
+		 * null when source is null, creates a string when source is an array of chars or bytes.
+		 * calls any.toString() at least.
+		 *
+		 * @param any
+		 * @return string */
+		private static final String toString(final Object any) {
 
+			if (any == null) {
+				return null;
+			}
+			final Class<?> cls = any.getClass();
+			if (cls == String.class) {
+				return (String) any;
+			}
+			if (cls == char[].class) {
+				return new String((char[]) any);
+			}
+			if (cls == byte[].class) {
+				return new String((byte[]) any);
+			}
+			return any.toString();
+		}
+		
 		/** @param <T>
 		 * @param any
 		 * @return object */
 		@SuppressWarnings("unchecked")
 		public final static <T> T toAny(final Object any) {
-			
+
 			return (T) any;
 		}
-
+		
 		/** CATCH METHOD
 		 *
 		 * @param any
 		 * @param defaultValue
 		 * @return boolean */
 		public static final boolean toBoolean(final BaseObject any, final boolean defaultValue) {
-			
+
 			if (any == null || any == BaseObject.UNDEFINED || any == BaseObject.NULL) {
 				return defaultValue;
 			}
@@ -160,14 +184,14 @@ public class Convert {
 						? 1
 						: 0) != 0;
 		}
-
+		
 		/** = Convert.Any.toInt( any, defaultValue ? 1 : 0) != 0
 		 *
 		 * @param any
 		 * @param defaultValue
 		 * @return boolean */
 		public static final boolean toBoolean(final Object any, final boolean defaultValue) {
-			
+
 			if (any == null) {
 				return defaultValue;
 			}
@@ -177,7 +201,7 @@ public class Convert {
 						? 1
 						: 0) != 0;
 		}
-
+		
 		/** Safely converts any object to byte. Following steps are performed while converting: <br>
 		 * <ul>
 		 * <li>Check for NULL value - return default</li>
@@ -194,7 +218,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return byte */
 		public static final byte toByte(final Object any, final byte defaultValue) {
-			
+
 			if (any == null) {
 				return defaultValue;
 			}
@@ -277,7 +301,7 @@ public class Convert {
 			}
 			return defaultValue;
 		}
-
+		
 		/** Safely converts any object to char. Following steps are performed while converting: <br>
 		 * <ul>
 		 * <li>Check for NULL value - return default</li>
@@ -290,7 +314,7 @@ public class Convert {
 		 * @param def
 		 * @return char */
 		public static final char toChar(final Object any, final char def) {
-			
+
 			if (any == null) {
 				return def;
 			}
@@ -309,7 +333,7 @@ public class Convert {
 			}
 			return def;
 		}
-
+		
 		/** Safely converts any object to double. Following steps are performed while converting:
 		 * <br>
 		 * <ul>
@@ -328,7 +352,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return float */
 		public static final double toDouble(final Object any, final double defaultValue) {
-			
+
 			if (any == null) {
 				return defaultValue;
 			}
@@ -418,7 +442,7 @@ public class Convert {
 			}
 			return defaultValue;
 		}
-
+		
 		/** Safely converts any object to float. Following steps are performed while converting:
 		 * <br>
 		 * <ul>
@@ -437,7 +461,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return float */
 		public static final float toFloat(final Object any, final float defaultValue) {
-			
+
 			if (any == null) {
 				return defaultValue;
 			}
@@ -524,7 +548,7 @@ public class Convert {
 			}
 			return defaultValue;
 		}
-
+		
 		/** Safely converts any object to int. Following steps are performed while converting: <br>
 		 * <ul>
 		 * <li>Check for NULL value - return default</li>
@@ -541,7 +565,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return int */
 		public static final int toInt(final Object any, final int defaultValue) {
-			
+
 			if (any == null) {
 				return defaultValue;
 			}
@@ -626,7 +650,7 @@ public class Convert {
 			}
 			return defaultValue;
 		}
-
+		
 		/** Safely converts any object to int. Following steps are performed while converting: <br>
 		 * <ul>
 		 * <li>Check for NULL value - return default</li>
@@ -645,7 +669,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return int */
 		public static final int toInt(final Object any, final String[] variants, final int defaultValue) {
-			
+
 			if (any == null) {
 				return defaultValue;
 			}
@@ -734,7 +758,7 @@ public class Convert {
 			}
 			return defaultValue;
 		}
-
+		
 		/** Safely converts any object to long. Following steps are performed while converting: <br>
 		 * <ul>
 		 * <li>Check for NULL value - return default</li>
@@ -753,7 +777,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return long */
 		public static final long toLong(final Object any, final long defaultValue) {
-			
+
 			if (any == null) {
 				return defaultValue;
 			}
@@ -855,18 +879,18 @@ public class Convert {
 			}
 			return defaultValue;
 		}
-
+		
 		/** @param <T>
 		 * @param any
 		 * @param defaultValue
 		 * @return object */
 		public static final <T> T toObject(final T any, final T defaultValue) {
-			
+
 			return any == null
 				? defaultValue
 				: any;
 		}
-
+		
 		/** Safely converts any object to period in milliseconds. Following steps are performed
 		 * while converting: <br>
 		 * <ul>
@@ -882,7 +906,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return long */
 		public static final long toPeriod(final Object any, final long defaultValue) {
-			
+
 			if (any == null) {
 				return defaultValue;
 			}
@@ -965,7 +989,7 @@ public class Convert {
 			}
 			return defaultValue;
 		}
-
+		
 		/** Safely converts any object to short. Following steps are performed while converting:
 		 * <br>
 		 * <ul>
@@ -983,7 +1007,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return short */
 		public static final short toShort(final Object any, final short defaultValue) {
-			
+
 			if (any == null) {
 				return defaultValue;
 			}
@@ -1066,31 +1090,7 @@ public class Convert {
 			}
 			return defaultValue;
 		}
-
-		/** Safely converts any object to String without any NullPointerException errors. Returns
-		 * null when source is null, creates a string when source is an array of chars or bytes.
-		 * calls any.toString() at least.
-		 *
-		 * @param any
-		 * @return string */
-		private static final String toString(final Object any) {
-			
-			if (any == null) {
-				return null;
-			}
-			final Class<?> cls = any.getClass();
-			if (cls == String.class) {
-				return (String) any;
-			}
-			if (cls == char[].class) {
-				return new String((char[]) any);
-			}
-			if (cls == byte[].class) {
-				return new String((byte[]) any);
-			}
-			return any.toString();
-		}
-
+		
 		/** Safely converts any object to String without any NullPointerException and null results
 		 * (when defaultValue is not null). Default value returned when any is null or when
 		 * any.toString() equals to null. Creates a string when source is an array.
@@ -1099,7 +1099,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return string */
 		public static final String toString(final Object any, final String defaultValue) {
-			
+
 			if (any == null) {
 				return defaultValue;
 			}
@@ -1118,190 +1118,190 @@ public class Convert {
 				? defaultValue
 				: tmp;
 		}
-
+		
 		/** CATCH METHOD
 		 *
 		 * @param string */
 		public static final void toString(final String string) {
-			
+
 			//
 		}
-
+		
 		/** CATCH METHOD
 		 *
 		 * @param string
 		 * @param defaultValue */
 		public static final void toString(final String string, final String defaultValue) {
-			
+
 			//
 		}
-
+		
 		private Any() {
-
+			
 			// empty
 		}
 	}
-
+	
 	/** @author myx */
 	public static class Array {
-		
+
 		/** @param <T>
 		 * @param array
 		 * @return array */
 		@SuppressWarnings("unchecked")
 		public final static <T> T[] toAny(final Object[] array) {
-			
+
 			return (T[]) array;
 		}
-
+		
 		/** @param array
 		 * @param def
 		 * @return byte array */
 		public static final byte[] toBytes(final Object[] array, final byte def) {
-			
+
 			final byte[] result = new byte[array.length];
 			for (int i = array.length - 1; i >= 0; --i) {
 				result[i] = Any.toByte(array[i], def);
 			}
 			return result;
 		}
-
+		
 		/** @param array
 		 * @param def
 		 * @return byte array */
 		public static final byte[] toBytes(final Object[] array, final byte[] def) {
-			
+
 			final byte[] result = new byte[array.length];
 			for (int i = array.length - 1; i >= 0; --i) {
 				result[i] = Any.toByte(array[i], def[i]);
 			}
 			return result;
 		}
-
+		
 		/** @param array
 		 * @param def
 		 * @return char array */
 		public static final char[] toChars(final Object[] array, final char def) {
-			
+
 			final char[] result = new char[array.length];
 			for (int i = array.length - 1; i >= 0; --i) {
 				result[i] = Any.toChar(array[i], def);
 			}
 			return result;
 		}
-
+		
 		/** @param array
 		 * @param def
 		 * @return char array */
 		public static final char[] toChars(final Object[] array, final char[] def) {
-			
+
 			final char[] result = new char[array.length];
 			for (int i = array.length - 1; i >= 0; --i) {
 				result[i] = Any.toChar(array[i], def[i]);
 			}
 			return result;
 		}
-
+		
 		/** @param array
 		 * @param def
 		 * @return double array */
 		public static final double[] toDoubles(final Object[] array, final double def) {
-			
+
 			final double[] result = new double[array.length];
 			for (int i = array.length - 1; i >= 0; --i) {
 				result[i] = Any.toDouble(array[i], def);
 			}
 			return result;
 		}
-
+		
 		/** @param array
 		 * @param def
 		 * @return double array */
 		public static final double[] toDoubles(final Object[] array, final double[] def) {
-			
+
 			final double[] result = new double[array.length];
 			for (int i = array.length - 1; i >= 0; --i) {
 				result[i] = Any.toDouble(array[i], def[i]);
 			}
 			return result;
 		}
-
+		
 		/** @param array
 		 * @param def
 		 * @return float array */
 		public static final float[] toFloats(final Object[] array, final float def) {
-			
+
 			final float[] result = new float[array.length];
 			for (int i = array.length - 1; i >= 0; --i) {
 				result[i] = Any.toFloat(array[i], def);
 			}
 			return result;
 		}
-
+		
 		/** @param array
 		 * @param def
 		 * @return fload array */
 		public static final float[] toFloats(final Object[] array, final float[] def) {
-			
+
 			final float[] result = new float[array.length];
 			for (int i = array.length - 1; i >= 0; --i) {
 				result[i] = Any.toFloat(array[i], def[i]);
 			}
 			return result;
 		}
-
+		
 		/** @param array
 		 * @param def
 		 * @return int array */
 		public static final int[] toInts(final Object[] array, final int def) {
-			
+
 			final int[] result = new int[array.length];
 			for (int i = array.length - 1; i >= 0; --i) {
 				result[i] = Any.toInt(array[i], def);
 			}
 			return result;
 		}
-
+		
 		/** @param array
 		 * @param def
 		 * @return int array */
 		public static final int[] toInts(final Object[] array, final int[] def) {
-			
+
 			final int[] result = new int[array.length];
 			for (int i = array.length - 1; i >= 0; --i) {
 				result[i] = Any.toInt(array[i], def[i]);
 			}
 			return result;
 		}
-
+		
 		/** @param array
 		 * @param def
 		 * @return long array */
 		public static final long[] toLongs(final Object[] array, final long def) {
-			
+
 			final long[] result = new long[array.length];
 			for (int i = array.length - 1; i >= 0; --i) {
 				result[i] = Any.toLong(array[i], def);
 			}
 			return result;
 		}
-
+		
 		/** @param array
 		 * @param def
 		 * @return long array */
 		public static final long[] toLongs(final Object[] array, final long[] def) {
-			
+
 			final long[] result = new long[array.length];
 			for (int i = array.length - 1; i >= 0; --i) {
 				result[i] = Any.toLong(array[i], def[i]);
 			}
 			return result;
 		}
-
+		
 		/** @param array
 		 * @return array */
 		public static final Object[] toObjects(final boolean[] array) {
-			
+
 			final Object[] result = new Object[array.length];
 			for (int i = array.length - 1; i >= 0; --i) {
 				result[i] = array[i]
@@ -1310,119 +1310,119 @@ public class Convert {
 			}
 			return result;
 		}
-
+		
 		/** @param array
 		 * @return array */
 		public static final Object[] toObjects(final byte[] array) {
-			
+
 			final Object[] result = new Object[array.length];
 			for (int i = array.length - 1; i >= 0; --i) {
 				result[i] = Byte.valueOf(array[i]);
 			}
 			return result;
 		}
-
+		
 		/** @param array
 		 * @return array */
 		public static final Object[] toObjects(final char[] array) {
-			
+
 			final Object[] result = new Object[array.length];
 			for (int i = array.length - 1; i >= 0; --i) {
 				result[i] = Character.valueOf(array[i]);
 			}
 			return result;
 		}
-
+		
 		/** @param array
 		 * @return array */
 		public static final Object[] toObjects(final double[] array) {
-			
+
 			final Object[] result = new Object[array.length];
 			for (int i = array.length - 1; i >= 0; --i) {
 				result[i] = Double.valueOf(array[i]);
 			}
 			return result;
 		}
-
+		
 		/** @param array
 		 * @return array */
 		public static final Object[] toObjects(final float[] array) {
-			
+
 			final Object[] result = new Object[array.length];
 			for (int i = array.length - 1; i >= 0; --i) {
 				result[i] = Float.valueOf(array[i]);
 			}
 			return result;
 		}
-
+		
 		/** @param array
 		 * @return array */
 		public static final Object[] toObjects(final int[] array) {
-			
+
 			final Object[] result = new Object[array.length];
 			for (int i = array.length - 1; i >= 0; --i) {
 				result[i] = Integer.valueOf(array[i]);
 			}
 			return result;
 		}
-
+		
 		/** @param array
 		 * @return array */
 		public static final Object[] toObjects(final long[] array) {
-			
+
 			final Object[] result = new Object[array.length];
 			for (int i = array.length - 1; i >= 0; --i) {
 				result[i] = Long.valueOf(array[i]);
 			}
 			return result;
 		}
-
+		
 		/** @param array
 		 * @return array */
 		public static final Object[] toObjects(final short[] array) {
-			
+
 			final Object[] result = new Object[array.length];
 			for (int i = array.length - 1; i >= 0; --i) {
 				result[i] = Short.valueOf(array[i]);
 			}
 			return result;
 		}
-
+		
 		/** @param array
 		 * @param def
 		 * @return short array */
 		public static final short[] toShorts(final Object[] array, final short def) {
-			
+
 			final short[] result = new short[array.length];
 			for (int i = array.length - 1; i >= 0; --i) {
 				result[i] = Any.toShort(array[i], def);
 			}
 			return result;
 		}
-
+		
 		/** @param array
 		 * @param def
 		 * @return short array */
 		public static final short[] toShorts(final Object[] array, final short[] def) {
-			
+
 			final short[] result = new short[array.length];
 			for (int i = array.length - 1; i >= 0; --i) {
 				result[i] = Any.toShort(array[i], def[i]);
 			}
 			return result;
 		}
-
+		
 		private Array() {
-
+			
 			// empty
 		}
 	}
-
+	
 	/** @author myx */
 	public static class ListEntry {
-		
-		private static final String NOT_A_STRING = "<not a string>";
 
+		private static final String NOT_A_STRING = "<not a string>";
+		
 		/** Tries to get booleans from map for all keys specified in array, if map is null or no
 		 * object found - defaultValue is stored in its place of result array.
 		 *
@@ -1431,7 +1431,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return boolean array */
 		public static final boolean[] allToBoolean(final java.util.List<?> list, final int[] key, final boolean defaultValue) {
-			
+
 			final int count = key.length;
 			final boolean[] result = new boolean[count];
 			for (int i = count - 1; i >= 0; --i) {
@@ -1439,7 +1439,7 @@ public class Convert {
 			}
 			return result;
 		}
-
+		
 		/** Tries to get ints from map for all keys specified in array, if map is null or no object
 		 * found - defaultValue is stored in its place of result array.
 		 *
@@ -1448,7 +1448,7 @@ public class Convert {
 		 * @param def
 		 * @return boolean array */
 		public static final boolean[] allToBooleans(final java.util.List<?> list, final int[] key, final boolean[] def) {
-			
+
 			final int count = key.length;
 			final boolean[] result = new boolean[count];
 			for (int i = count - 1; i >= 0; --i) {
@@ -1456,7 +1456,7 @@ public class Convert {
 			}
 			return result;
 		}
-
+		
 		/** Tries to get bytes from map for all keys specified in array, if map is null or no object
 		 * found - defaultValue is stored in its place of result array.
 		 *
@@ -1465,7 +1465,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return byte array */
 		public static final byte[] allToByte(final java.util.List<?> list, final int[] key, final byte defaultValue) {
-			
+
 			final int count = key.length;
 			final byte[] result = new byte[count];
 			for (int i = count - 1; i >= 0; --i) {
@@ -1473,7 +1473,7 @@ public class Convert {
 			}
 			return result;
 		}
-
+		
 		/** Tries to get bytes from map for all keys specified in array, if map is null or no object
 		 * found - defaultValue is stored in its place of result array.
 		 *
@@ -1482,7 +1482,7 @@ public class Convert {
 		 * @param def
 		 * @return byte array */
 		public static final byte[] allToBytes(final java.util.List<?> list, final int[] key, final byte[] def) {
-			
+
 			final int count = key.length;
 			final byte[] result = new byte[count];
 			for (int i = count - 1; i >= 0; --i) {
@@ -1490,7 +1490,7 @@ public class Convert {
 			}
 			return result;
 		}
-
+		
 		/** Tries to get chars from map for all keys specified in array, if map is null or no object
 		 * found - defaultValue is stored in its place of result array.
 		 *
@@ -1499,7 +1499,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return char array */
 		public static final char[] allToChar(final java.util.List<?> list, final int[] key, final char defaultValue) {
-			
+
 			final int count = key.length;
 			final char[] result = new char[count];
 			for (int i = count - 1; i >= 0; --i) {
@@ -1507,7 +1507,7 @@ public class Convert {
 			}
 			return result;
 		}
-
+		
 		/** Tries to get chars from map for all keys specified in array, if map is null or no object
 		 * found - defaultValue is stored in its place of result array.
 		 *
@@ -1516,7 +1516,7 @@ public class Convert {
 		 * @param def
 		 * @return char array */
 		public static final char[] allToChars(final java.util.List<?> list, final int[] key, final char[] def) {
-			
+
 			final int count = key.length;
 			final char[] result = new char[count];
 			for (int i = count - 1; i >= 0; --i) {
@@ -1524,7 +1524,7 @@ public class Convert {
 			}
 			return result;
 		}
-
+		
 		/** Tries to get doubles from map for all keys specified in array, if map is null or no
 		 * object found - defaultValue is stored in its place of result array.
 		 *
@@ -1533,7 +1533,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return double array */
 		public static final double[] allToDouble(final java.util.List<?> list, final int[] key, final double defaultValue) {
-			
+
 			final int count = key.length;
 			final double[] result = new double[count];
 			for (int i = count - 1; i >= 0; --i) {
@@ -1541,7 +1541,7 @@ public class Convert {
 			}
 			return result;
 		}
-
+		
 		/** Tries to get doubles from map for all keys specified in array, if map is null or no
 		 * object found - defaultValue is stored in its place of result array.
 		 *
@@ -1550,7 +1550,7 @@ public class Convert {
 		 * @param def
 		 * @return double array */
 		public static final double[] allToDoubles(final java.util.List<?> list, final int[] key, final double[] def) {
-			
+
 			final int count = key.length;
 			final double[] result = new double[count];
 			for (int i = count - 1; i >= 0; --i) {
@@ -1558,7 +1558,7 @@ public class Convert {
 			}
 			return result;
 		}
-
+		
 		/** Tries to get floats from map for all keys specified in array, if map is null or no
 		 * object found - defaultValue is stored in its place of result array.
 		 *
@@ -1567,7 +1567,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return float array */
 		public static final float[] allToFloat(final java.util.List<?> list, final int[] key, final float defaultValue) {
-			
+
 			final int count = key.length;
 			final float[] result = new float[count];
 			for (int i = count - 1; i >= 0; --i) {
@@ -1575,7 +1575,7 @@ public class Convert {
 			}
 			return result;
 		}
-
+		
 		/** Tries to get floats from map for all keys specified in array, if map is null or no
 		 * object found - defaultValue is stored in its place of result array.
 		 *
@@ -1584,7 +1584,7 @@ public class Convert {
 		 * @param def
 		 * @return float array */
 		public static final float[] allToFloats(final java.util.List<?> list, final int[] key, final float[] def) {
-			
+
 			final int count = key.length;
 			final float[] result = new float[count];
 			for (int i = count - 1; i >= 0; --i) {
@@ -1592,7 +1592,7 @@ public class Convert {
 			}
 			return result;
 		}
-
+		
 		/** Tries to get ints from map for all keys specified in array, if map is null or no object
 		 * found - defaultValue is stored in its place of result array.
 		 *
@@ -1601,7 +1601,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return int array */
 		public static final int[] allToInt(final java.util.List<?> list, final int[] key, final int defaultValue) {
-			
+
 			final int count = key.length;
 			final int[] result = new int[count];
 			for (int i = count - 1; i >= 0; --i) {
@@ -1609,7 +1609,7 @@ public class Convert {
 			}
 			return result;
 		}
-
+		
 		/** Tries to get ints from map for all keys specified in array, if map is null or no object
 		 * found - defaultValue is stored in its place of result array.
 		 *
@@ -1618,7 +1618,7 @@ public class Convert {
 		 * @param def
 		 * @return int array */
 		public static final int[] allToInts(final java.util.List<?> list, final int[] key, final int[] def) {
-			
+
 			final int count = key.length;
 			final int[] result = new int[count];
 			for (int i = count - 1; i >= 0; --i) {
@@ -1626,7 +1626,7 @@ public class Convert {
 			}
 			return result;
 		}
-
+		
 		/** Tries to get longs from map for all keys specified in array, if map is null or no object
 		 * found - defaultValue is stored in its place of result array.
 		 *
@@ -1635,7 +1635,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return long array */
 		public static final long[] allToLong(final java.util.List<?> list, final int[] key, final long defaultValue) {
-			
+
 			final int count = key.length;
 			final long[] result = new long[count];
 			for (int i = count - 1; i >= 0; --i) {
@@ -1643,7 +1643,7 @@ public class Convert {
 			}
 			return result;
 		}
-
+		
 		/** Tries to get longs from map for all keys specified in array, if map is null or no object
 		 * found - defaultValue is stored in its place of result array.
 		 *
@@ -1652,7 +1652,7 @@ public class Convert {
 		 * @param def
 		 * @return long array */
 		public static final long[] allToLongs(final java.util.List<?> list, final int[] key, final long[] def) {
-			
+
 			final int count = key.length;
 			final long[] result = new long[count];
 			for (int i = count - 1; i >= 0; --i) {
@@ -1660,7 +1660,7 @@ public class Convert {
 			}
 			return result;
 		}
-
+		
 		/** Tries to get an objects from map for all keys specified in array, if map is null or no
 		 * object found - defaultValue is stored in its place of result array.
 		 *
@@ -1669,7 +1669,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return object array */
 		public static final Object[] allToObject(final java.util.List<?> list, final int[] key, final Object defaultValue) {
-			
+
 			final int count = key.length;
 			final Object[] result = new Object[count];
 			for (int i = count - 1; i >= 0; --i) {
@@ -1677,7 +1677,7 @@ public class Convert {
 			}
 			return result;
 		}
-
+		
 		/** Tries to get an objects from map for all keys specified in array, if map is null or no
 		 * object found - defaultValue is stored in its place of result array.
 		 *
@@ -1686,7 +1686,7 @@ public class Convert {
 		 * @param def
 		 * @return array */
 		public static final Object[] allToObjects(final java.util.List<?> list, final int[] key, final Object[] def) {
-			
+
 			final int count = key.length;
 			final Object[] result = new Object[count];
 			for (int i = count - 1; i >= 0; --i) {
@@ -1694,7 +1694,7 @@ public class Convert {
 			}
 			return result;
 		}
-
+		
 		/** Tries to get shorts from map for all keys specified in array, if map is null or no
 		 * object found - defaultValue is stored in its place of result array.
 		 *
@@ -1703,7 +1703,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return short array */
 		public static final short[] allToShort(final java.util.List<?> list, final int[] key, final short defaultValue) {
-			
+
 			final int count = key.length;
 			final short[] result = new short[count];
 			for (int i = count - 1; i >= 0; --i) {
@@ -1711,7 +1711,7 @@ public class Convert {
 			}
 			return result;
 		}
-
+		
 		/** Tries to get shorts from map for all keys specified in array, if map is null or no
 		 * object found - defaultValue is stored in its place of result array.
 		 *
@@ -1720,7 +1720,7 @@ public class Convert {
 		 * @param def
 		 * @return short array */
 		public static final short[] allToShorts(final java.util.List<?> list, final int[] key, final short[] def) {
-			
+
 			final int count = key.length;
 			final short[] result = new short[count];
 			for (int i = count - 1; i >= 0; --i) {
@@ -1728,7 +1728,7 @@ public class Convert {
 			}
 			return result;
 		}
-
+		
 		/** Tries to get strings from map for all keys specified in array, if map is null or no
 		 * object found - defaultValue is stored in its place of result array.
 		 *
@@ -1737,7 +1737,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return string srray */
 		public static final String[] allToString(final java.util.List<?> list, final int[] key, final String defaultValue) {
-			
+
 			final int count = key.length;
 			final String[] result = new String[count];
 			for (int i = count - 1; i >= 0; --i) {
@@ -1745,7 +1745,7 @@ public class Convert {
 			}
 			return result;
 		}
-
+		
 		/** Tries to get strings from map for all keys specified in array, if map is null or no
 		 * object found - defaultValue is stored in its place of result array.
 		 *
@@ -1754,7 +1754,7 @@ public class Convert {
 		 * @param def
 		 * @return string array */
 		public static final String[] allToStrings(final java.util.List<?> list, final int[] key, final String[] def) {
-			
+
 			final int count = key.length;
 			final String[] result = new String[count];
 			for (int i = count - 1; i >= 0; --i) {
@@ -1762,7 +1762,7 @@ public class Convert {
 			}
 			return result;
 		}
-
+		
 		/** Tries to get a boolean value from map for any key specified in array, if map is null or
 		 * no object found - returns defaultValue. Keys are searched from first to last.
 		 *
@@ -1771,7 +1771,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return boolean */
 		public static final boolean anyToBoolean(final java.util.List<?> list, final int[] key, final boolean defaultValue) {
-			
+
 			if (list == null) {
 				return defaultValue;
 			}
@@ -1794,7 +1794,7 @@ public class Convert {
 			}
 			return defaultValue;
 		}
-
+		
 		/** Tries to get a byte from map for any key specified in array, if map is null or no object
 		 * found - returns defaultValue. Keys are searched from first to last.
 		 *
@@ -1803,7 +1803,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return byte */
 		public static final byte anyToByte(final java.util.List<?> list, final int[] key, final byte defaultValue) {
-			
+
 			if (list == null) {
 				return defaultValue;
 			}
@@ -1822,7 +1822,7 @@ public class Convert {
 			}
 			return defaultValue;
 		}
-
+		
 		/** Tries to get a char from map for any key specified in array, if map is null or no object
 		 * found - returns defaultValue. Keys are searched from first to last.
 		 *
@@ -1831,7 +1831,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return char */
 		public static final char anyToChar(final java.util.List<?> list, final int[] key, final char defaultValue) {
-			
+
 			if (list == null) {
 				return defaultValue;
 			}
@@ -1857,7 +1857,7 @@ public class Convert {
 			}
 			return defaultValue;
 		}
-
+		
 		/** Tries to get a double from map for any key specified in array, if map is null or no
 		 * object found - returns defaultValue. Keys are searched from first to last.
 		 *
@@ -1866,7 +1866,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return double */
 		public static final double anyToDouble(final java.util.List<?> list, final int[] key, final double defaultValue) {
-			
+
 			if (list == null) {
 				return defaultValue;
 			}
@@ -1885,7 +1885,7 @@ public class Convert {
 			}
 			return defaultValue;
 		}
-
+		
 		/** Tries to get a float from map for any key specified in array, if map is null or no
 		 * object found - returns defaultValue. Keys are searched from first to last.
 		 *
@@ -1894,7 +1894,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return float */
 		public static final float anyToFloat(final java.util.List<?> list, final int[] key, final float defaultValue) {
-			
+
 			if (list == null) {
 				return defaultValue;
 			}
@@ -1913,7 +1913,7 @@ public class Convert {
 			}
 			return defaultValue;
 		}
-
+		
 		/** Tries to get an int from map for any key specified in array, if map is null or no object
 		 * found - returns defaultValue. Keys are searched from first to last.
 		 *
@@ -1922,7 +1922,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return int */
 		public static final int anyToInt(final java.util.List<?> list, final int[] key, final int defaultValue) {
-			
+
 			if (list == null) {
 				return defaultValue;
 			}
@@ -1941,7 +1941,7 @@ public class Convert {
 			}
 			return defaultValue;
 		}
-
+		
 		/** Tries to get a long from map for any key specified in array, if map is null or no object
 		 * found - returns defaultValue. Keys are searched from first to last.
 		 *
@@ -1950,7 +1950,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return long */
 		public static final long anyToLong(final java.util.List<?> list, final int[] key, final long defaultValue) {
-			
+
 			if (list == null) {
 				return defaultValue;
 			}
@@ -1969,7 +1969,7 @@ public class Convert {
 			}
 			return defaultValue;
 		}
-
+		
 		/** Tries to get an object from map for any key specified in array, if map is null or no
 		 * object found - returns defaultValue. Keys are searched from first to last.
 		 *
@@ -1978,7 +1978,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return object */
 		public static final Object anyToObject(final java.util.List<?> list, final int[] key, final Object defaultValue) {
-			
+
 			if (list == null) {
 				return defaultValue;
 			}
@@ -1993,7 +1993,7 @@ public class Convert {
 			}
 			return defaultValue;
 		}
-
+		
 		/** Tries to get a short from map for any key specified in array, if map is null or no
 		 * object found - returns defaultValue. Keys are searched from first to last.
 		 *
@@ -2002,7 +2002,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return short */
 		public static final short anyToShort(final java.util.List<?> list, final int[] key, final short defaultValue) {
-			
+
 			if (list == null) {
 				return defaultValue;
 			}
@@ -2021,7 +2021,7 @@ public class Convert {
 			}
 			return defaultValue;
 		}
-
+		
 		/** Tries to get a string from map for any key specified in array, if map is null or no
 		 * object found - returns defaultValue. Keys are searched from first to last.
 		 *
@@ -2030,7 +2030,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return string */
 		public static final String anyToString(final java.util.List<?> list, final int[] key, final String defaultValue) {
-			
+
 			if (list == null) {
 				return defaultValue;
 			}
@@ -2049,7 +2049,7 @@ public class Convert {
 			}
 			return defaultValue;
 		}
-
+		
 		/** Tries to get a boolean value from list, if list is null or object is null returns
 		 * defaultValue.
 		 *
@@ -2058,7 +2058,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return boolean */
 		public static final boolean toBoolean(final BaseArray list, final int key, final boolean defaultValue) {
-			
+
 			if (list == null || list.length() <= key) {
 				return defaultValue;
 			}
@@ -2071,7 +2071,7 @@ public class Convert {
 							? 1
 							: 0) != 0;
 		}
-
+		
 		/** Tries to get a boolean value from list, if list is null or object is null returns
 		 * defaultValue.
 		 *
@@ -2080,7 +2080,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return boolean */
 		public static final boolean toBoolean(final java.util.List<?> list, final int key, final boolean defaultValue) {
-			
+
 			if (list == null || list.size() <= key) {
 				return defaultValue;
 			}
@@ -2093,7 +2093,7 @@ public class Convert {
 							? 1
 							: 0) != 0;
 		}
-
+		
 		/** Tries to get a byte from map, if map is null or object is null returns defaultValue.
 		 *
 		 * @param list
@@ -2101,7 +2101,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return byte */
 		public static final byte toByte(final java.util.List<?> list, final int key, final byte defaultValue) {
-			
+
 			if (list == null || list.size() <= key) {
 				return defaultValue;
 			}
@@ -2110,7 +2110,7 @@ public class Convert {
 				? defaultValue
 				: Any.toByte(result, defaultValue);
 		}
-
+		
 		/** Tries to get a char from map, if map is null or object is null returns defaultValue.
 		 *
 		 * @param list
@@ -2118,7 +2118,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return char */
 		public static final char toChar(final java.util.List<?> list, final int key, final char defaultValue) {
-			
+
 			if (list == null || list.size() <= key) {
 				return defaultValue;
 			}
@@ -2127,14 +2127,14 @@ public class Convert {
 				? defaultValue
 				: Any.toChar(result, defaultValue);
 		}
-
+		
 		/** @param <T>
 		 * @param list
 		 * @param key
 		 * @param defaultValue
 		 * @return collection */
 		public static final <T> Collection<T> toCollection(final BaseArray list, final int key, final Collection<T> defaultValue) {
-			
+
 			if (list == null || list.length() <= key) {
 				return defaultValue;
 			}
@@ -2158,14 +2158,14 @@ public class Convert {
 				return Collections.singleton(object);
 			}
 		}
-
+		
 		/** @param <T>
 		 * @param list
 		 * @param key
 		 * @param defaultValue
 		 * @return collection */
 		public static final <T> Collection<T> toCollection(final java.util.List<?> list, final int key, final Collection<T> defaultValue) {
-			
+
 			if (list == null || list.size() <= key) {
 				return defaultValue;
 			}
@@ -2189,7 +2189,7 @@ public class Convert {
 				return Collections.singleton(object);
 			}
 		}
-
+		
 		/** Tries to get a double from map, if map is null or object is null returns defaultValue.
 		 *
 		 * @param list
@@ -2197,7 +2197,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return double */
 		public static final double toDouble(final BaseArray list, final int key, final double defaultValue) {
-			
+
 			if (list == null || list.length() <= key) {
 				return defaultValue;
 			}
@@ -2206,7 +2206,7 @@ public class Convert {
 				? defaultValue
 				: Any.toDouble(result, defaultValue);
 		}
-
+		
 		/** Tries to get a double from map, if map is null or object is null returns defaultValue.
 		 *
 		 * @param list
@@ -2214,7 +2214,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return double */
 		public static final double toDouble(final java.util.List<?> list, final int key, final double defaultValue) {
-			
+
 			if (list == null || list.size() <= key) {
 				return defaultValue;
 			}
@@ -2223,7 +2223,7 @@ public class Convert {
 				? defaultValue
 				: Any.toDouble(result, defaultValue);
 		}
-
+		
 		/** Tries to get a float from map, if map is null or object is null returns defaultValue.
 		 *
 		 * @param list
@@ -2231,7 +2231,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return float */
 		public static final float toFloat(final BaseArray list, final int key, final float defaultValue) {
-			
+
 			if (list == null || list.length() <= key) {
 				return defaultValue;
 			}
@@ -2240,7 +2240,7 @@ public class Convert {
 				? defaultValue
 				: Any.toFloat(result, defaultValue);
 		}
-
+		
 		/** Tries to get a float from map, if map is null or object is null returns defaultValue.
 		 *
 		 * @param list
@@ -2248,7 +2248,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return float */
 		public static final float toFloat(final java.util.List<?> list, final int key, final float defaultValue) {
-			
+
 			if (list == null || list.size() <= key) {
 				return defaultValue;
 			}
@@ -2257,7 +2257,7 @@ public class Convert {
 				? defaultValue
 				: Any.toFloat(result, defaultValue);
 		}
-
+		
 		/** Tries to get an int from map, if map is null or object is null returns defaultValue.
 		 *
 		 * @param list
@@ -2265,7 +2265,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return int */
 		public static final int toInt(final BaseArray list, final int key, final int defaultValue) {
-			
+
 			if (list == null || list.length() <= key) {
 				return defaultValue;
 			}
@@ -2274,7 +2274,7 @@ public class Convert {
 				? defaultValue
 				: Any.toInt(result, defaultValue);
 		}
-
+		
 		/** Tries to get an int from map, if map is null or object is null returns defaultValue.
 		 *
 		 * @param list
@@ -2282,7 +2282,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return int */
 		public static final int toInt(final java.util.List<?> list, final int key, final int defaultValue) {
-			
+
 			if (list == null || list.size() <= key) {
 				return defaultValue;
 			}
@@ -2291,7 +2291,7 @@ public class Convert {
 				? defaultValue
 				: Any.toInt(result, defaultValue);
 		}
-
+		
 		/** Tries to get an int from map, if map is null or object is null returns defaultValue.
 		 * case insencetive, 0-indexed.
 		 *
@@ -2301,7 +2301,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return int */
 		public static final int toInt(final java.util.List<?> list, final int key, final String[] variants, final int defaultValue) {
-			
+
 			if (list == null) {
 				return defaultValue;
 			}
@@ -2317,7 +2317,7 @@ public class Convert {
 			}
 			return Any.toInt(result, defaultValue);
 		}
-
+		
 		/** Tries to get a long from map, if map is null or object is null returns defaultValue.
 		 *
 		 * @param list
@@ -2325,7 +2325,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return long */
 		public static final long toLong(final BaseArray list, final int key, final long defaultValue) {
-			
+
 			if (list == null || list.length() <= key) {
 				return defaultValue;
 			}
@@ -2334,7 +2334,7 @@ public class Convert {
 				? defaultValue
 				: Any.toLong(result, defaultValue);
 		}
-
+		
 		/** Tries to get a long from map, if map is null or object is null returns defaultValue.
 		 *
 		 * @param list
@@ -2342,7 +2342,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return long */
 		public static final long toLong(final java.util.List<?> list, final int key, final long defaultValue) {
-			
+
 			if (list == null || list.size() <= key) {
 				return defaultValue;
 			}
@@ -2351,7 +2351,7 @@ public class Convert {
 				? defaultValue
 				: Any.toLong(result, defaultValue);
 		}
-
+		
 		/** Tries to get an object from list, if map is null or object is null returns defaultValue.
 		 *
 		 * @param list
@@ -2359,7 +2359,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return object */
 		public static final Object toObject(final BaseArray list, final int key, final Object defaultValue) {
-			
+
 			if (list == null || list.length() <= key) {
 				return defaultValue;
 			}
@@ -2368,7 +2368,7 @@ public class Convert {
 				? defaultValue
 				: any;
 		}
-
+		
 		/** Tries to get an object from list, if map is null or object is null returns defaultValue.
 		 *
 		 * @param list
@@ -2376,7 +2376,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return object */
 		public static final Object toObject(final java.util.List<?> list, final int key, final Object defaultValue) {
-			
+
 			if (list == null || list.size() <= key) {
 				return defaultValue;
 			}
@@ -2385,7 +2385,7 @@ public class Convert {
 				? defaultValue
 				: any;
 		}
-
+		
 		/** Tries to get a period from map, if map is null or object is null returns defaultValue.
 		 *
 		 * @param list
@@ -2393,7 +2393,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return long */
 		public static final long toPeriod(final java.util.List<?> list, final int key, final long defaultValue) {
-			
+
 			if (list == null || list.size() <= key) {
 				return defaultValue;
 			}
@@ -2402,7 +2402,7 @@ public class Convert {
 				? defaultValue
 				: Any.toPeriod(result, defaultValue);
 		}
-
+		
 		/** Tries to get a short from map, if map is null or object is null returns defaultValue.
 		 *
 		 * @param list
@@ -2410,7 +2410,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return short */
 		public static final short toShort(final java.util.List<?> list, final int key, final short defaultValue) {
-			
+
 			if (list == null || list.size() <= key) {
 				return defaultValue;
 			}
@@ -2419,7 +2419,7 @@ public class Convert {
 				? defaultValue
 				: Any.toShort(result, defaultValue);
 		}
-
+		
 		/** Tries to get a string from map, if map is null or object is null returns defaultValue.
 		 *
 		 * @param list
@@ -2427,7 +2427,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return string */
 		public static final String toString(final BaseArray list, final int key, final String defaultValue) {
-			
+
 			if (list == null || list.length() <= key) {
 				return defaultValue;
 			}
@@ -2443,7 +2443,7 @@ public class Convert {
 				? defaultValue
 				: tmp;
 		}
-
+		
 		/** Tries to get a string from map, if map is null or object is null returns defaultValue.
 		 *
 		 * @param list
@@ -2451,7 +2451,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return string */
 		public static final String toString(final java.util.List<?> list, final int key, final String defaultValue) {
-			
+
 			if (list == null || list.size() <= key) {
 				return defaultValue;
 			}
@@ -2467,18 +2467,18 @@ public class Convert {
 				? defaultValue
 				: tmp;
 		}
-
+		
 		private ListEntry() {
-
+			
 			// empty
 		}
 	}
-
+	
 	/** @author myx */
 	public static class MapEntry {
-		
-		private static final String NOT_A_STRING = "<not a string>";
 
+		private static final String NOT_A_STRING = "<not a string>";
+		
 		/** Tries to get booleans from map for all keys specified in array, if map is null or no
 		 * object found - defaultValue is stored in its place of result array.
 		 *
@@ -2487,7 +2487,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return boolean array */
 		public static final boolean[] allToBoolean(final Map<?, ?> map, final Object[] key, final boolean defaultValue) {
-			
+
 			final int count = key.length;
 			final boolean[] result = new boolean[count];
 			for (int i = count - 1; i >= 0; --i) {
@@ -2495,7 +2495,7 @@ public class Convert {
 			}
 			return result;
 		}
-
+		
 		/** Tries to get ints from map for all keys specified in array, if map is null or no object
 		 * found - defaultValue is stored in its place of result array.
 		 *
@@ -2504,7 +2504,7 @@ public class Convert {
 		 * @param def
 		 * @return boolean array */
 		public static final boolean[] allToBooleans(final Map<?, ?> map, final Object[] key, final boolean[] def) {
-			
+
 			final int count = key.length;
 			final boolean[] result = new boolean[count];
 			for (int i = count - 1; i >= 0; --i) {
@@ -2512,7 +2512,7 @@ public class Convert {
 			}
 			return result;
 		}
-
+		
 		/** Tries to get bytes from map for all keys specified in array, if map is null or no object
 		 * found - defaultValue is stored in its place of result array.
 		 *
@@ -2521,7 +2521,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return byte array */
 		public static final byte[] allToByte(final Map<?, ?> map, final Object[] key, final byte defaultValue) {
-			
+
 			final int count = key.length;
 			final byte[] result = new byte[count];
 			for (int i = count - 1; i >= 0; --i) {
@@ -2529,7 +2529,7 @@ public class Convert {
 			}
 			return result;
 		}
-
+		
 		/** Tries to get bytes from map for all keys specified in array, if map is null or no object
 		 * found - defaultValue is stored in its place of result array.
 		 *
@@ -2538,7 +2538,7 @@ public class Convert {
 		 * @param def
 		 * @return byte array */
 		public static final byte[] allToBytes(final Map<?, ?> map, final Object[] key, final byte[] def) {
-			
+
 			final int count = key.length;
 			final byte[] result = new byte[count];
 			for (int i = count - 1; i >= 0; --i) {
@@ -2546,7 +2546,7 @@ public class Convert {
 			}
 			return result;
 		}
-
+		
 		/** Tries to get chars from map for all keys specified in array, if map is null or no object
 		 * found - defaultValue is stored in its place of result array.
 		 *
@@ -2555,7 +2555,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return char array */
 		public static final char[] allToChar(final Map<?, ?> map, final Object[] key, final char defaultValue) {
-			
+
 			final int count = key.length;
 			final char[] result = new char[count];
 			for (int i = count - 1; i >= 0; --i) {
@@ -2563,7 +2563,7 @@ public class Convert {
 			}
 			return result;
 		}
-
+		
 		/** Tries to get chars from map for all keys specified in array, if map is null or no object
 		 * found - defaultValue is stored in its place of result array.
 		 *
@@ -2572,7 +2572,7 @@ public class Convert {
 		 * @param def
 		 * @return char array */
 		public static final char[] allToChars(final Map<?, ?> map, final Object[] key, final char[] def) {
-			
+
 			final int count = key.length;
 			final char[] result = new char[count];
 			for (int i = count - 1; i >= 0; --i) {
@@ -2580,7 +2580,7 @@ public class Convert {
 			}
 			return result;
 		}
-
+		
 		/** Tries to get doubles from map for all keys specified in array, if map is null or no
 		 * object found - defaultValue is stored in its place of result array.
 		 *
@@ -2589,7 +2589,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return double array */
 		public static final double[] allToDouble(final Map<?, ?> map, final Object[] key, final double defaultValue) {
-			
+
 			final int count = key.length;
 			final double[] result = new double[count];
 			for (int i = count - 1; i >= 0; --i) {
@@ -2597,7 +2597,7 @@ public class Convert {
 			}
 			return result;
 		}
-
+		
 		/** Tries to get doubles from map for all keys specified in array, if map is null or no
 		 * object found - defaultValue is stored in its place of result array.
 		 *
@@ -2606,7 +2606,7 @@ public class Convert {
 		 * @param def
 		 * @return double array */
 		public static final double[] allToDoubles(final Map<?, ?> map, final Object[] key, final double[] def) {
-			
+
 			final int count = key.length;
 			final double[] result = new double[count];
 			for (int i = count - 1; i >= 0; --i) {
@@ -2614,7 +2614,7 @@ public class Convert {
 			}
 			return result;
 		}
-
+		
 		/** Tries to get floats from map for all keys specified in array, if map is null or no
 		 * object found - defaultValue is stored in its place of result array.
 		 *
@@ -2623,7 +2623,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return float array */
 		public static final float[] allToFloat(final Map<?, ?> map, final Object[] key, final float defaultValue) {
-			
+
 			final int count = key.length;
 			final float[] result = new float[count];
 			for (int i = count - 1; i >= 0; --i) {
@@ -2631,7 +2631,7 @@ public class Convert {
 			}
 			return result;
 		}
-
+		
 		/** Tries to get floats from map for all keys specified in array, if map is null or no
 		 * object found - defaultValue is stored in its place of result array.
 		 *
@@ -2640,7 +2640,7 @@ public class Convert {
 		 * @param def
 		 * @return float array */
 		public static final float[] allToFloats(final Map<?, ?> map, final Object[] key, final float[] def) {
-			
+
 			final int count = key.length;
 			final float[] result = new float[count];
 			for (int i = count - 1; i >= 0; --i) {
@@ -2648,7 +2648,7 @@ public class Convert {
 			}
 			return result;
 		}
-
+		
 		/** Tries to get ints from map for all keys specified in array, if map is null or no object
 		 * found - defaultValue is stored in its place of result array.
 		 *
@@ -2657,7 +2657,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return int array */
 		public static final int[] allToInt(final Map<?, ?> map, final Object[] key, final int defaultValue) {
-			
+
 			final int count = key.length;
 			final int[] result = new int[count];
 			for (int i = count - 1; i >= 0; --i) {
@@ -2665,7 +2665,7 @@ public class Convert {
 			}
 			return result;
 		}
-
+		
 		/** Tries to get ints from map for all keys specified in array, if map is null or no object
 		 * found - defaultValue is stored in its place of result array.
 		 *
@@ -2674,7 +2674,7 @@ public class Convert {
 		 * @param def
 		 * @return int array */
 		public static final int[] allToInts(final Map<?, ?> map, final Object[] key, final int[] def) {
-			
+
 			final int count = key.length;
 			final int[] result = new int[count];
 			for (int i = count - 1; i >= 0; --i) {
@@ -2682,7 +2682,7 @@ public class Convert {
 			}
 			return result;
 		}
-
+		
 		/** Tries to get longs from map for all keys specified in array, if map is null or no object
 		 * found - defaultValue is stored in its place of result array.
 		 *
@@ -2691,7 +2691,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return long array */
 		public static final long[] allToLong(final Map<?, ?> map, final Object[] key, final long defaultValue) {
-			
+
 			final int count = key.length;
 			final long[] result = new long[count];
 			for (int i = count - 1; i >= 0; --i) {
@@ -2699,7 +2699,7 @@ public class Convert {
 			}
 			return result;
 		}
-
+		
 		/** Tries to get longs from map for all keys specified in array, if map is null or no object
 		 * found - defaultValue is stored in its place of result array.
 		 *
@@ -2708,7 +2708,7 @@ public class Convert {
 		 * @param def
 		 * @return long array */
 		public static final long[] allToLongs(final Map<?, ?> map, final Object[] key, final long[] def) {
-			
+
 			final int count = key.length;
 			final long[] result = new long[count];
 			for (int i = count - 1; i >= 0; --i) {
@@ -2716,7 +2716,7 @@ public class Convert {
 			}
 			return result;
 		}
-
+		
 		/** Tries to get an objects from map for all keys specified in array, if map is null or no
 		 * object found - defaultValue is stored in its place of result array.
 		 *
@@ -2725,7 +2725,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return array */
 		public static final Object[] allToObject(final Map<?, ?> map, final Object[] key, final Object defaultValue) {
-			
+
 			final int count = key.length;
 			final Object[] result = new Object[count];
 			for (int i = count - 1; i >= 0; --i) {
@@ -2733,7 +2733,7 @@ public class Convert {
 			}
 			return result;
 		}
-
+		
 		/** Tries to get an objects from map for all keys specified in array, if map is null or no
 		 * object found - defaultValue is stored in its place of result array.
 		 *
@@ -2742,7 +2742,7 @@ public class Convert {
 		 * @param def
 		 * @return array */
 		public static final Object[] allToObjects(final Map<?, ?> map, final Object[] key, final Object[] def) {
-			
+
 			final int count = key.length;
 			final Object[] result = new Object[count];
 			for (int i = count - 1; i >= 0; --i) {
@@ -2750,7 +2750,7 @@ public class Convert {
 			}
 			return result;
 		}
-
+		
 		/** Tries to get shorts from map for all keys specified in array, if map is null or no
 		 * object found - defaultValue is stored in its place of result array.
 		 *
@@ -2759,7 +2759,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return short array */
 		public static final short[] allToShort(final Map<?, ?> map, final Object[] key, final short defaultValue) {
-			
+
 			final int count = key.length;
 			final short[] result = new short[count];
 			for (int i = count - 1; i >= 0; --i) {
@@ -2767,7 +2767,7 @@ public class Convert {
 			}
 			return result;
 		}
-
+		
 		/** Tries to get shorts from map for all keys specified in array, if map is null or no
 		 * object found - defaultValue is stored in its place of result array.
 		 *
@@ -2776,7 +2776,7 @@ public class Convert {
 		 * @param def
 		 * @return string array */
 		public static final short[] allToShorts(final Map<?, ?> map, final Object[] key, final short[] def) {
-			
+
 			final int count = key.length;
 			final short[] result = new short[count];
 			for (int i = count - 1; i >= 0; --i) {
@@ -2784,7 +2784,7 @@ public class Convert {
 			}
 			return result;
 		}
-
+		
 		/** Tries to get strings from map for all keys specified in array, if map is null or no
 		 * object found - defaultValue is stored in its place of result array.
 		 *
@@ -2793,7 +2793,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return string array */
 		public static final String[] allToString(final Map<?, ?> map, final Object[] key, final String defaultValue) {
-			
+
 			final int count = key.length;
 			final String[] result = new String[count];
 			for (int i = count - 1; i >= 0; --i) {
@@ -2801,7 +2801,7 @@ public class Convert {
 			}
 			return result;
 		}
-
+		
 		/** Tries to get strings from map for all keys specified in array, if map is null or no
 		 * object found - defaultValue is stored in its place of result array.
 		 *
@@ -2810,7 +2810,7 @@ public class Convert {
 		 * @param def
 		 * @return string array */
 		public static final String[] allToStrings(final Map<?, ?> map, final Object[] key, final String[] def) {
-			
+
 			final int count = key.length;
 			final String[] result = new String[count];
 			for (int i = count - 1; i >= 0; --i) {
@@ -2818,7 +2818,7 @@ public class Convert {
 			}
 			return result;
 		}
-
+		
 		/** Tries to get a boolean value from map for any key specified in array, if map is null or
 		 * no object found - returns defaultValue. Keys are searched from first to last.
 		 *
@@ -2827,7 +2827,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return boolean */
 		public static final boolean anyToBoolean(final Map<?, ?> map, final Object[] key, final boolean defaultValue) {
-			
+
 			if (map == null) {
 				return defaultValue;
 			}
@@ -2847,7 +2847,7 @@ public class Convert {
 			}
 			return defaultValue;
 		}
-
+		
 		/** Tries to get a byte from map for any key specified in array, if map is null or no object
 		 * found - returns defaultValue. Keys are searched from first to last.
 		 *
@@ -2856,7 +2856,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return byte */
 		public static final byte anyToByte(final Map<?, ?> map, final Object[] key, final byte defaultValue) {
-			
+
 			if (map == null) {
 				return defaultValue;
 			}
@@ -2872,7 +2872,7 @@ public class Convert {
 			}
 			return defaultValue;
 		}
-
+		
 		/** Tries to get a char from map for any key specified in array, if map is null or no object
 		 * found - returns defaultValue. Keys are searched from first to last.
 		 *
@@ -2881,7 +2881,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return char */
 		public static final char anyToChar(final Map<?, ?> map, final Object[] key, final char defaultValue) {
-			
+
 			if (map == null) {
 				return defaultValue;
 			}
@@ -2904,7 +2904,7 @@ public class Convert {
 			}
 			return defaultValue;
 		}
-
+		
 		/** Tries to get a double from map for any key specified in array, if map is null or no
 		 * object found - returns defaultValue. Keys are searched from first to last.
 		 *
@@ -2913,7 +2913,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return double */
 		public static final double anyToDouble(final Map<?, ?> map, final Object[] key, final double defaultValue) {
-			
+
 			if (map == null) {
 				return defaultValue;
 			}
@@ -2929,7 +2929,7 @@ public class Convert {
 			}
 			return defaultValue;
 		}
-
+		
 		/** Tries to get a float from map for any key specified in array, if map is null or no
 		 * object found - returns defaultValue. Keys are searched from first to last.
 		 *
@@ -2938,7 +2938,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return float */
 		public static final float anyToFloat(final Map<?, ?> map, final Object[] key, final float defaultValue) {
-			
+
 			if (map == null) {
 				return defaultValue;
 			}
@@ -2954,7 +2954,7 @@ public class Convert {
 			}
 			return defaultValue;
 		}
-
+		
 		/** Tries to get an int from map for any key specified in array, if map is null or no object
 		 * found - returns defaultValue. Keys are searched from first to last.
 		 *
@@ -2963,7 +2963,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return int */
 		public static final int anyToInt(final BaseMap map, final String[] key, final int defaultValue) {
-			
+
 			if (map == null || map.baseIsPrimitive()) {
 				return defaultValue;
 			}
@@ -2980,7 +2980,7 @@ public class Convert {
 			}
 			return defaultValue;
 		}
-
+		
 		/** Tries to get an int from map for any key specified in array, if map is null or no object
 		 * found - returns defaultValue. Keys are searched from first to last.
 		 *
@@ -2989,7 +2989,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return int */
 		public static final int anyToInt(final BaseObject map, final String[] key, final int defaultValue) {
-			
+
 			if (map == null || map.baseIsPrimitive()) {
 				return defaultValue;
 			}
@@ -3006,7 +3006,7 @@ public class Convert {
 			}
 			return defaultValue;
 		}
-
+		
 		/** Tries to get an int from map for any key specified in array, if map is null or no object
 		 * found - returns defaultValue. Keys are searched from first to last.
 		 *
@@ -3015,7 +3015,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return int */
 		public static final int anyToInt(final Map<?, ?> map, final Object[] key, final int defaultValue) {
-			
+
 			if (map == null) {
 				return defaultValue;
 			}
@@ -3031,7 +3031,7 @@ public class Convert {
 			}
 			return defaultValue;
 		}
-
+		
 		/** Tries to get a long from map for any key specified in array, if map is null or no object
 		 * found - returns defaultValue. Keys are searched from first to last.
 		 *
@@ -3040,7 +3040,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return long */
 		public static final long anyToLong(final BaseMap map, final String[] key, final long defaultValue) {
-			
+
 			if (map == null) {
 				return defaultValue;
 			}
@@ -3057,7 +3057,7 @@ public class Convert {
 			}
 			return defaultValue;
 		}
-
+		
 		/** Tries to get a long from map for any key specified in array, if map is null or no object
 		 * found - returns defaultValue. Keys are searched from first to last.
 		 *
@@ -3066,7 +3066,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return long */
 		public static final long anyToLong(final BaseObject map, final String[] key, final long defaultValue) {
-			
+
 			if (map == null) {
 				return defaultValue;
 			}
@@ -3083,7 +3083,7 @@ public class Convert {
 			}
 			return defaultValue;
 		}
-
+		
 		/** Tries to get a long from map for any key specified in array, if map is null or no object
 		 * found - returns defaultValue. Keys are searched from first to last.
 		 *
@@ -3092,7 +3092,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return long */
 		public static final long anyToLong(final Map<?, ?> map, final Object[] key, final long defaultValue) {
-			
+
 			if (map == null) {
 				return defaultValue;
 			}
@@ -3108,7 +3108,7 @@ public class Convert {
 			}
 			return defaultValue;
 		}
-
+		
 		/** Tries to get an object from map for any key specified in array, if map is null or no
 		 * object found - returns defaultValue. Keys are searched from first to last.
 		 *
@@ -3117,7 +3117,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return object */
 		public static final Object anyToObject(final Map<?, ?> map, final Object[] key, final Object defaultValue) {
-			
+
 			if (map == null) {
 				return defaultValue;
 			}
@@ -3129,7 +3129,7 @@ public class Convert {
 			}
 			return defaultValue;
 		}
-
+		
 		/** Tries to get a short from map for any key specified in array, if map is null or no
 		 * object found - returns defaultValue. Keys are searched from first to last.
 		 *
@@ -3138,7 +3138,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return short */
 		public static final short anyToShort(final Map<?, ?> map, final Object[] key, final short defaultValue) {
-			
+
 			if (map == null) {
 				return defaultValue;
 			}
@@ -3154,7 +3154,7 @@ public class Convert {
 			}
 			return defaultValue;
 		}
-
+		
 		/** Tries to get a string from map for any key specified in array, if map is null or no
 		 * object found - returns defaultValue. Keys are searched from first to last.
 		 *
@@ -3163,7 +3163,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return string */
 		public static final String anyToString(final BaseMap map, final String[] key, final String defaultValue) {
-			
+
 			if (map == null) {
 				return defaultValue;
 			}
@@ -3180,7 +3180,7 @@ public class Convert {
 			}
 			return defaultValue;
 		}
-
+		
 		/** Tries to get a string from map for any key specified in array, if map is null or no
 		 * object found - returns defaultValue. Keys are searched from first to last.
 		 *
@@ -3189,7 +3189,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return string */
 		public static final String anyToString(final BaseObject map, final String[] key, final String defaultValue) {
-			
+
 			if (map == null) {
 				return defaultValue;
 			}
@@ -3206,7 +3206,7 @@ public class Convert {
 			}
 			return defaultValue;
 		}
-
+		
 		/** Tries to get a string from map for any key specified in array, if map is null or no
 		 * object found - returns defaultValue. Keys are searched from first to last.
 		 *
@@ -3215,7 +3215,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return string */
 		public static final String anyToString(final Map<?, ?> map, final Object[] key, final String defaultValue) {
-			
+
 			if (map == null) {
 				return defaultValue;
 			}
@@ -3231,13 +3231,13 @@ public class Convert {
 			}
 			return defaultValue;
 		}
-
+		
 		/** @param object
 		 * @param key
 		 * @param defaultValue
 		 * @return */
 		public static boolean toBoolean(final BaseMap object, final String key, final boolean defaultValue) {
-			
+
 			return Convert.MapEntry.toInt(
 					object,
 					key,
@@ -3247,13 +3247,13 @@ public class Convert {
 			/** THIS WOULD BE WRONG: 'false' will become true */
 			// return object.baseGetBoolean( key, defaultValue );
 		}
-
+		
 		/** @param object
 		 * @param key
 		 * @param defaultValue
 		 * @return */
 		public static boolean toBoolean(final BaseObject object, final String key, final boolean defaultValue) {
-			
+
 			return Convert.MapEntry.toInt(
 					object,
 					key,
@@ -3263,7 +3263,7 @@ public class Convert {
 			/** THIS WOULD BE WRONG: 'false' will become true */
 			// return object.baseGetBoolean( key, defaultValue );
 		}
-
+		
 		/** Tries to get a boolean value from map, if map is null or object is null returns
 		 * defaultValue.
 		 *
@@ -3272,7 +3272,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return boolean */
 		public static final boolean toBoolean(final Map<?, ?> map, final Object key, final boolean defaultValue) {
-			
+
 			if (map == null) {
 				return defaultValue;
 			}
@@ -3285,7 +3285,7 @@ public class Convert {
 							? 1
 							: 0) != 0;
 		}
-
+		
 		/** Tries to get a byte from map, if map is null or object is null returns defaultValue.
 		 *
 		 * @param map
@@ -3293,7 +3293,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return byte */
 		public static final byte toByte(final BaseMap map, final String key, final byte defaultValue) {
-			
+
 			if (map == null) {
 				return defaultValue;
 			}
@@ -3302,7 +3302,7 @@ public class Convert {
 				? defaultValue
 				: Any.toByte(result, defaultValue);
 		}
-
+		
 		/** Tries to get a byte from map, if map is null or object is null returns defaultValue.
 		 *
 		 * @param map
@@ -3310,7 +3310,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return byte */
 		public static final byte toByte(final BaseObject map, final String key, final byte defaultValue) {
-			
+
 			if (map == null) {
 				return defaultValue;
 			}
@@ -3319,7 +3319,7 @@ public class Convert {
 				? defaultValue
 				: Any.toByte(result, defaultValue);
 		}
-
+		
 		/** Tries to get a byte from map, if map is null or object is null returns defaultValue.
 		 *
 		 * @param map
@@ -3327,7 +3327,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return byte */
 		public static final byte toByte(final Map<?, ?> map, final Object key, final byte defaultValue) {
-			
+
 			if (map == null) {
 				return defaultValue;
 			}
@@ -3336,7 +3336,7 @@ public class Convert {
 				? defaultValue
 				: Any.toByte(result, defaultValue);
 		}
-
+		
 		/** Tries to get a char from map, if map is null or object is null returns defaultValue.
 		 *
 		 * @param map
@@ -3344,7 +3344,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return char */
 		public static final char toChar(final Map<?, ?> map, final Object key, final char defaultValue) {
-			
+
 			if (map == null) {
 				return defaultValue;
 			}
@@ -3353,21 +3353,21 @@ public class Convert {
 				? defaultValue
 				: Any.toChar(result, defaultValue);
 		}
-
+		
 		/** @param map
 		 * @param key
 		 * @return */
 		public static final BaseArray toCollection(final BaseMap map, final String key) {
-			
+
 			return MapEntry.toCollection(map, key, (BaseArray) null);
 		}
-
+		
 		/** @param map
 		 * @param key
 		 * @param defaultValue
 		 * @return */
 		public static final BaseArray toCollection(final BaseMap map, final String key, final BaseArray defaultValue) {
-			
+
 			if (map == null) {
 				return defaultValue;
 			}
@@ -3384,13 +3384,13 @@ public class Convert {
 				? new BaseNativeArray(object)
 				: array;
 		}
-
+		
 		/** @param map
 		 * @param key
 		 * @param defaultValue
 		 * @return */
 		public static final BaseArray toCollection(final BaseObject map, final String key, final BaseArray defaultValue) {
-			
+
 			if (map == null) {
 				return defaultValue;
 			}
@@ -3425,7 +3425,7 @@ public class Convert {
 				return new BaseNativeArray(object);
 			}
 		}
-
+		
 		/** Tries to get a collection from map, if map is null or object is null returns
 		 * defaultValue.
 		 *
@@ -3435,7 +3435,7 @@ public class Convert {
 		 * @param <T>
 		 * @return collection */
 		public static final <T> Collection<T> toCollection(final Map<?, ?> map, final Object key, final Collection<T> defaultValue) {
-			
+
 			if (map == null) {
 				return defaultValue;
 			}
@@ -3459,13 +3459,13 @@ public class Convert {
 				return Collections.singleton(object);
 			}
 		}
-
+		
 		/** @param object
 		 * @param key
 		 * @param defaultValue
 		 * @return */
 		public static double toDouble(final BaseMap object, final String key, final double defaultValue) {
-			
+
 			if (object == null) {
 				return defaultValue;
 			}
@@ -3474,13 +3474,13 @@ public class Convert {
 				? defaultValue
 				: Any.toDouble(result, defaultValue);
 		}
-
+		
 		/** @param object
 		 * @param key
 		 * @param defaultValue
 		 * @return */
 		public static double toDouble(final BaseObject object, final String key, final double defaultValue) {
-			
+
 			if (object == null) {
 				return defaultValue;
 			}
@@ -3489,7 +3489,7 @@ public class Convert {
 				? defaultValue
 				: Any.toDouble(result, defaultValue);
 		}
-
+		
 		/** Tries to get a double from map, if map is null or object is null returns defaultValue.
 		 *
 		 * @param map
@@ -3497,7 +3497,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return double */
 		public static final double toDouble(final Map<?, ?> map, final Object key, final double defaultValue) {
-			
+
 			if (map == null) {
 				return defaultValue;
 			}
@@ -3506,7 +3506,7 @@ public class Convert {
 				? defaultValue
 				: Any.toDouble(result, defaultValue);
 		}
-
+		
 		/** Tries to get a float from map, if map is null or object is null returns defaultValue.
 		 *
 		 * @param map
@@ -3514,7 +3514,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return float */
 		public static final float toFloat(final BaseMap map, final String key, final float defaultValue) {
-			
+
 			if (map == null) {
 				return defaultValue;
 			}
@@ -3523,7 +3523,7 @@ public class Convert {
 				? defaultValue
 				: Any.toFloat(result, defaultValue);
 		}
-
+		
 		/** Tries to get a float from map, if map is null or object is null returns defaultValue.
 		 *
 		 * @param map
@@ -3531,7 +3531,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return float */
 		public static final float toFloat(final BaseObject map, final String key, final float defaultValue) {
-			
+
 			if (map == null) {
 				return defaultValue;
 			}
@@ -3540,7 +3540,7 @@ public class Convert {
 				? defaultValue
 				: Any.toFloat(result, defaultValue);
 		}
-
+		
 		/** Tries to get a float from map, if map is null or object is null returns defaultValue.
 		 *
 		 * @param map
@@ -3548,7 +3548,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return float */
 		public static final float toFloat(final Map<?, ?> map, final Object key, final float defaultValue) {
-			
+
 			if (map == null) {
 				return defaultValue;
 			}
@@ -3557,7 +3557,7 @@ public class Convert {
 				? defaultValue
 				: Any.toFloat(result, defaultValue);
 		}
-
+		
 		/** Tries to get an int from map, if map is null or object is null returns defaultValue.
 		 *
 		 * @param map
@@ -3565,7 +3565,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return int */
 		public static final int toInt(final BaseMap map, final String key, final int defaultValue) {
-			
+
 			if (map == null) {
 				return defaultValue;
 			}
@@ -3574,7 +3574,7 @@ public class Convert {
 				? defaultValue
 				: Any.toInt(result, defaultValue);
 		}
-
+		
 		/** Tries to get an int from map, if map is null or object is null returns defaultValue.
 		 *
 		 * @param map
@@ -3582,7 +3582,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return int */
 		public static final int toInt(final BaseObject map, final String key, final int defaultValue) {
-			
+
 			if (map == null) {
 				return defaultValue;
 			}
@@ -3591,7 +3591,7 @@ public class Convert {
 				? defaultValue
 				: Any.toInt(result, defaultValue);
 		}
-
+		
 		/** Tries to get an int from map, if map is null or object is null returns defaultValue.
 		 * case insencetive, 0-indexed.
 		 *
@@ -3601,7 +3601,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return int */
 		public static final int toInt(final BaseObject map, final String key, final String[] variants, final int defaultValue) {
-			
+
 			if (map == null) {
 				return defaultValue;
 			}
@@ -3618,7 +3618,7 @@ public class Convert {
 			}
 			return Any.toInt(result, defaultValue);
 		}
-
+		
 		/** Tries to get an int from map, if map is null or object is null returns defaultValue.
 		 *
 		 * @param map
@@ -3626,7 +3626,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return int */
 		public static final int toInt(final Map<?, ?> map, final Object key, final int defaultValue) {
-			
+
 			if (map == null) {
 				return defaultValue;
 			}
@@ -3635,7 +3635,7 @@ public class Convert {
 				? defaultValue
 				: Any.toInt(result, defaultValue);
 		}
-
+		
 		/** Tries to get an int from map, if map is null or object is null returns defaultValue.
 		 * case insencetive, 0-indexed.
 		 *
@@ -3645,7 +3645,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return int */
 		public static final int toInt(final Map<?, ?> map, final String key, final String[] variants, final int defaultValue) {
-			
+
 			if (map == null) {
 				return defaultValue;
 			}
@@ -3661,13 +3661,13 @@ public class Convert {
 			}
 			return Any.toInt(result, defaultValue);
 		}
-
+		
 		/** @param object
 		 * @param key
 		 * @param defaultValue
 		 * @return */
 		public static long toLong(final BaseMap object, final String key, final long defaultValue) {
-			
+
 			if (object == null) {
 				return defaultValue;
 			}
@@ -3676,13 +3676,13 @@ public class Convert {
 				? defaultValue
 				: Any.toLong(result, defaultValue);
 		}
-
+		
 		/** @param object
 		 * @param key
 		 * @param defaultValue
 		 * @return */
 		public static long toLong(final BaseObject object, final String key, final long defaultValue) {
-			
+
 			if (object == null) {
 				return defaultValue;
 			}
@@ -3691,7 +3691,7 @@ public class Convert {
 				? defaultValue
 				: Any.toLong(result, defaultValue);
 		}
-
+		
 		/** Tries to get a long from map, if map is null or object is null returns defaultValue.
 		 *
 		 * @param map
@@ -3699,7 +3699,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return long */
 		public static final long toLong(final Map<?, ?> map, final Object key, final long defaultValue) {
-			
+
 			if (map == null) {
 				return defaultValue;
 			}
@@ -3708,7 +3708,7 @@ public class Convert {
 				? defaultValue
 				: Any.toLong(result, defaultValue);
 		}
-
+		
 		/** Tries to get a map from map, if map is null or object is null returns defaultValue.
 		 *
 		 * @param map
@@ -3718,7 +3718,7 @@ public class Convert {
 		 * @param <V>
 		 * @return map */
 		public static final <K, V> Map<K, V> toMap(final Map<?, ?> map, final Object key, final Map<K, V> defaultValue) {
-			
+
 			if (map == null) {
 				return defaultValue;
 			}
@@ -3731,7 +3731,7 @@ public class Convert {
 			}
 			return defaultValue;
 		}
-
+		
 		/** Tries to get an object from map, if map is null or object is null returns defaultValue.
 		 *
 		 * @param map
@@ -3739,12 +3739,12 @@ public class Convert {
 		 * @param defaultValue
 		 * @return object */
 		public static final Object toObject(final BaseMap map, final String key, final Object defaultValue) {
-			
+
 			return map == null
 				? defaultValue
 				: Base.getJava(map, key, defaultValue);
 		}
-
+		
 		/** Tries to get an object from map, if map is null or object is null returns defaultValue.
 		 *
 		 * @param map
@@ -3752,7 +3752,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return object */
 		public static final Object toObject(final BaseObject map, final String key, final Object defaultValue) {
-			
+
 			if (map == null) {
 				return defaultValue;
 			}
@@ -3761,7 +3761,7 @@ public class Convert {
 				? defaultValue
 				: any;
 		}
-
+		
 		/** Tries to get an object from map, if map is null or object is null returns defaultValue.
 		 *
 		 * @param map
@@ -3769,7 +3769,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return object */
 		public static final Object toObject(final Map<?, ?> map, final Object key, final Object defaultValue) {
-			
+
 			if (map == null) {
 				return defaultValue;
 			}
@@ -3778,7 +3778,7 @@ public class Convert {
 				? defaultValue
 				: any;
 		}
-
+		
 		/** Tries to get a period from map, if map is null or object is null returns defaultValue.
 		 *
 		 * @param map
@@ -3786,7 +3786,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return long */
 		public static final long toPeriod(final BaseMap map, final String key, final long defaultValue) {
-			
+
 			if (map == null || map.baseIsPrimitive()) {
 				return defaultValue;
 			}
@@ -3795,7 +3795,7 @@ public class Convert {
 				? defaultValue
 				: Any.toPeriod(result, defaultValue);
 		}
-
+		
 		/** Tries to get a period from map, if map is null or object is null returns defaultValue.
 		 *
 		 * @param map
@@ -3803,7 +3803,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return long */
 		public static final long toPeriod(final BaseObject map, final String key, final long defaultValue) {
-			
+
 			if (map == null || map.baseIsPrimitive()) {
 				return defaultValue;
 			}
@@ -3812,7 +3812,7 @@ public class Convert {
 				? defaultValue
 				: Any.toPeriod(result, defaultValue);
 		}
-
+		
 		/** Tries to get a period from map, if map is null or object is null returns defaultValue.
 		 *
 		 * @param map
@@ -3820,7 +3820,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return long */
 		public static final long toPeriod(final Map<?, ?> map, final Object key, final long defaultValue) {
-			
+
 			if (map == null) {
 				return defaultValue;
 			}
@@ -3829,7 +3829,7 @@ public class Convert {
 				? defaultValue
 				: Any.toPeriod(result, defaultValue);
 		}
-
+		
 		/** Tries to get a short from map, if map is null or object is null returns defaultValue.
 		 *
 		 * @param map
@@ -3837,7 +3837,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return short */
 		public static final short toShort(final BaseMap map, final String key, final short defaultValue) {
-			
+
 			if (map == null) {
 				return defaultValue;
 			}
@@ -3846,7 +3846,7 @@ public class Convert {
 				? defaultValue
 				: Any.toShort(result, defaultValue);
 		}
-
+		
 		/** Tries to get a short from map, if map is null or object is null returns defaultValue.
 		 *
 		 * @param map
@@ -3854,7 +3854,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return short */
 		public static final short toShort(final BaseObject map, final String key, final short defaultValue) {
-			
+
 			if (map == null) {
 				return defaultValue;
 			}
@@ -3863,7 +3863,7 @@ public class Convert {
 				? defaultValue
 				: Any.toShort(result, defaultValue);
 		}
-
+		
 		/** Tries to get a short from map, if map is null or object is null returns defaultValue.
 		 *
 		 * @param map
@@ -3871,7 +3871,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return short */
 		public static final short toShort(final Map<?, ?> map, final Object key, final short defaultValue) {
-			
+
 			if (map == null) {
 				return defaultValue;
 			}
@@ -3880,7 +3880,7 @@ public class Convert {
 				? defaultValue
 				: Any.toShort(result, defaultValue);
 		}
-
+		
 		/** Tries to get a string from map, if map is null or object is null returns defaultValue.
 		 *
 		 * @param map
@@ -3888,7 +3888,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return string */
 		public static final String toString(final BaseArray map, final String key, final String defaultValue) {
-			
+
 			if (map == null) {
 				return defaultValue;
 			}
@@ -3908,7 +3908,7 @@ public class Convert {
 				? defaultValue
 				: result;
 		}
-
+		
 		/** Tries to get a string from map, if map is null or object is null returns defaultValue.
 		 *
 		 * @param map
@@ -3916,7 +3916,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return string */
 		public static final String toString(final BaseMap map, final String key, final String defaultValue) {
-			
+
 			if (map == null) {
 				return defaultValue;
 			}
@@ -3936,7 +3936,7 @@ public class Convert {
 				? defaultValue
 				: result;
 		}
-
+		
 		/** Tries to get a string from map, if map is null or object is null returns defaultValue.
 		 *
 		 * @param map
@@ -3944,7 +3944,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return string */
 		public static final String toString(final BaseObject map, final String key, final String defaultValue) {
-			
+
 			if (map == null) {
 				return defaultValue;
 			}
@@ -3964,7 +3964,7 @@ public class Convert {
 				? defaultValue
 				: result;
 		}
-
+		
 		/** Tries to get a string from map, if map is null or object is null returns defaultValue.
 		 *
 		 * @param map
@@ -3972,7 +3972,7 @@ public class Convert {
 		 * @param defaultValue
 		 * @return string */
 		public static final String toString(final Map<?, ?> map, final Object key, final String defaultValue) {
-			
+
 			if (map == null) {
 				return defaultValue;
 			}
@@ -3992,60 +3992,60 @@ public class Convert {
 				? defaultValue
 				: result;
 		}
-
+		
 		private MapEntry() {
-
+			
 			// empty
 		}
 	}
-
+	
 	/**
 	 *
 	 */
-	public static final long MUL_SECONDS = 1000L;
-
+	public static final long MUL_SECONDS = 1_000L;
+	
 	/**
 	 *
 	 */
 	public static final long MUL_MINUTES = Convert.MUL_SECONDS * 60L;
-
+	
 	/**
 	 *
 	 */
 	public static final long MUL_HOURS = Convert.MUL_MINUTES * 60L;
-
+	
 	/**
 	 *
 	 */
 	public static final long MUL_DAYS = Convert.MUL_HOURS * 24L;
-
+	
 	/**
 	 *
 	 */
 	public static final long MUL_WEEKS = Convert.MUL_DAYS * 7L;
-
+	
 	/**
 	 *
 	 */
 	public static final long MUL_KILO = 1024L;
-
+	
 	/**
 	 *
 	 */
 	public static final long MUL_MEGA = Convert.MUL_KILO * 1024L;
-
+	
 	/**
 	 *
 	 */
 	public static final long MUL_GIGA = Convert.MUL_MEGA * 1024L;
-
+	
 	/**
 	 *
 	 */
 	public static final long MUL_TERA = Convert.MUL_GIGA * 1024L;
-
+	
 	private Convert() {
-
+		
 		// empty
 	}
 }

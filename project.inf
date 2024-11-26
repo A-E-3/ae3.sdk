@@ -6,7 +6,6 @@ Requires: \
 
 Provides: \
 	ae3.sdk \
-	source-process:compile-java \
-	source-process:java-compile:java \
+	--source-process:compile-java \
 	source-process:ae3-packages \
 	export-classpath:java \

@@ -18,24 +18,24 @@ import ru.myx.ae3.reflect.ReflectionManual;
 /** @author myx */
 @ReflectionManual
 public final class FunctionWrapOnceWithExpiration extends BaseFunctionAbstract implements ExecCallableJava.NativeE0, ExecCallable.ForStore.UseStore0 {
-
+	
 	/** MAKING : result == null
 	 *
 	 * FAILED : expiration negative
 	 *
 	 * RETURN : result != null && expiration is OK */
-
+	
 	private final BaseFunction function;
 	private final long expirationMillis;
-
+	
 	private BaseObject result = BaseObject.UNDEFINED;
 	private long expires = 0;
-
+	
 	/** @param function
 	 * @param expirationMillis */
 	@ReflectionExplicit
 	public FunctionWrapOnceWithExpiration(final BaseFunction function, final long expirationMillis) {
-		
+
 		if (expirationMillis <= 0) {
 			throw new IllegalArgumentException("expirationMillis is too small: " + expirationMillis);
 		}
@@ -48,44 +48,44 @@ public final class FunctionWrapOnceWithExpiration extends BaseFunctionAbstract i
 		this.function = function;
 		this.expirationMillis = expirationMillis;
 	}
-
+	
 	@Override
 	public BaseArray baseArray() {
-
+		
 		return this.function.baseArray();
 	}
-
+	
 	@Override
 	public String baseClass() {
-
+		
 		return this.function.baseClass();
 	}
-
+	
 	@Override
 	public void baseClear() {
-
+		
 		this.function.baseClear();
 	}
-
+	
 	@Override
 	public BaseFunction baseConstruct() {
-
+		
 		return this.function;
 	}
-
+	
 	//
-
+	
 	@Override
 	public BaseObject baseConstructPrototype() {
-
+		
 		return this.function.baseConstructPrototype();
 	}
-
+	
 	@Override
 	public BaseObject callNE0(final ExecProcess ctx, final BaseObject instance) {
-
+		
 		final long checkTime = Engine.fastTime();
-
+		
 		/** fast path */
 		{
 			final BaseObject result = this.result;
@@ -105,7 +105,7 @@ public final class FunctionWrapOnceWithExpiration extends BaseFunctionAbstract i
 					final BaseObject result = this.result;
 					if (result == null) {
 						try {
-							this.wait(1000L);
+							this.wait(1_000L);
 							continue;
 						} catch (final InterruptedException e) {
 							throw new RuntimeException(e);
@@ -118,14 +118,14 @@ public final class FunctionWrapOnceWithExpiration extends BaseFunctionAbstract i
 					if (-expires > checkTime) {
 						throw (BaseAbstractException) result;
 					}
-
+					
 					/** result expired, make new */
 					this.result = null;
 					break;
 				}
 			}
 			/** end of sync */
-
+			
 			try {
 				final BaseObject result = this.function.callNE0(ctx, instance);
 				synchronized (this) {
@@ -145,12 +145,12 @@ public final class FunctionWrapOnceWithExpiration extends BaseFunctionAbstract i
 			}
 		}
 	}
-
+	
 	@Override
 	public ExecStateCode execCallPrepare(final ExecProcess ctx, final BaseObject instance, final ResultHandler store, final boolean inline) {
-
+		
 		final long checkTime = Engine.fastTime();
-
+		
 		/** fast path */
 		{
 			final BaseObject result = this.result;
@@ -171,7 +171,7 @@ public final class FunctionWrapOnceWithExpiration extends BaseFunctionAbstract i
 					final BaseObject result = this.result;
 					if (result == null) {
 						try {
-							this.wait(1000L);
+							this.wait(1_000L);
 							continue;
 						} catch (final InterruptedException e) {
 							return ctx.vmRaise(e);
@@ -185,14 +185,14 @@ public final class FunctionWrapOnceWithExpiration extends BaseFunctionAbstract i
 						ctx.ra0RB = result;
 						return ExecStateCode.ERROR;
 					}
-
+					
 					/** result expired, make new */
 					this.result = null;
 					break;
 				}
 			}
 			/** end of sync */
-
+			
 			try {
 				final BaseObject result = this.function.callNE0(ctx, instance);
 				synchronized (this) {
@@ -213,34 +213,34 @@ public final class FunctionWrapOnceWithExpiration extends BaseFunctionAbstract i
 			}
 		}
 	}
-
+	
 	@Override
 	public boolean execIsConstant() {
-
+		
 		return true;
 	}
-
+	
 	@Override
 	public Class<? extends Object> execResultClassJava() {
-
+		
 		final BaseFunction function = this.function;
 		return function == null
 			? Object.class
 			: function.execResultClassJava();
 	}
-
+	
 	@Override
 	public BaseObject execScope() {
-
+		
 		final BaseFunction function = this.function;
 		return function == null
 			? ExecProcess.GLOBAL
 			: function.execScope();
 	}
-
+	
 	@Override
 	public String toString() {
-
+		
 		final BaseObject result = this.result;
 		final long expires = this.expires;
 		final BaseFunction function = this.function;

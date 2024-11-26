@@ -14,47 +14,47 @@ import ru.myx.ae3.common.Holder;
  * @param <T>
  * @param <C> */
 public abstract class RequestAttachment<T, C extends RunnerDatabaseRequestor> implements Function<C, T>, Holder<T>, FutureValue<T> {
-
+	
 	private T result;
-
+	
 	private Error error;
-
+	
 	private boolean loadDone = false;
-
+	
 	private RequestAttachment<T, C> loadResult = null;
-
+	
 	private long hashCode = 0xF000000000000000L;
-
-	@Override
-	public final T baseValue() {
-		
-		return this.getReference().result;
-	}
-
+	
 	private final int createHashCode() {
-		
+
 		final Object o = this.baseValue();
 		if (o == null) {
 			return 0;
 		}
 		return (int) (this.hashCode = o.hashCode());
 	}
+	
+	@Override
+	public final T baseValue() {
 
+		return this.getReference().result;
+	}
+	
 	@Override
 	public final boolean equals(final Object anotherObject) {
-		
+
 		return anotherObject == this || anotherObject != null && anotherObject.equals(this.baseValue());
 	}
-
+	
 	@Override
 	public final boolean execCanSet() {
-		
+
 		return !this.loadDone;
 	}
-
+	
 	@Override
 	public final boolean execCompareAndSet(final T compare, final T value) {
-		
+
 		if (this.result == compare) {
 			this.result = value;
 			this.loadResult = this;
@@ -65,10 +65,10 @@ public abstract class RequestAttachment<T, C extends RunnerDatabaseRequestor> im
 		}
 		return false;
 	}
-
+	
 	@Override
 	public final T execGetAndSet(final T value) {
-		
+
 		try {
 			return this.result;
 		} finally {
@@ -79,25 +79,25 @@ public abstract class RequestAttachment<T, C extends RunnerDatabaseRequestor> im
 			Act.launchNotifyAll(this);
 		}
 	}
-
+	
 	@Override
 	public final void execSet(final T value) {
-		
+
 		this.result = value;
 		this.loadResult = this;
 		this.loadDone = true;
 		/** TODO: is there a point? Why not just inline? */
 		Act.launchNotifyAll(this);
 	}
-
+	
 	/** If key is not NULL - runner will try not to execute same request more than once in one loop.
 	 *
 	 * @return key for comparsion */
 	public abstract String getKey();
-
+	
 	/** @return linkData */
 	public final RequestAttachment<T, C> getReference() {
-		
+
 		if (this.loadDone) {
 			if (this.error != null) {
 				throw this.error;
@@ -133,7 +133,7 @@ public abstract class RequestAttachment<T, C extends RunnerDatabaseRequestor> im
 					 * Item 50 in Joshua Bloch's "Effective Java Programming Language Guide"
 					 * (Addison-Wesley, 2001). */
 					for (//
-							long left = 60000L, expires = Engine.fastTime() + left; //
+							long left = 60_000L, expires = Engine.fastTime() + left; //
 							left > 0; //
 							left = expires - Engine.fastTime()) {
 						//
@@ -163,72 +163,72 @@ public abstract class RequestAttachment<T, C extends RunnerDatabaseRequestor> im
 		this.loadDone = true;
 		return this.loadResult;
 	}
-
-	/** @return */
-	protected final T getResult() {
-		
-		return this.result;
-	}
-
+	
 	@Override
 	public final int hashCode() {
-		
+
 		return this.hashCode == 0xF000000000000000L
 			? this.createHashCode()
 			: (int) this.hashCode;
 	}
-
+	
 	@Override
 	public final boolean isDone() {
-		
+
 		return this.loadResult == this && this.loadDone || this.loadResult != null && this.loadResult.isDone();
 	}
-
+	
 	@Override
 	public boolean isFailed() {
-		
+
 		return this.loadResult == this && this.loadDone && this.error != null || this.loadResult != null && this.loadResult.isFailed();
 	}
-
+	
 	/** @return is this request still valid? */
 	public boolean isValid() {
-		
+
 		return !this.loadDone;
 	}
-
+	
 	/** @param link */
 	public final void setDuplicateOf(final RequestAttachment<T, C> link) {
-		
+
 		this.loadResult = link;
 		this.loadDone = true;
 		synchronized (this) {
 			this.notifyAll();
 		}
 	}
+	
+	@Override
+	public final String toString() {
 
+		return String.valueOf(this.baseValue());
+	}
+	
+	/** @return */
+	protected final T getResult() {
+
+		return this.result;
+	}
+	
 	/** @param result */
 	protected final void setError(final Error result) {
-		
+
 		this.error = result;
 		this.loadResult = this;
 		this.loadDone = true;
 		/** TODO: is there a point? Why not just inline? */
 		Act.launchNotifyAll(this);
 	}
-
+	
 	/** @param result */
 	protected final void setResult(final T result) {
-		
+
 		this.result = result;
 		this.loadResult = this;
 		this.loadDone = true;
 		/** TODO: is there a point? Why not just inline? */
 		Act.launchNotifyAll(this);
-	}
-
-	@Override
-	public final String toString() {
-		
-		return String.valueOf(this.baseValue());
 	}
 }

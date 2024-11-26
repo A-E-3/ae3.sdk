@@ -17,35 +17,36 @@ import ru.myx.ae3.reflect.ControlType;
 
 /** @author myx */
 public final class ExecOnceStatic extends BaseFunctionAbstract implements ExecCallableBoth.ExecStore0 {
-	
+
 	private boolean doing = false;
-
+	
 	private boolean error = false;
-
+	
 	private final BaseObject instance;
-
+	
 	private final ExecProcess parentContext;
-
+	
 	private final ProgramPart renderer;
-
+	
 	private final ControlType<?, ?> result;
-
+	
 	private BaseObject value = null;
-
+	
 	/** @param instance
 	 * @param result
 	 * @param renderer
 	 * @param parentContext */
 	public ExecOnceStatic(final BaseObject instance, final ControlType<?, ?> result, final ProgramPart renderer, final ExecProcess parentContext) {
+		
 		this.instance = instance;
 		this.result = result;
 		this.renderer = renderer;
 		this.parentContext = parentContext;
 	}
-
+	
 	@Override
 	public ExecStateCode execCallPrepare(final ExecProcess ctx, final BaseObject instance, final ResultHandler store, final boolean inline) {
-		
+
 		BaseObject result = this.value;
 		if (result == null) {
 			boolean make = false;
@@ -58,7 +59,7 @@ public final class ExecOnceStatic extends BaseFunctionAbstract implements ExecCa
 					if (this.doing) {
 						do {
 							try {
-								this.wait(1000L);
+								this.wait(1_000L);
 							} catch (final InterruptedException e) {
 								return ctx.vmRaise(e);
 							}
@@ -96,28 +97,28 @@ public final class ExecOnceStatic extends BaseFunctionAbstract implements ExecCa
 		}
 		return store.execReturn(ctx, this.result.convertAnyNativeToNative(result));
 	}
-
+	
 	@Override
 	public final boolean execHasNamedArguments() {
-		
+
 		return false;
 	}
-
+	
 	@Override
 	public final boolean execIsConstant() {
-		
+
 		return false;
 	}
-
+	
 	@Override
 	public Class<?> execResultClassJava() {
-		
+
 		return this.result.getJavaClass();
 	}
-
+	
 	@Override
 	public BaseObject execScope() {
-		
+
 		/** executes in real current scope */
 		return ExecProcess.GLOBAL;
 	}

@@ -21,49 +21,49 @@ import ru.myx.ae3.report.Report;
 /** @author myx */
 @ReflectionManual
 public final class FunctionWrapBuffered extends BaseFunctionAbstract implements ExecCallableBoth.ExecStoreX, Runnable {
-
+	
 	static class BufferedArguments extends ExecArgumentsLinkedList {
-
+		
 		private static final long serialVersionUID = -6368502895839729589L;
-
+		
 		/** @param callee */
 		BufferedArguments(final BaseFunction callee) {
-
+			
 			//
 		}
-
+		
 	}
-
+	
 	private final ControlFieldset<?> argumentsFieldset;
-
+	
 	private final BufferedArguments[] buffers;
-
+	
 	private final BaseFunction function;
-
+	
 	private final ExecProcess ctx;
-
+	
 	private volatile int counter = 0;
-
+	
 	private final long delay;
-
+	
 	private final long period;
-
+	
 	private volatile int remaining;
-
+	
 	private final int capacity;
-
+	
 	private final boolean overflowDrop;
-
+	
 	private volatile byte started = (byte) 0;
-
+	
 	private volatile boolean stopped = false;
-
+	
 	/** @param parent
 	 * @param function
 	 * @param options */
 	@ReflectionExplicit
 	public FunctionWrapBuffered(final ExecProcess parent, final BaseFunction function, final BaseObject options) {
-
+		
 		if (function == null) {
 			throw new IllegalArgumentException("Function is NULL!");
 		}
@@ -75,83 +75,83 @@ public final class FunctionWrapBuffered extends BaseFunctionAbstract implements 
 				new BufferedArguments(function), new BufferedArguments(function),
 				//
 		};
-
+		
 		this.delay = Base.getInt(options, "delay", 0);
 		this.period = Base.getInt(options, "period", 0);
 		this.capacity = Base.getInt(options, "buffer", -1);
 		this.remaining = this.capacity;
 		this.overflowDrop = Base.getString(options, "overflow", "block").equals("drop");
-
+		
 		this.ctx = Exec.createProcess(parent, "Buffered method, fn=" + function);
 		this.function = function;
 	}
-
+	
 	@Override
 	public BaseArray baseArray() {
-
+		
 		return this.function.baseArray();
 	}
-
+	
 	@Override
 	public String baseClass() {
-
+		
 		return this.function.baseClass();
 	}
-
+	
 	@Override
 	public void baseClear() {
-
+		
 		this.function.baseClear();
 	}
-
+	
 	@Override
 	public BaseFunction baseConstruct() {
-
+		
 		return this.function;
 	}
-
+	
 	@Override
 	public BaseObject baseConstructPrototype() {
-
+		
 		return this.function.baseConstructPrototype();
 	}
-
+	
 	/**
 	 *
 	 */
 	@ReflectionExplicit
 	public void destroy() {
-
+		
 		this.stopped = true;
 	}
-
+	
 	@Override
 	public int execArgumentsAcceptable() {
-
+		
 		return this.argumentsFieldset == null
 			? this.function.execArgumentsAcceptable()
 			: this.argumentsFieldset.size();
 	}
-
+	
 	@Override
 	public final int execArgumentsDeclared() {
-
+		
 		return this.argumentsFieldset == null
 			? this.function.execArgumentsDeclared()
 			: this.argumentsFieldset.size();
 	}
-
+	
 	@Override
 	public int execArgumentsMinimal() {
-
+		
 		return this.argumentsFieldset == null
 			? this.function.execArgumentsMinimal()
 			: 0;
 	}
-
+	
 	@Override
 	public ExecStateCode execCallPrepare(final ExecProcess ctx, final BaseObject instance, final ResultHandler store, final boolean inline, final BaseArray arguments) {
-
+		
 		final BaseObject record = this.argumentsFieldset == null
 			? ExecProcess.vmEnsureArgumentsDetached(ctx, arguments)
 			: ControlFieldset.argumentsFieldsetContextToLocals(//
@@ -186,7 +186,7 @@ public final class FunctionWrapBuffered extends BaseFunctionAbstract implements 
 										break drop;
 									}
 									try {
-										this.buffers.wait(1000L);
+										this.buffers.wait(1_000L);
 										continue retry;
 									} catch (final InterruptedException e) {
 										return store.execReturnFalse(ctx);
@@ -211,40 +211,40 @@ public final class FunctionWrapBuffered extends BaseFunctionAbstract implements 
 		}
 		return store.execReturnFalse(ctx);
 	}
-
+	
 	@Override
 	public String[] execFormalParameters() {
-
+		
 		return this.function.execFormalParameters();
 	}
-
+	
 	@Override
 	public boolean execHasNamedArguments() {
-
+		
 		return this.function.execHasNamedArguments();
 	}
-
+	
 	@Override
 	public boolean execIsConstant() {
-
+		
 		return this.function.execIsConstant();
 	}
-
+	
 	@Override
 	public Class<? extends Object> execResultClassJava() {
-
+		
 		return Void.class;
 	}
-
+	
 	@Override
 	public BaseObject execScope() {
-
+		
 		return ExecProcess.GLOBAL;
 	}
-
+	
 	@Override
 	public final void run() {
-
+		
 		synchronized (this.buffers) {
 			if (this.started > 2) {
 				return;
@@ -290,10 +290,10 @@ public final class FunctionWrapBuffered extends BaseFunctionAbstract implements 
 			buffer.clear();
 		}
 	}
-
+	
 	@Override
 	public String toString() {
-
+		
 		return "[function " + this.getClass().getSimpleName() + '(' + this.function + ")]";
 	}
 }

@@ -271,7 +271,7 @@ public final class ExpressionParser {
 				}
 			}
 		}
-		// System.out.println(">>> >>> ADD-IDENT-ACCESS precompiled size: " + precompiled.size() +
+		// System.out.println(">>>>>> ADD-IDENT-ACCESS precompiled size: " + precompiled.size() +
 		// ", list: " + precompiled + ", field: " + fieldName);
 		precompiled.add(result);
 	}
@@ -1130,7 +1130,7 @@ public final class ExpressionParser {
 		final TokenInstruction last = precompiled.get(precompiledSize - 1);
 		/** TODO: not working, unfinished!!! */
 		if (last == ParseConstants.TKS_EOCO) {
-			// System.out.println(">>> >>> CLOSEBRACE EOCO: " + precompiled + ", sub: " + sub);
+			// System.out.println(">>>>>> CLOSEBRACE EOCO: " + precompiled + ", sub: " + sub);
 			precompiled.add(
 					ExpressionParser.encodeCallAccessXXE(
 							assembly, //
@@ -1153,7 +1153,7 @@ public final class ExpressionParser {
 		/** DEBUG<code>
 			</code> */
 		if (last.isAccessReference()) {
-			// System.out.println(">>> >>> CLOSEBRACE L AR: " + precompiled + ", sub: " + sub);
+			// System.out.println(">>>>>> CLOSEBRACE L AR: " + precompiled + ", sub: " + sub);
 			final TokenInstruction accessPropertyReference = last.toReferenceProperty();
 			assert accessPropertyReference != null : "no TKO_ACCESS_BA_Sx token!";
 			final TokenInstruction accessObject = last.toReferenceObject();
@@ -1191,7 +1191,8 @@ public final class ExpressionParser {
 		}
 
 		if (last == ParseConstants.TKV_DIRECT) {
-			System.out.println(">>>>>> CLOSEBRACE L RR: leftHand: " + precompiled + ", sub: " + sub);
+			// System.out.println(">>>>>> CLOSEBRACE L RR: leftHand: " + precompiled + ", sub: " +
+			// sub);
 			precompiled.set( //
 					precompiledSize - 1,
 					ExpressionParser.encodeCallAccessXXE(
@@ -1204,7 +1205,7 @@ public final class ExpressionParser {
 		}
 
 		{
-			// System.out.println(">>> >>> CLOSEBRACE L FV: last: " + last + ", leftHand: " +
+			// System.out.println(">>>>>> CLOSEBRACE L FV: last: " + last + ", leftHand: " +
 			// precompiled + ", sub: " + sub);
 			if (!last.isStackValue()) {
 				precompiled.add(ParseConstants.TKV_ERROR_EXPRESSION_EXPECTED);
@@ -1294,7 +1295,7 @@ public final class ExpressionParser {
 			for (final int expressionStart = i;;) {
 				final boolean end = i == subSize;
 				if (end || sub.get(i++) == ParseConstants.TKS_COMMA) {
-					// System.out.println( ">>> >>> CREATE " + sub + ", i=" +
+					// System.out.println( ">>>>>> CREATE " + sub + ", i=" +
 					// i + ", subSize=" + subSize );
 					if (i == expressionStart) {
 						assembly.truncate(size);
@@ -1350,7 +1351,7 @@ public final class ExpressionParser {
 			return true;
 		}
 		final TokenInstruction last = precompiled.get(precompiledSize - 1);
-		// System.out.println(">>> >>> CLOSEINDEX precompiled size: " + precompiledSize + ", list: "
+		// System.out.println(">>>>>> CLOSEINDEX precompiled size: " + precompiledSize + ", list: "
 		// + precompiled + ", last: " + last + ", sub: " + sub);
 		if (last == ParseConstants.TKS_EOCO) {
 			ExpressionParser.EXPR_PRIVATE_COUNT++;
@@ -1409,7 +1410,7 @@ public final class ExpressionParser {
 			precompiled.add( assembly.compileExpression( sub, BalanceType.EXPRESSION ) );
 			precompiled.add( ParseConstants.TKS_CHOOSE );
 			</code> */
-			// System.out.println( ">>> >>> precompiled: " + precompiled );
+			// System.out.println( ">>>>>> precompiled: " + precompiled );
 			return true;
 		}
 		{
@@ -1545,7 +1546,7 @@ public final class ExpressionParser {
 		assert accessProperty.assertStackValue();
 
 		if (callArguments == null || callArguments.size() == 0) {
-			// System.out.println(">>> >>> CALLXXE_V, callee: " + accessObjectModifier + ", prop: "
+			// System.out.println(">>>>>> CALLXXE_V, callee: " + accessObjectModifier + ", prop: "
 			// + accessProperty);
 
 			return accessObjectModifier == ModifierArguments.AB7FV
@@ -1635,105 +1636,6 @@ public final class ExpressionParser {
 	private static final boolean isWhitespace(final char c) {
 
 		return (ExpressionParser.CHARS[c] & 0x01) != 0;
-	}
-
-	/** @param assembly
-	 * @param expression
-	 * @param balanceType
-	 * @return */
-	public static TokenInstruction parseExpression(final ProgramAssembly assembly, final String expression, final BalanceType balanceType) {
-
-		ExpressionParser.EXPR_PUBLIC_COUNT++;
-		final String expr = expression.trim();
-		try {
-			/** check for simple expressions */
-			if (expr.length() < 12) {
-				final TokenValue ready = ExpressionParser.DEFAULT_VARIABLES.get(expr);
-				if (ready != null) {
-					if (balanceType == BalanceType.DECLARATION) {
-						throw new IllegalArgumentException("Token is not suitable for daclaration: " + ready);
-					}
-					if (ready.toConstantValue() != ExpressionParser.RESERVED_OBJECT) {
-						ExpressionParser.EXPR_BUILTIN_HITS++;
-						if (balanceType == BalanceType.STATEMENT) {
-							return null;
-						}
-						if (balanceType == BalanceType.ARGUMENT_LIST) {
-							return ready;
-						}
-						if (balanceType == BalanceType.EXPRESSION) {
-							return ready;
-						}
-						if (balanceType == BalanceType.ARRAY_LITERAL) {
-							return ready.getResultType() == InstructionResult.NEVER
-								? ready
-								: new TKV_CARRAY1(ready);
-						}
-						throw new RuntimeException("Unknown balanceType: " + balanceType);
-					}
-					Report.warning("EVALUATE", "Reserved word (" + ready.getNotation() + ") in expression: " + expr);
-					return new TKV_FLOAD_A_Cs_S(Base.forString(expr));
-				}
-			}
-
-			/**
-			 *
-			 */
-			final List<TokenInstruction> precompiled = ExpressionParser.prepare(assembly, expr);
-			List<TokenInstruction> subStatements = null;
-			{
-				final int tokenCount = precompiled.size();
-				boolean foundStatements = false;
-				for (int index = 0, prevIndex = 0;; ++index) {
-					final boolean end = index == tokenCount;
-					if (!foundStatements && end) {
-						/** Fall through. We've just checked that there is no semicolons in the
-						 * expression. */
-						return assembly.compileExpression(precompiled, balanceType);
-					}
-					if (end || precompiled.get(index) == ParseConstants.TKS_SEMICOLON) {
-						final List<TokenInstruction> subStatement = prevIndex == index
-							? null
-							: precompiled.subList(prevIndex, index);
-						final TokenInstruction subToken = subStatement == null
-							? null
-							: assembly.compileExpression(subStatement, BalanceType.STATEMENT);
-						if (end) {
-							if (subStatements == null) {
-								/** we have nothing else added into assembly */
-								return subToken;
-							}
-							if (subToken != null) {
-								subStatements.add(subToken);
-							}
-
-							final int size = subStatements.size();
-							switch (size) {
-								case 1 :
-									return subStatements.get(0);
-								case 2 :
-									return new TKV_EFLOW2(subStatements.get(0), subStatements.get(1));
-								case 3 :
-									return new TKV_EFLOW3(subStatements.get(0), subStatements.get(1), subStatements.get(2));
-								default :
-									return new TKV_EFLOWX(subStatements.toArray(new TokenInstruction[size]));
-							}
-						}
-						/** For statements we need only non-constant ones. */
-						if (subToken != null && subToken.toConstantModifier() == null) {
-							if (subStatements == null) {
-								subStatements = new ArrayList<>();
-							}
-							subStatements.add(subToken);
-						}
-						foundStatements = true;
-						prevIndex = index + 1;
-					}
-				}
-			}
-		} catch (final Throwable t) {
-			throw new RuntimeException("Error while compiling: " + expr, t);
-		}
 	}
 
 	private static final List<TokenInstruction> prepare(final ProgramAssembly assembly, final String expressionString) throws Throwable {
@@ -2915,7 +2817,7 @@ public final class ExpressionParser {
 							// ##### final int precompiledSize = precompiled.size();
 							// if (precompiledSize == 0 || precompiled.get(precompiledSize - 1) !=
 							// ParseConstants.TKS_EOCO) {
-							// // System.out.println(">>> >>> PARSER-ST-CODE: identifierStart: " +
+							// // System.out.println(">>>>>> PARSER-ST-CODE: identifierStart: " +
 							// // precompiled);
 							// state = ExpressionParser.ST_IDENTIFIER_ROOT;
 							// } else {
@@ -3030,7 +2932,7 @@ public final class ExpressionParser {
 													sub));
 								}
 
-								// System.out.println(">>> >>> PREPARE 2 ')', leftHand: " +
+								// System.out.println(">>>>>> PREPARE 2 ')', leftHand: " +
 								// precompiled + ", argB: " + argumentB);
 
 								identifier = null;
@@ -3093,7 +2995,7 @@ public final class ExpressionParser {
 													sub) //
 								);
 
-								// System.out.println(">>> >>> PREPARE 1 ')', leftHand: " +
+								// System.out.println(">>>>>> PREPARE 1 ')', leftHand: " +
 								// precompiled + ", argB: " + accessProperty);
 
 								identifier = null;
@@ -3441,7 +3343,7 @@ public final class ExpressionParser {
 								final String[] arguments = constant == BaseObject.UNDEFINED
 									? null
 									: ((ParserArguments) constant).toArray();
-								// System.out.println( ">>> >>> CODE: " +
+								// System.out.println( ">>>>>> CODE: " +
 								// expressionString.substring( blockStart, i )
 								// );
 								precompiled.set(
@@ -3654,6 +3556,105 @@ public final class ExpressionParser {
 		precompiled.clear();
 		precompiled.add(new TKV_ERROR_A_C_E("Unknown parser state(" + state + "): " + expressionString));
 		return precompiled;
+	}
+
+	/** @param assembly
+	 * @param expression
+	 * @param balanceType
+	 * @return */
+	public static TokenInstruction parseExpression(final ProgramAssembly assembly, final String expression, final BalanceType balanceType) {
+
+		ExpressionParser.EXPR_PUBLIC_COUNT++;
+		final String expr = expression.trim();
+		try {
+			/** check for simple expressions */
+			if (expr.length() < 12) {
+				final TokenValue ready = ExpressionParser.DEFAULT_VARIABLES.get(expr);
+				if (ready != null) {
+					if (balanceType == BalanceType.DECLARATION) {
+						throw new IllegalArgumentException("Token is not suitable for daclaration: " + ready);
+					}
+					if (ready.toConstantValue() != ExpressionParser.RESERVED_OBJECT) {
+						ExpressionParser.EXPR_BUILTIN_HITS++;
+						if (balanceType == BalanceType.STATEMENT) {
+							return null;
+						}
+						if (balanceType == BalanceType.ARGUMENT_LIST) {
+							return ready;
+						}
+						if (balanceType == BalanceType.EXPRESSION) {
+							return ready;
+						}
+						if (balanceType == BalanceType.ARRAY_LITERAL) {
+							return ready.getResultType() == InstructionResult.NEVER
+								? ready
+								: new TKV_CARRAY1(ready);
+						}
+						throw new RuntimeException("Unknown balanceType: " + balanceType);
+					}
+					Report.warning("EVALUATE", "Reserved word (" + ready.getNotation() + ") in expression: " + expr);
+					return new TKV_FLOAD_A_Cs_S(Base.forString(expr));
+				}
+			}
+
+			/**
+			 *
+			 */
+			final List<TokenInstruction> precompiled = ExpressionParser.prepare(assembly, expr);
+			List<TokenInstruction> subStatements = null;
+			{
+				final int tokenCount = precompiled.size();
+				boolean foundStatements = false;
+				for (int index = 0, prevIndex = 0;; ++index) {
+					final boolean end = index == tokenCount;
+					if (!foundStatements && end) {
+						/** Fall through. We've just checked that there is no semicolons in the
+						 * expression. */
+						return assembly.compileExpression(precompiled, balanceType);
+					}
+					if (end || precompiled.get(index) == ParseConstants.TKS_SEMICOLON) {
+						final List<TokenInstruction> subStatement = prevIndex == index
+							? null
+							: precompiled.subList(prevIndex, index);
+						final TokenInstruction subToken = subStatement == null
+							? null
+							: assembly.compileExpression(subStatement, BalanceType.STATEMENT);
+						if (end) {
+							if (subStatements == null) {
+								/** we have nothing else added into assembly */
+								return subToken;
+							}
+							if (subToken != null) {
+								subStatements.add(subToken);
+							}
+
+							final int size = subStatements.size();
+							switch (size) {
+								case 1 :
+									return subStatements.get(0);
+								case 2 :
+									return new TKV_EFLOW2(subStatements.get(0), subStatements.get(1));
+								case 3 :
+									return new TKV_EFLOW3(subStatements.get(0), subStatements.get(1), subStatements.get(2));
+								default :
+									return new TKV_EFLOWX(subStatements.toArray(new TokenInstruction[size]));
+							}
+						}
+						/** For statements we need only non-constant ones. */
+						if (subToken != null && subToken.toConstantModifier() == null) {
+							if (subStatements == null) {
+								subStatements = new ArrayList<>();
+							}
+							subStatements.add(subToken);
+						}
+						foundStatements = true;
+						prevIndex = index + 1;
+					}
+				}
+			}
+		} catch (final Throwable t) {
+			throw new RuntimeException("Error while compiling: " + expr, t);
+		}
 	}
 
 	/** @param data */

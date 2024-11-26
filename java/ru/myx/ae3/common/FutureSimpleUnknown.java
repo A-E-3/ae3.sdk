@@ -145,7 +145,7 @@ public class FutureSimpleUnknown<V> extends BaseFutureAbstract<V> implements Bas
 				 *
 				 * <pre>
 				 * try {
-				 * 	this.wait(60000L);
+				 * 	this.wait(60_000L);
 				 * } catch (final InterruptedException e) {
 				 * 	return null;
 				 * }
@@ -172,7 +172,7 @@ public class FutureSimpleUnknown<V> extends BaseFutureAbstract<V> implements Bas
 					 * Item 50 in Joshua Bloch's "Effective Java Programming Language Guide"
 					 * (Addison-Wesley, 2001). */
 					for (//
-							long left = 60000L, expires = Engine.fastTime() + left; //
+							long left = 60_000L, expires = Engine.fastTime() + left; //
 							left > 0; //
 							left = expires - Engine.fastTime()) {
 						//

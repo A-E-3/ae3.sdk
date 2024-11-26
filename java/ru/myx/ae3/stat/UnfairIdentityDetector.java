@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package ru.myx.ae3.stat;
 
@@ -11,53 +11,49 @@ import ru.myx.ae3.ecma.compare.ComparatorEcma;
 import ru.myx.ae3.help.Format;
 import ru.myx.util.Counter;
 
-/**
- * @author myx
- * @param <T>
- * 
- */
+/** @author myx
+ * @param <T> */
 public class UnfairIdentityDetector<T> {
-	private final Object[]			fifoIdentity;
 	
-	private final long[]			fifoDate;
-	
-	private final Map<T, Counter>	tree;
-	
-	private static final long		DELAY	= 300000L;
-	
-	private static final int		SIZE	= 4096;
-	
-	private static final int		MASK	= UnfairIdentityDetector.SIZE - 1;
-	
-	private static final int		MARK	= 384;
-	
-	private int						head	= 0;
-	
-	private int						tail	= 0;
-	
-	private int						size	= 0;
-	
-	/**
-	 * @param comparator
-	 */
+	private static final long DELAY = 300_000L;
+
+	private static final int SIZE = 4096;
+
+	private static final int MASK = UnfairIdentityDetector.SIZE - 1;
+
+	private static final int MARK = 384;
+
+	private final Object[] fifoIdentity;
+
+	private final long[] fifoDate;
+
+	private final Map<T, Counter> tree;
+
+	private int head = 0;
+
+	private int tail = 0;
+
+	private int size = 0;
+
+	/** @param comparator */
 	public UnfairIdentityDetector(final Comparator<T> comparator) {
+		
 		this.fifoIdentity = new Object[UnfairIdentityDetector.SIZE];
 		this.fifoDate = new long[UnfairIdentityDetector.SIZE];
 		if (comparator == null) {
 			@SuppressWarnings("unchecked")
 			final Comparator<T> comp = (Comparator<T>) ComparatorEcma.INSTANCE;
-			this.tree = new TreeMap<>( comp );
+			this.tree = new TreeMap<>(comp);
 		} else {
-			this.tree = new TreeMap<>( comparator );
+			this.tree = new TreeMap<>(comparator);
 		}
 	}
-	
-	/**
-	 * @param identity
+
+	/** @param identity
 	 * @param time
-	 * @return true when should be banned
-	 */
+	 * @return true when should be banned */
 	public boolean register(final T identity, final long time) {
+		
 		// clean
 		{
 			for (int i = this.size; i > 0; --i) {
@@ -70,12 +66,12 @@ public class UnfairIdentityDetector<T> {
 				if (expire > time) {
 					break;
 				}
-				final Counter counter = this.tree.get( check );
+				final Counter counter = this.tree.get(check);
 				if (counter != null) {
 					if (counter.intValue() < 2) {
-						this.tree.remove( check );
+						this.tree.remove(check);
 					} else {
-						counter.register( -1 );
+						counter.register(-1);
 					}
 				}
 				this.fifoIdentity[index] = null;
@@ -86,13 +82,13 @@ public class UnfairIdentityDetector<T> {
 		final int weight;
 		// register
 		{
-			final Counter existing = this.tree.get( identity );
+			final Counter existing = this.tree.get(identity);
 			if (existing == null) {
-				final Counter created = new Counter( 1 );
-				this.tree.put( identity, created );
+				final Counter created = new Counter(1);
+				this.tree.put(identity, created);
 				weight = 1;
 			} else {
-				existing.register( 1 );
+				existing.register(1);
 				weight = existing.intValue();
 			}
 		}
@@ -104,17 +100,15 @@ public class UnfairIdentityDetector<T> {
 			if (check == null) {
 				this.size++;
 				this.head++;
-				final int mark = UnfairIdentityDetector.MARK
-						* (UnfairIdentityDetector.SIZE + this.size)
-						/ (UnfairIdentityDetector.SIZE * 2);
+				final int mark = UnfairIdentityDetector.MARK * (UnfairIdentityDetector.SIZE + this.size) / (UnfairIdentityDetector.SIZE * 2);
 				return weight > mark;
 			}
-			final Counter counter = this.tree.get( check );
+			final Counter counter = this.tree.get(check);
 			if (counter != null) {
 				if (counter.intValue() < 2) {
-					this.tree.remove( check );
+					this.tree.remove(check);
 				} else {
-					counter.register( -1 );
+					counter.register(-1);
 				}
 			}
 			this.tail++;
@@ -122,17 +116,11 @@ public class UnfairIdentityDetector<T> {
 			return weight > UnfairIdentityDetector.MARK;
 		}
 	}
-	
+
 	@Override
 	public String toString() {
-		return "STAT(DELAY="
-				+ Format.Compact.toPeriod( UnfairIdentityDetector.DELAY )
-				+ "SIZE="
-				+ this.size
-				+ "/"
-				+ UnfairIdentityDetector.SIZE
-				+ ", UNIQUE="
-				+ this.tree.size()
+		
+		return "STAT(DELAY=" + Format.Compact.toPeriod(UnfairIdentityDetector.DELAY) + "SIZE=" + this.size + "/" + UnfairIdentityDetector.SIZE + ", UNIQUE=" + this.tree.size()
 				+ ")";
 	}
 }

@@ -14,42 +14,42 @@ import ru.myx.ae3.exec.ProgramPart;
 
 /** @author myx */
 public final class RenderCollectionFilesystem extends RenderCollectionAbstract {
-
+	
 	private static final CacheL2<RenderCacheEntry> CACHE = Cache.createL2("file_collections", "Prepared Renderers From File Collections");
-
+	
 	private final File root;
-
+	
 	private final String cacheId;
-
+	
 	private final Charset charset;
-
+	
 	private Function<String, String> characterSource = null;
-
+	
 	private Function<String, TransferBuffer> binarySource = null;
-
+	
 	/** @param charset
 	 * @param root
 	 * @param language */
 	public RenderCollectionFilesystem(final Charset charset, final File root, final LanguageImpl language) {
-		
+
 		super(language);
 		this.charset = charset;
 		this.root = root.getAbsoluteFile();
 		this.cacheId = "RCF:" + String.valueOf(System.identityHashCode(this));
 	}
-
+	
 	@Override
 	public final Function<String, TransferBuffer> getBinarySource() {
-
+		
 		if (this.binarySource == null) {
 			synchronized (this) {
 				if (this.binarySource == null) {
 					final File root = this.root;
 					this.binarySource = new Function<>() {
-
+						
 						@Override
-						public TransferBuffer apply(String argument) {
-
+						public TransferBuffer apply(final String argument) {
+							
 							final File file = new File(root, argument);
 							return file.exists()
 								? Transfer.createBuffer(file)
@@ -61,20 +61,20 @@ public final class RenderCollectionFilesystem extends RenderCollectionAbstract {
 		}
 		return this.binarySource;
 	}
-
+	
 	@Override
 	public final Function<String, String> getCharacterSource() {
-
+		
 		if (this.characterSource == null) {
 			synchronized (this) {
 				if (this.characterSource == null) {
 					final File root = this.root;
 					final Charset charset = this.charset;
 					this.characterSource = new Function<>() {
-
+						
 						@Override
-						public String apply(String argument) {
-							
+						public String apply(final String argument) {
+
 							final File file = new File(root, argument);
 							return file.exists()
 								? Transfer.createBuffer(file).toString(charset)
@@ -86,10 +86,10 @@ public final class RenderCollectionFilesystem extends RenderCollectionAbstract {
 		}
 		return this.characterSource;
 	}
-
+	
 	@Override
 	public final ProgramPart prepare(final String name) throws Throwable {
-
+		
 		final RenderCacheEntry cached = RenderCollectionFilesystem.CACHE.get(this.cacheId, name);
 		final File file = new File(this.root, name);
 		if (file.exists()) {
@@ -98,7 +98,7 @@ public final class RenderCollectionFilesystem extends RenderCollectionAbstract {
 				return cached.renderer;
 			}
 			final ProgramPart prepared = Evaluate.compileProgram(this.languageMapper.getLanguage(name), "collection/" + name, this.getCharacterSource(), name);
-			RenderCollectionFilesystem.CACHE.put(this.cacheId, name, new RenderCacheEntry(prepared, modified), 1000L * 60L * 60L);
+			RenderCollectionFilesystem.CACHE.put(this.cacheId, name, new RenderCacheEntry(prepared, modified), 60_000L * 60L);
 			return prepared;
 		}
 		if (cached != null && cached.modified == 0L) {
@@ -106,10 +106,10 @@ public final class RenderCollectionFilesystem extends RenderCollectionAbstract {
 		}
 		return null;
 	}
-
+	
 	@Override
 	public String toString() {
-
+		
 		return "[object " + this.baseClass() + "(" + "identityHashCode:" + System.identityHashCode(this) + ")]";
 	}
 }

@@ -97,7 +97,7 @@ public final class FunctionWrapOnce extends BaseFunctionAbstract implements Exec
 				if (function == FunctionWrapOnce.ST_MAKING) {
 					try {
 						do {
-							this.wait(1000L);
+							this.wait(1_000L);
 						} while (function == FunctionWrapOnce.ST_MAKING);
 					} catch (final InterruptedException e) {
 						throw new RuntimeException(e);
@@ -168,7 +168,7 @@ public final class FunctionWrapOnce extends BaseFunctionAbstract implements Exec
 				if (function == FunctionWrapOnce.ST_MAKING) {
 					try {
 						do {
-							this.wait(1000L);
+							this.wait(1_000L);
 						} while (function == FunctionWrapOnce.ST_MAKING);
 					} catch (final InterruptedException e) {
 						return ctx.vmRaise(e);

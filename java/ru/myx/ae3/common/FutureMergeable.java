@@ -12,20 +12,29 @@ import ru.myx.ae3.reflect.ReflectionManual;
  * @param <V> */
 @ReflectionManual
 public class FutureMergeable<V> extends BaseFutureAbstract<V> {
-
+	
 	private volatile V result = null;
-
+	
 	private volatile Object error = null;
-
+	
 	private volatile boolean loadDone = false;
-
+	
 	private volatile FutureMergeable<V> loadResult = null;
-
+	
 	private long hashCode = 0xF000000000000000L;
-
+	
+	private final int createHashCode() {
+		
+		final Object o = this.baseValue();
+		if (o == null) {
+			return 0;
+		}
+		return (int) (this.hashCode = o.hashCode());
+	}
+	
 	@Override
 	public final Throwable baseError() {
-
+		
 		if (this.loadResult == this) {
 			if (this.error != null) {
 				return FutureValue.throwTaskFailedError(this.error, this);
@@ -34,37 +43,88 @@ public class FutureMergeable<V> extends BaseFutureAbstract<V> {
 		}
 		return this.getReference().baseError();
 	}
-
+	
 	@Override
 	public final V baseValue() {
-
+		
 		if (this.loadResult == this) {
 			if (this.error != null) {
 				throw FutureValue.throwTaskFailedError(this.error, this);
 			}
 			return this.result;
 		}
-
+		
 		return this.getReference().baseValue();
 	}
-
-	private final int createHashCode() {
-
-		final Object o = this.baseValue();
-		if (o == null) {
-			return 0;
-		}
-		return (int) (this.hashCode = o.hashCode());
-	}
-
+	
 	@Override
 	public final boolean equals(final Object anotherObject) {
-
+		
 		return anotherObject == this || anotherObject != null && anotherObject.equals(this.baseValue());
 	}
-
+	
+	@Override
+	public final int hashCode() {
+		
+		return this.hashCode == 0xF000000000000000L
+			? this.createHashCode()
+			: (int) this.hashCode;
+	}
+	
+	@Override
+	public final boolean isDone() {
+		
+		return this.loadResult == this && this.loadDone || this.loadResult != null && this.loadResult.isDone();
+	}
+	
+	@Override
+	public boolean isFailed() {
+		
+		return this.loadResult == this && this.loadDone && this.error != null || this.loadResult != null && this.loadResult.isFailed();
+	}
+	
+	/** @param result */
+	@ReflectionExplicit
+	public final void setError(final Object result) {
+		
+		assert result != null : "Error shouldn't be null";
+		this.error = result;
+		this.loadResult = this;
+		this.loadDone = true;
+		/** TODO: is there a point? Why not just inline? */
+		Act.launchNotifyAll(this);
+	}
+	
+	/** @param result */
+	@ReflectionExplicit
+	public final void setResult(final V result) {
+		
+		this.result = result;
+		this.loadResult = this;
+		this.loadDone = true;
+		/** TODO: is there a point? Why not just inline? */
+		Act.launchNotifyAll(this);
+	}
+	
+	@Override
+	public String toString() {
+		
+		return String.valueOf(this.getReference().result);
+	}
+	
+	/** @param depends */
+	protected final void setDuplicateOf(final FutureMergeable<V> depends) {
+		
+		assert depends != null : "Dependency shouldn't be null";
+		this.loadResult = depends;
+		this.loadDone = true;
+		synchronized (this) {
+			this.notifyAll();
+		}
+	}
+	
 	final FutureMergeable<V> getReference() {
-
+		
 		if (this.loadDone) {
 			return this.loadResult;
 		}
@@ -91,7 +151,7 @@ public class FutureMergeable<V> extends BaseFutureAbstract<V> {
 					 * Item 50 in Joshua Bloch's "Effective Java Programming Language Guide"
 					 * (Addison-Wesley, 2001). */
 					for (//
-							long left = 60000L, expires = Engine.fastTime() + left; //
+							long left = 60_000L, expires = Engine.fastTime() + left; //
 							left > 0; //
 							left = expires - Engine.fastTime()) {
 						//
@@ -124,65 +184,5 @@ public class FutureMergeable<V> extends BaseFutureAbstract<V> {
 		this.loadDone = true;
 		return this.loadResult;
 	}
-
-	@Override
-	public final int hashCode() {
-
-		return this.hashCode == 0xF000000000000000L
-			? this.createHashCode()
-			: (int) this.hashCode;
-	}
-
-	@Override
-	public final boolean isDone() {
-
-		return this.loadResult == this && this.loadDone || this.loadResult != null && this.loadResult.isDone();
-	}
-
-	@Override
-	public boolean isFailed() {
-
-		return this.loadResult == this && this.loadDone && this.error != null || this.loadResult != null && this.loadResult.isFailed();
-	}
-
-	/** @param depends */
-	protected final void setDuplicateOf(final FutureMergeable<V> depends) {
-
-		assert depends != null : "Dependency shouldn't be null";
-		this.loadResult = depends;
-		this.loadDone = true;
-		synchronized (this) {
-			this.notifyAll();
-		}
-	}
-
-	/** @param result */
-	@ReflectionExplicit
-	public final void setError(final Object result) {
-
-		assert result != null : "Error shouldn't be null";
-		this.error = result;
-		this.loadResult = this;
-		this.loadDone = true;
-		/** TODO: is there a point? Why not just inline? */
-		Act.launchNotifyAll(this);
-	}
-
-	/** @param result */
-	@ReflectionExplicit
-	public final void setResult(final V result) {
-
-		this.result = result;
-		this.loadResult = this;
-		this.loadDone = true;
-		/** TODO: is there a point? Why not just inline? */
-		Act.launchNotifyAll(this);
-	}
-
-	@Override
-	public String toString() {
-
-		return String.valueOf(this.getReference().result);
-	}
-
+	
 }

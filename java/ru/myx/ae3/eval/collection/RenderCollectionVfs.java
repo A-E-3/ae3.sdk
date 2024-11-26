@@ -14,27 +14,27 @@ import ru.myx.ae3.vfs.Entry;
 
 /** @author myx */
 public final class RenderCollectionVfs extends RenderCollectionAbstract {
-	
+
 	private static final CacheL2<RenderCacheEntry> CACHE = Cache.createL2("vfs_collections", "Prepared Renderers From File Collections");
-	
+
 	private final Entry root;
-	
+
 	private final String cacheId;
-	
+
 	private final Charset charset;
-	
+
 	private final String extensionSuffix;
-	
+
 	private Function<String, String> characterSource = null;
-	
+
 	private Function<String, TransferBuffer> binarySource = null;
-	
+
 	/** @param charset
 	 * @param root
 	 * @param renderer
 	 * @param extensionSuffix */
 	public RenderCollectionVfs(final Charset charset, final Entry root, final LanguageImpl renderer, final String extensionSuffix) {
-		
+
 		super(renderer);
 		this.root = root;
 		this.charset = charset;
@@ -43,20 +43,20 @@ public final class RenderCollectionVfs extends RenderCollectionAbstract {
 			: extensionSuffix;
 		this.cacheId = "RCV:" + String.valueOf(System.identityHashCode(this));
 	}
-	
+
 	@Override
 	public final Function<String, TransferBuffer> getBinarySource() {
-		
+
 		if (this.binarySource == null) {
 			synchronized (this) {
 				if (this.binarySource == null) {
 					final Entry root = this.root;
 					// final String extensionSuffix = this.extensionSuffix;
 					this.binarySource = new Function<>() {
-						
+
 						@Override
 						public TransferBuffer apply(final String argument) {
-							
+
 							final Entry file = root.relative(
 									argument,
 									// extensionSuffix == null
@@ -67,10 +67,10 @@ public final class RenderCollectionVfs extends RenderCollectionAbstract {
 								? file.toBinary().getBinaryContent().baseValue().nextCopy()
 								: null;
 						}
-						
+
 						@Override
 						public String toString() {
-							
+
 							return "binary(" + RenderCollectionVfs.this.toString() + ")";
 						}
 					};
@@ -79,10 +79,10 @@ public final class RenderCollectionVfs extends RenderCollectionAbstract {
 		}
 		return this.binarySource;
 	}
-	
+
 	@Override
 	public final Function<String, String> getCharacterSource() {
-		
+
 		if (this.characterSource == null) {
 			synchronized (this) {
 				if (this.characterSource == null) {
@@ -90,10 +90,10 @@ public final class RenderCollectionVfs extends RenderCollectionAbstract {
 					// final String extensionSuffix = this.extensionSuffix;
 					final Charset charset = this.charset;
 					this.characterSource = new Function<>() {
-						
+
 						@Override
 						public String apply(final String argument) throws Transfer.TransferOperationException {
-							
+
 							final Entry file = root.relative(
 									argument,
 									// extensionSuffix == null
@@ -104,10 +104,10 @@ public final class RenderCollectionVfs extends RenderCollectionAbstract {
 								? file.toBinary().getBinaryContent().baseValue().toString(charset)
 								: null;
 						}
-						
+
 						@Override
 						public String toString() {
-							
+
 							return "character(" + RenderCollectionVfs.this.toString() + ")";
 						}
 					};
@@ -116,10 +116,10 @@ public final class RenderCollectionVfs extends RenderCollectionAbstract {
 		}
 		return this.characterSource;
 	}
-	
+
 	@Override
 	public final ProgramPart prepare(final String argument) throws Throwable {
-		
+
 		final String extensionSuffix = this.extensionSuffix;
 		final String name = extensionSuffix == null
 			? argument
@@ -141,7 +141,7 @@ public final class RenderCollectionVfs extends RenderCollectionAbstract {
 					this.cacheId, //
 					name,
 					new RenderCacheEntry(prepared, modified),
-					1000L * 60L * 60L);
+					60_000L * 60L);
 			return prepared;
 		}
 		if (cached != null && cached.modified == 0L) {
@@ -149,10 +149,10 @@ public final class RenderCollectionVfs extends RenderCollectionAbstract {
 		}
 		return null;
 	}
-	
+
 	@Override
 	public String toString() {
-		
+
 		return "[object " + this.baseClass() + "(" + "identityHashCode:" + System.identityHashCode(this) + ", location:" + this.root.getLocation() + ")]";
 	}
 }
