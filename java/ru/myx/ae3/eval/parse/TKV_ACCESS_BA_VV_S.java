@@ -26,9 +26,9 @@ import ru.myx.vm_vliw32_2010.OperationA3X;
  *         Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments */
 public final class TKV_ACCESS_BA_VV_S extends TokenValue {
 
-	private final TokenInstruction argumentA;
+	private final TokenInstruction tokenLeft;
 
-	private final TokenInstruction argumentB;
+	private final TokenInstruction tokenRight;
 
 	private int visibility = 0;
 
@@ -38,20 +38,20 @@ public final class TKV_ACCESS_BA_VV_S extends TokenValue {
 
 		assert argumentA.isStackValue();
 		assert argumentB.isStackValue();
-		this.argumentA = argumentA;
-		this.argumentB = argumentB;
+		this.tokenLeft = argumentA;
+		this.tokenRight = argumentB;
 	}
 
 	@Override
 	public final String getNotation() {
 
-		return this.argumentA.getNotationValue() + "[" + this.argumentB.getNotation() + "]";
+		return this.tokenLeft.getNotationValue() + "[" + this.tokenRight.getNotation() + "]";
 	}
 
 	@Override
 	public final String getNotationValue() {
 
-		return this.argumentA.getNotationValue() + "[" + this.argumentB.getNotation() + "]";
+		return this.tokenLeft.getNotationValue() + "[" + this.tokenRight.getNotation() + "]";
 	}
 
 	@Override
@@ -76,12 +76,12 @@ public final class TKV_ACCESS_BA_VV_S extends TokenValue {
 		/** valid store */
 		assert store != null;
 
-		final ModifierArgument modifierA = this.argumentA.toDirectModifier();
-		final ModifierArgument modifierB = this.argumentB.toDirectModifier();
+		final ModifierArgument modifierA = this.tokenLeft.toDirectModifier();
+		final ModifierArgument modifierB = this.tokenRight.toDirectModifier();
 		final boolean directA = modifierA == ModifierArguments.AA0RB;
 		final boolean directB = modifierB == ModifierArguments.AA0RB;
 		if (directA) {
-			this.argumentA.toAssembly(
+			this.tokenLeft.toAssembly(
 					assembly,
 					null,
 					null,
@@ -90,9 +90,9 @@ public final class TKV_ACCESS_BA_VV_S extends TokenValue {
 						: ResultHandler.FA_BNN_NXT);
 		}
 		if (directB) {
-			this.argumentB.toAssembly(assembly, null, null, ResultHandler.FA_BNN_NXT);
+			this.tokenRight.toAssembly(assembly, null, null, ResultHandler.FA_BNN_NXT);
 		}
-		final InstructionResult argumentType = this.argumentB.getResultType();
+		final InstructionResult argumentType = this.tokenRight.getResultType();
 		assembly.addInstruction(
 				(argumentType == InstructionResult.INTEGER
 					? this.visibility == 0
@@ -117,7 +117,7 @@ public final class TKV_ACCESS_BA_VV_S extends TokenValue {
 	@Override
 	public final String toCode() {
 
-		return "ACCESS\t0\tVV ->S\t[" + this.argumentA + ", " + this.argumentB + "];";
+		return "ACCESS\t0\tVV ->S\t[" + this.tokenLeft + ", " + this.tokenRight + "];";
 	}
 
 	@Override
@@ -137,19 +137,19 @@ public final class TKV_ACCESS_BA_VV_S extends TokenValue {
 	@Override
 	public TokenInstruction toReferenceDelete() {
 
-		return new TKV_DELETE_BA_VV_S(this.argumentA, this.argumentB);
+		return new TKV_DELETE_BA_VV_S(this.tokenLeft, this.tokenRight);
 	}
 
 	@Override
 	public TokenInstruction toReferenceObject() {
 
-		return this.argumentA;
+		return this.tokenLeft;
 	}
 
 	@Override
 	public TokenInstruction toReferenceProperty() {
 
-		return this.argumentB;
+		return this.tokenRight;
 	}
 
 	@Override
@@ -163,21 +163,21 @@ public final class TKV_ACCESS_BA_VV_S extends TokenValue {
 		assert argumentA == null;
 		assert argumentB == null;
 
-		final ModifierArgument modifierA = this.argumentA.toDirectModifier();
+		final ModifierArgument modifierA = this.tokenLeft.toDirectModifier();
 		final boolean directA = modifierA == ModifierArguments.AA0RB;
 
-		final ModifierArgument modifierB = this.argumentB.toDirectModifier();
+		final ModifierArgument modifierB = this.tokenRight.toDirectModifier();
 		final boolean directB = modifierB == ModifierArguments.AA0RB;
 
 		if (needRead) {
 			assert !directWriteFollows;
 			if (directA) {
-				this.argumentA.toAssembly(assembly, null, null, ResultHandler.FB_BSN_NXT);
+				this.tokenLeft.toAssembly(assembly, null, null, ResultHandler.FB_BSN_NXT);
 			}
 			if (directB) {
-				this.argumentB.toAssembly(assembly, null, null, ResultHandler.FB_BSN_NXT);
+				this.tokenRight.toAssembly(assembly, null, null, ResultHandler.FB_BSN_NXT);
 			}
-			final InstructionResult argumentType = this.argumentB.getResultType();
+			final InstructionResult argumentType = this.tokenRight.getResultType();
 			assembly.addInstruction(
 					(argumentType == InstructionResult.INTEGER
 						? this.visibility == 0
@@ -209,7 +209,7 @@ public final class TKV_ACCESS_BA_VV_S extends TokenValue {
 		}
 		assert !directReadAllowed;
 		if (directA) {
-			this.argumentA.toAssembly(
+			this.tokenLeft.toAssembly(
 					assembly,
 					null,
 					null,
@@ -218,7 +218,7 @@ public final class TKV_ACCESS_BA_VV_S extends TokenValue {
 						: ResultHandler.FB_BSN_NXT);
 		}
 		if (directB) {
-			this.argumentB.toAssembly(
+			this.tokenRight.toAssembly(
 					assembly,
 					null,
 					null,
@@ -240,12 +240,12 @@ public final class TKV_ACCESS_BA_VV_S extends TokenValue {
 		assert argumentA == null;
 		assert argumentB == null;
 		assert modifierValue != null;
-		final ModifierArgument modifierA = this.argumentA.toDirectModifier();
-		final ModifierArgument modifierB = this.argumentB.toDirectModifier();
+		final ModifierArgument modifierA = this.tokenLeft.toDirectModifier();
+		final ModifierArgument modifierB = this.tokenRight.toDirectModifier();
 		final boolean directA = modifierA == ModifierArguments.AA0RB;
 		final boolean directB = modifierB == ModifierArguments.AA0RB;
 		final OperationA3X operation;
-		switch (this.argumentB.getResultType()) {
+		switch (this.tokenRight.getResultType()) {
 			case STRING :
 				operation = OperationsS3X.VASTORE_NS;
 				break;
@@ -284,8 +284,8 @@ public final class TKV_ACCESS_BA_VV_S extends TokenValue {
 
 		assert argumentA == null;
 		assert argumentB == null;
-		final ModifierArgument modifierA = this.argumentA.toDirectModifier();
-		final ModifierArgument modifierB = this.argumentB.toDirectModifier();
+		final ModifierArgument modifierA = this.tokenLeft.toDirectModifier();
+		final ModifierArgument modifierB = this.tokenRight.toDirectModifier();
 		final boolean directA = modifierA == ModifierArguments.AA0RB;
 		final boolean directB = modifierB == ModifierArguments.AA0RB;
 

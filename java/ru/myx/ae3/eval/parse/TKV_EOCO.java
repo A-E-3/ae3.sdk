@@ -36,12 +36,6 @@ public final class TKV_EOCO extends TokenValue {
 		assert tokenRight.assertStackValue();
 		this.tokenLeft = tokenLeft;
 		this.tokenRight = tokenRight;
-		/** DEBUG <code>
-		System.out.println( ">>> >>>   tokenLeft: "
-				+ this.tokenLeft.getNotation()
-				+ ", tokenRight: "
-				+ this.tokenRight.getNotation() );
-		</code> */
 	}
 
 	@Override
@@ -53,7 +47,7 @@ public final class TKV_EOCO extends TokenValue {
 	@Override
 	public final InstructionResult getResultType() {
 
-		return this.tokenLeft.getResultType().merge(this.tokenRight.getResultType());
+		return InstructionResult.OBJECT;
 	}
 
 	@Override

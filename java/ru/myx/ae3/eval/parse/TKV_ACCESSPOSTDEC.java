@@ -11,44 +11,43 @@ import ru.myx.ae3.exec.OperationsS2X;
 import ru.myx.ae3.exec.ProgramAssembly;
 import ru.myx.ae3.exec.ResultHandler;
 import ru.myx.ae3.exec.ResultHandlerBasic;
-import ru.myx.vm_vliw32_2010.OperationA2X;
 
 class TKV_ACCESSPOSTDEC extends TokenValue {
 
 	private final TokenInstruction reference;
-	
+
 	private int visibility;
-	
+
 	public TKV_ACCESSPOSTDEC(final TokenInstruction reference, final int visibility) {
-		
+
 		assert reference.isAccessReference();
 		assert reference.isStackValue();
 		this.reference = reference;
 		this.visibility = visibility;
 	}
-	
+
 	@Override
 	public String getNotation() {
 
 		return this.reference.getNotation() + "-- ";
 	}
-	
+
 	@Override
 	public final InstructionResult getResultType() {
 
 		return InstructionResult.NUMBER;
 	}
-	
+
 	@Override
 	public void toAssembly(final ProgramAssembly assembly, final ModifierArgument argumentA, final ModifierArgument argumentB, final ResultHandlerBasic store) {
 
 		/** zero operands */
 		assert argumentA == null;
 		assert argumentB == null;
-		
+
 		/** valid store */
 		assert store != null;
-		
+
 		final ModifierArgument modifierReferenced = this.reference.toReferenceReadBeforeWrite(assembly, null, null, true, true, false);
 		assembly.addInstruction(
 				modifierReferenced == ModifierArguments.AA0RB
@@ -63,26 +62,26 @@ class TKV_ACCESSPOSTDEC extends TokenValue {
 						: this.visibility == 1
 							? Instructions.INSTR_MADDN_D_BA_1R_V
 							: Instructions.INSTR_MADDN_T_BA_1R_V
-					: ((OperationA2X) (this.visibility == 2
+					: (this.visibility == 2
 						? OperationsS2X.VMADDN_N
 						: this.visibility == 1
 							? OperationsS2X.VMADDN_D
-							: OperationsS2X.VMADDN_T)).instruction(ModifierArguments.AA0RB, ModifierArgumentA30IMM.ONE, 0, store));
+							: OperationsS2X.VMADDN_T).instruction(ModifierArguments.AA0RB, ModifierArgumentA30IMM.ONE, 0, store));
 	}
-	
+
 	@Override
 	public String toCode() {
 
 		return "ACCESSPOSTDEC [" + this.reference + "];";
 	}
-	
+
 	@Override
 	public TokenInstruction toExecDetachableResult() {
 
 		this.visibility = 1;
 		return this;
 	}
-	
+
 	@Override
 	public TokenInstruction toExecNativeResult() {
 

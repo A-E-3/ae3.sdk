@@ -34,90 +34,90 @@ import ru.myx.ae3.report.Report;
 
 /** @author myx */
 public class ProgramAssembly {
-	
+
 	final class PlaceholderSimple implements InstructionPlaceholder {
-		
+
 		Instruction instruction;
-		
+
 		@Override
 		public ExecStateCode execCall(final ExecProcess process) throws Exception {
-			
+
 			return process.vmRaise("Placeholder instruction should have been replaced before execution!");
 		}
-		
+
 		/** Returns non-editable (optimised?) instruction.
 		 *
 		 * @return */
 		@Override
-		
+
 		public Instruction getFinalIfReady() {
-			
+
 			return this.instruction;
 		}
-		
+
 		@Override
 		public int getOperandCount() {
-			
+
 			throw new UnsupportedOperationException("Placeholder Instruction should have been replaced before execution!");
 		}
-		
+
 		@Override
 		public int getResultCount() {
-			
+
 			throw new UnsupportedOperationException("Placeholder Instruction should have been replaced before execution!");
 		}
-		
+
 		/** @param instruction
 		 * @return this */
 		@Override
-		
+
 		public InstructionPlaceholder setInstruction(final Instruction instruction) {
-			
+
 			this.instruction = instruction;
 			return this;
 		}
-		
+
 		@Override
 		public String toCode() {
-			
+
 			return "[PlaceholderInstruction]";
 		}
-		
+
 	}
-	
+
 	/**
 	 *
 	 */
 	public static final String FLAG_REPORT_ERRORS = "_report$errors_";
-	
+
 	private static final Instruction VALUE_TRUE = Instructions.INSTR_LOAD_TRUE_SN_NEXT;
-	
+
 	private static final Instruction VALUE_FALSE = Instructions.INSTR_LOAD_FALSE_SN_NEXT;
-	
+
 	private static final Instruction VALUE_UNDEFINED = Instructions.INSTR_LOAD_UNDEFINED_SN_NEXT;
-	
+
 	/** Empty program */
 	public static final ProgramPart PROGRAM_EMPTY = new ProgramPart(new Instruction[0]);
-	
+
 	/** Program with the only command to load TRUE in stack */
 	public static final ProgramPart PROGRAM_PUSH_TRUE = new ProgramPart(new Instruction[]{
 			ProgramAssembly.VALUE_TRUE
 	});
-	
+
 	/** Program with the only command to load FALSE in stack */
 	public static final ProgramPart PROGRAM_PUSH_FALSE = new ProgramPart(new Instruction[]{
 			ProgramAssembly.VALUE_FALSE
 	});
-	
+
 	/** Program with the only command to load UNDEFINED in stack */
 	public static final ProgramPart PROGRAM_PUSH_UNDEFINED = new ProgramPart(new Instruction[]{
 			ProgramAssembly.VALUE_UNDEFINED
 	});
-	
+
 	private static final int INITIAL = 64;
-	
+
 	private static int compilerSearchInSource(final List<TokenInstruction> precompiled, final int exprLength, final int i, final int priorityRight) {
-		
+
 		int length = i + 1;
 		for (; length < exprLength; length++) {
 			final TokenInstruction candidate = precompiled.get(length);
@@ -128,41 +128,41 @@ public class ProgramAssembly {
 		}
 		return length;
 	}
-	
+
 	private TokenInstruction[] compilerTokens;
-	
+
 	/** operators may have 0..3 operand count and must have 1 result count. */
 	private int compilerPointerOperator;
-	
+
 	/** values all must have 0 operand count and 1 execution result. */
 	private int compilerPointerValue;
-	
+
 	private Instruction[] assemblyCode;
-	
+
 	private int assemblyCapacity;
-	
+
 	private int assemblySize;
-	
+
 	private String lastDebug = null;
-	
+
 	private Object errors = null;
-	
+
 	private List<TokenValue> constants;
-	
+
 	private Map<BasePrimitive<?>, Integer> constantMap;
-	
+
 	/**
 	 *
 	 */
 	public final ExecProcess ctx;
-	
+
 	private boolean reportErrors = true;
-	
+
 	/**
 	 *
 	 */
 	public ProgramAssembly() {
-		
+
 		final ExecProcess ctx = Exec.currentProcess();
 		this.ctx = Exec.createProcess(ctx, "Assembly Builder / Optimizer");
 		this.assemblyCode = null;
@@ -173,10 +173,10 @@ public class ProgramAssembly {
 				ProgramAssembly.FLAG_REPORT_ERRORS,
 				true);
 	}
-	
+
 	/** @param container */
 	public ProgramAssembly(final ExecProcess container) {
-		
+
 		final ExecProcess ctx = container;
 		this.ctx = Exec.createProcess(ctx, "Assembly Builder / Optimizer");
 		this.assemblyCode = null;
@@ -187,11 +187,309 @@ public class ProgramAssembly {
 				ProgramAssembly.FLAG_REPORT_ERRORS,
 				true);
 	}
-	
+
+	private void compilerEnsure(final int count) {
+
+		if (this.compilerTokens == null) {
+			final int length = Math.max(32, count);
+			this.compilerTokens = new TokenInstruction[length];
+			assert this.compilerPointerOperator == 0;
+			this.compilerPointerValue = length;
+			return;
+		}
+		final int buffer = this.compilerTokens.length;
+		final int operatorCount = this.compilerPointerOperator;
+		final int valueCount = buffer - this.compilerPointerValue;
+		if (buffer <= valueCount + operatorCount + count) {
+			final int length = Math.min(buffer + 1024, buffer << 1) + count;
+			final TokenInstruction[] replacement = new TokenInstruction[length];
+			if (operatorCount > 0) {
+				System.arraycopy(
+						this.compilerTokens, //
+						0,
+						replacement,
+						0,
+						operatorCount);
+			}
+			if (valueCount > 0) {
+				System.arraycopy(
+						this.compilerTokens, //
+						buffer - valueCount,
+						replacement,
+						length - valueCount,
+						valueCount);
+			}
+			this.compilerTokens = replacement;
+			this.compilerPointerValue = length - valueCount;
+		}
+	}
+
+	/** @param operatorCount
+	 * @param valueCount
+	 * @param priorityLeft
+	 * @return <code>false</code> on error or so. when processing should be stopped.<br>
+	 *         <code>true</code> otherwise
+	 * @throws Exception */
+	private boolean compilerFlushOperators(final int operatorCount, final int valueCount, final int priorityLeft, final boolean sideEffectsOnly) throws Exception {
+
+		for (; this.compilerPointerOperator > operatorCount;) {
+			final TokenInstruction token = this.compilerTokens[this.compilerPointerOperator - 1];
+			if (priorityLeft > token.getPriorityRight()) {
+				break;
+			}
+			this.compilerTokens[--this.compilerPointerOperator] = null;
+			final int operandCount = token.getOperandCount();
+			{
+				final int resultCount = token.getResultCount();
+				if (resultCount == 0) {
+					assert token.getResultType() == InstructionResult.NEVER : "Invalid instruction result type for no-result instruction: type=" + token.getResultType()
+							+ ", tokenClass=" + token.getClass().getName() + ", token=" + token;
+					assert token.assertZeroStackOperands();
+					this.compilerTruncateAll(operatorCount, valueCount);
+					final TokenInstruction value = token.toStackValue(this, false);
+					assert value.assertStackValue();
+					this.compilerPushValue(value);
+					return false;
+				}
+				assert token.getResultCount() == 1 : "Not implementd yet, operandCount=" + token.getOperandCount() + ", resultCount=" + token.getResultCount() + ", token="
+						+ token.getNotation() + ", tokenType=" + token.getTokenType();
+			}
+			/** <code>
+			System.out.println( ">>>>> >>>>> FLUSH operator->value " + token + ", operands: " + operandCount );
+			for (int i = operatorCount; i < this.compilerPointerOperator; ++i) {
+				System.out.println( ">>>>> >>>>> >>>>> CO[" + i + "]" + this.compilerTokens[i] );
+			}
+			for (int i = this.compilerPointerValue; i < this.compilerTokens.length - valueCount; ++i) {
+				System.out.println( ">>>>> >>>>> >>>>> CV[" + i + "]" + this.compilerTokens[i] );
+			}
+			System.out.println( ">>>>> >>>>> FLUSH DO" );
+			 </code> */
+			switch (operandCount) {
+				case 0 :
+					// System.out.println( ">>> >>> 0: " + token );
+					this.compilerPushValue(token);
+					break;
+				case 1 : {
+					final TokenInstruction argumentA = this.compilerPopValue(valueCount);
+					if (argumentA == null) {
+						this.compilerTruncateAll(operatorCount, valueCount);
+						this.compilerPushValue(
+								Report.MODE_ASSERT || Report.MODE_DEBUG
+									? new TKV_ERROR_A_C_E(
+											"Expression expected: operator '" + token.getNotation() + "' (class=" + token.getClass().getSimpleName() + ") needs one argument!")
+									: ParseConstants.TKV_ERROR_EXPRESSION_EXPECTED);
+						return false;
+					}
+					final TokenInstruction value = token.toStackValue(this, argumentA, sideEffectsOnly);
+					assert value.assertStackValue();
+					this.compilerPushValue(value);
+					continue;
+				}
+				case 2 : {
+					final TokenInstruction argumentB = this.compilerPopValue(valueCount);
+					final TokenInstruction argumentA = this.compilerPopValue(valueCount);
+					if (argumentA == null) {
+						this.compilerTruncateAll(operatorCount, valueCount);
+						this.compilerPushValue(
+								Report.MODE_ASSERT || Report.MODE_DEBUG
+									? new TKV_ERROR_A_C_E(
+											"Expression expected: operator '" + token.getNotation() + "' (class=" + token.getClass().getSimpleName() + ") needs two arguments!")
+									: ParseConstants.TKV_ERROR_EXPRESSION_EXPECTED);
+						return false;
+						/** MORE INFO<code>
+						throw new IllegalArgumentException( "Value expected, two operands required but only "
+								+ (argumentB == null
+										? "zero"
+										: "one")
+								+ " available, tokenClass="
+								+ token.getClass().getName()
+								+ ", token="
+								+ token );
+						</code> */
+					}
+					final TokenInstruction value = token.toStackValue(this, argumentA, argumentB, sideEffectsOnly);
+					assert value.assertStackValue();
+					this.compilerPushValue(value);
+					continue;
+				}
+				default :
+					assert false : "invalid operand count: " + operandCount + ", tokenClass=" + token.getClass().getName() + ", token=" + token;
+					this.compilerPushValue(token);
+			}
+		}
+		return true;
+	}
+
+	private TokenInstruction compilerFlushToInstruction(final int operatorCount, final int valueCount, final BalanceType balanceType) throws Exception {
+
+		final boolean sideEffectsOnly = balanceType == BalanceType.STATEMENT;
+		/** everything */
+		this.compilerFlushOperators(operatorCount, valueCount, -1, sideEffectsOnly);
+		final int count = this.compilerValueCount(valueCount);
+		if (count == 0) {
+			return sideEffectsOnly
+				? null
+				: ParseConstants.TKV_UNDEFINED;
+		}
+		if (count == 1) {
+			final TokenInstruction value = this.compilerPopValue(valueCount);
+			return sideEffectsOnly
+				? value.toConstantValue() != null
+					? null
+					: value
+				: balanceType == BalanceType.ARRAY_LITERAL
+					? value.getResultType() == InstructionResult.ARRAY
+						? value
+						: value.getResultType() == InstructionResult.NEVER
+							? value
+							: new TKV_CARRAY1(value)
+					: value;
+		}
+		if (count == 2) {
+			final TokenInstruction token2 = this.compilerPopValue(valueCount);
+			final TokenInstruction token1 = this.compilerPopValue(valueCount);
+			return new TKV_EFLOW2(token1, token2);
+		}
+		if (count == 3) {
+			final TokenInstruction token3 = this.compilerPopValue(valueCount);
+			final TokenInstruction token2 = this.compilerPopValue(valueCount);
+			final TokenInstruction token1 = this.compilerPopValue(valueCount);
+			return new TKV_EFLOW3(token1, token2, token3);
+		}
+		/** FIXME isn't it an opposite direction? */
+		final TokenInstruction[] result = new TokenInstruction[count];
+		for (int i = count, j = 0; i > 0; --i) {
+			final int index = this.compilerPointerValue++;
+			result[j++] = this.compilerTokens[index];
+			this.compilerTokens[index] = null;
+		}
+		/** just an assumption */
+		assert this.compilerValueCount(valueCount) == 0;
+		return new TKV_EFLOWX(result);
+	}
+
+	private TokenInstruction compilerPopOperator(final int operatorCount) {
+
+		if (this.compilerPointerOperator > operatorCount) {
+			try {
+				return this.compilerTokens[--this.compilerPointerOperator];
+			} finally {
+				this.compilerTokens[this.compilerPointerOperator] = null;
+			}
+		}
+		return null;
+	}
+
+	private TokenInstruction compilerPopValue(final int valueCount) {
+
+		if (this.compilerPointerValue < this.compilerTokens.length - valueCount) {
+			try {
+				return this.compilerTokens[this.compilerPointerValue++];
+			} finally {
+				this.compilerTokens[this.compilerPointerValue - 1] = null;
+			}
+		}
+		return null;
+	}
+
+	private void compilerPushOperator(final TokenInstruction token) {
+
+		assert this.compilerPointerOperator < this.compilerPointerValue : "capacity: " + this.compilerTokens.length + ", ptrO=" + this.compilerPointerOperator + ", ptrV="
+				+ this.compilerPointerValue;
+		assert token != null;
+		this.compilerTokens[this.compilerPointerOperator++] = token;
+	}
+
+	private void compilerPushValue(final TokenInstruction value) {
+
+		assert this.compilerPointerValue > this.compilerPointerOperator;
+		assert value != null;
+		this.compilerTokens[--this.compilerPointerValue] = value;
+	}
+
+	private void compilerTruncateAll(final int operatorCount, final int valueCount) {
+
+		/** truncate values */
+		while (this.compilerPointerValue < this.compilerTokens.length - valueCount) {
+			this.compilerTokens[this.compilerPointerValue++] = null;
+		}
+		/** truncate operators */
+		while (this.compilerPointerOperator > operatorCount) {
+			this.compilerTokens[--this.compilerPointerOperator] = null;
+		}
+	}
+
+	private int compilerValueCount(final int valueCount) {
+
+		return this.compilerTokens.length - this.compilerPointerValue - valueCount;
+	}
+
+	private final void expandPrograms(final int offset) {
+
+		final Instruction[] assemblyCode;
+
+		/** grow assembly capacity if needed to accomodate expanded result **/
+		{
+			final int instructionCount = this.getInstructionCount(offset);
+			if (instructionCount + offset > this.assemblyCapacity) {
+				this.assemblyCapacity = instructionCount + offset;
+				final Instruction[] newCode = new Instruction[this.assemblyCapacity];
+				System.arraycopy(this.assemblyCode, 0, newCode, 0, this.assemblySize);
+				assemblyCode = this.assemblyCode = newCode;
+			} else {
+				assemblyCode = this.assemblyCode;
+			}
+		}
+		int i = offset;
+		for (Instruction current; i < this.assemblySize; ++i) {
+			current = assemblyCode[i];
+			if (current instanceof final ProgramPart nestedProgram) {
+				final Instruction[] toInsert = nestedProgram.getInstructions();
+				if (toInsert == null) {
+					throw new NullPointerException();
+				}
+				final int length = toInsert.length;
+				if (length == 1) {
+					/** replace in-place **/
+					assemblyCode[i] = toInsert[0];
+					continue;
+				}
+				/** kind of >1 but it feels that 1 is excluded anyways and comparison with 0 could
+				 * be faster :))) **/
+				if (length > 0) {
+					// TODO: optimise array-copying - go reverse and
+					/** make place for block of instructions to inline **/
+					System.arraycopy(assemblyCode, i + 1, assemblyCode, i + length, this.assemblySize - i - 1);
+					/** copy nested block **/
+					System.arraycopy(toInsert, 0, assemblyCode, i, length);
+					/** new size (we've grown) **/
+					this.assemblySize += length - 1;
+					--i;
+					continue;
+				}
+				// TODO: optimise array-copying - go reverse and
+				/** so, length of block to nest is zero... need to move bytes again **/
+				System.arraycopy(assemblyCode, i + 1, assemblyCode, i, this.assemblySize - i - 1);
+				--this.assemblySize;
+				--i;
+				continue;
+			}
+
+			/** special type of instructions for branching, can be finalized later **/
+			if (current instanceof final InstructionEditable instructionEditable) {
+				if (null != (current = instructionEditable.getFinalIfReady())) {
+					/** replace the with final value **/
+					assemblyCode[i] = current;
+				}
+				continue;
+			}
+		}
+	}
+
 	/** @param offset
 	 * @param length */
 	public void addCloned(final int offset, final int length) {
-		
+
 		if (this.assemblySize + length > this.assemblyCapacity) {
 			this.assemblyCapacity = this.assemblySize + length + ProgramAssembly.INITIAL;
 			final Instruction[] newRpn = new Instruction[this.assemblyCapacity];
@@ -201,18 +499,20 @@ public class ProgramAssembly {
 		System.arraycopy(this.assemblyCode, offset, this.assemblyCode, this.assemblySize, length);
 		this.assemblySize += length;
 	}
-	
+
 	/** @param message
-	 * @throws Evaluate.CompilationException */
+	 * @throws Evaluate.CompilationException
+	 *
+	 *             adds exactly */
 	public void addDebug(final String message) throws Evaluate.CompilationException {
-		
+
 		this.lastDebug = message;
 		this.addInstruction(new IAVV_VFDEBUG_C(message));
 	}
-	
+
 	/** @param error */
 	public void addError(final Object error) {
-		
+
 		if (this.reportErrors) {
 			if (error instanceof final Throwable throwableObject) {
 				Report.exception("ASSEMBLY", "Assembly error", throwableObject);
@@ -253,11 +553,11 @@ public class ProgramAssembly {
 		}
 		((ListString) this.errors).add(text);
 	}
-	
+
 	/** @param instruction
 	 * @throws Evaluate.CompilationException */
 	public void addInstruction(final Instruction instruction) throws Evaluate.CompilationException {
-		
+
 		if (instruction == null) {
 			throw new NullPointerException();
 		}
@@ -282,33 +582,35 @@ public class ProgramAssembly {
 		this.assemblyCode[this.assemblySize++] = instruction;
 		return;
 	}
-	
+
 	/** CATCH METHOD - use addTokenInstruction method
 	 *
 	 * @param instruction */
 	@SuppressWarnings("static-method")
 	@Deprecated
 	public void addInstruction(final TokenInstruction instruction) {
-		
+
 		throw new IllegalStateException("Use addTokenInstruction method");
 	}
-	
-	/** @return
+
+	/** Returns an instruction that can be replaced later, before the final program is assembled.
+	 *
+	 * @return
 	 * @throws Exception */
 	public InstructionPlaceholder addInstructionPlaceholder() throws Exception {
-		
+
 		final InstructionPlaceholder placeholder = new PlaceholderSimple();
 		this.addInstruction(placeholder);
 		return placeholder;
 	}
-	
+
 	/** TokenInstructions are expanded (and not accepted at all in assert mode) as an argument for
 	 * addInstruction method. Use this method if you intentionally want to collect TokenInstructions
 	 * using assembly instruction buffer.
 	 *
 	 * @param token */
 	public void addTokenInstruction(final TokenInstruction token) {
-		
+
 		assert token != null;
 		if (this.assemblyCode == null) {
 			this.assemblyCapacity = ProgramAssembly.INITIAL;
@@ -323,13 +625,13 @@ public class ProgramAssembly {
 		}
 		this.assemblyCode[this.assemblySize++] = token;
 	}
-	
+
 	/** @param precompiled
 	 * @param balanceType
 	 * @return stack result count
 	 * @throws Exception */
 	public TokenInstruction compileExpression(final List<TokenInstruction> precompiled, final BalanceType balanceType) throws Exception {
-		
+
 		/** <code>
 		System.out.println( ">>>>> expression ("
 				+ balanceType
@@ -555,7 +857,7 @@ public class ProgramAssembly {
 						this.compilerPushOperator(token);
 						continue expression;
 					}
-					
+
 					final int length = ProgramAssembly.compilerSearchInSource(precompiled, exprLength, i, token.getPriorityRight());
 					final TokenInstruction rightHand = this.compileExpression(precompiled.subList(i + 1, length), BalanceType.EXPRESSION);
 					// System.out.println( ">>> >>> assign " + token +
@@ -587,7 +889,7 @@ public class ProgramAssembly {
 					System.out.println(">>>>>> syntax " + token);
 					</code> */
 					if (token instanceof TokenSyntax.ConditionalStackValuable) {
-						
+
 						final int length = ProgramAssembly.compilerSearchInSource(//
 								precompiled,
 								exprLength,
@@ -683,9 +985,9 @@ public class ProgramAssembly {
 							this.compilerPushValue(error);
 							break expression;
 						}
-						
+
 						final TokenInstruction leftHand = this.compilerPopValue(valueCount);
-						
+
 						if (length == i + 1) {
 							final TKV_ERROR_A_C_E error = new TKV_ERROR_A_C_E(token + ": rightHand side expected");
 							this.compilerTruncateAll(operatorCount, valueCount);
@@ -695,13 +997,13 @@ public class ProgramAssembly {
 						final List<TokenInstruction> subList;
 						{
 							final List<TokenInstruction> rightHandCode = precompiled.subList(i + 1, length);
-							
+
 							subList = new ArrayList<>(length - i - 1);
 							subList.addAll(rightHandCode);
 							// System.out.println(">>> >>> syntax TKS_EOCO#0 " + token + ", sub: " +
 							// subList);
 						}
-						
+
 						final TokenInstruction rightHand = this.compileExpression(
 								subList,
 								balanceType != BalanceType.STATEMENT
@@ -803,263 +1105,27 @@ public class ProgramAssembly {
 		}
 		return this.compilerFlushToInstruction(operatorCount, valueCount, balanceType);
 	}
-	
-	private void compilerEnsure(final int count) {
-		
-		if (this.compilerTokens == null) {
-			final int length = Math.max(32, count);
-			this.compilerTokens = new TokenInstruction[length];
-			assert this.compilerPointerOperator == 0;
-			this.compilerPointerValue = length;
-			return;
-		}
-		final int buffer = this.compilerTokens.length;
-		final int operatorCount = this.compilerPointerOperator;
-		final int valueCount = buffer - this.compilerPointerValue;
-		if (buffer <= valueCount + operatorCount + count) {
-			final int length = Math.min(buffer + 1024, buffer << 1) + count;
-			final TokenInstruction[] replacement = new TokenInstruction[length];
-			if (operatorCount > 0) {
-				System.arraycopy(
-						this.compilerTokens, //
-						0,
-						replacement,
-						0,
-						operatorCount);
-			}
-			if (valueCount > 0) {
-				System.arraycopy(
-						this.compilerTokens, //
-						buffer - valueCount,
-						replacement,
-						length - valueCount,
-						valueCount);
-			}
-			this.compilerTokens = replacement;
-			this.compilerPointerValue = length - valueCount;
-		}
-	}
-	
-	/** @param operatorCount
-	 * @param valueCount
-	 * @param priorityLeft
-	 * @return <code>false</code> on error or so. when processing should be stopped.<br>
-	 *         <code>true</code> otherwise
-	 * @throws Exception */
-	private boolean compilerFlushOperators(final int operatorCount, final int valueCount, final int priorityLeft, final boolean sideEffectsOnly) throws Exception {
-		
-		for (; this.compilerPointerOperator > operatorCount;) {
-			final TokenInstruction token = this.compilerTokens[this.compilerPointerOperator - 1];
-			if (priorityLeft > token.getPriorityRight()) {
-				break;
-			}
-			this.compilerTokens[--this.compilerPointerOperator] = null;
-			final int operandCount = token.getOperandCount();
-			{
-				final int resultCount = token.getResultCount();
-				if (resultCount == 0) {
-					assert token.getResultType() == InstructionResult.NEVER : "Invalid instruction result type for no-result instruction: type=" + token.getResultType()
-							+ ", tokenClass=" + token.getClass().getName() + ", token=" + token;
-					assert token.assertZeroStackOperands();
-					this.compilerTruncateAll(operatorCount, valueCount);
-					final TokenInstruction value = token.toStackValue(this, false);
-					assert value.assertStackValue();
-					this.compilerPushValue(value);
-					return false;
-				}
-				assert token.getResultCount() == 1 : "Not implementd yet, operandCount=" + token.getOperandCount() + ", resultCount=" + token.getResultCount() + ", token="
-						+ token.getNotation() + ", tokenType=" + token.getTokenType();
-			}
-			/** <code>
-			System.out.println( ">>>>> >>>>> FLUSH operator->value " + token + ", operands: " + operandCount );
-			for (int i = operatorCount; i < this.compilerPointerOperator; ++i) {
-				System.out.println( ">>>>> >>>>> >>>>> CO[" + i + "]" + this.compilerTokens[i] );
-			}
-			for (int i = this.compilerPointerValue; i < this.compilerTokens.length - valueCount; ++i) {
-				System.out.println( ">>>>> >>>>> >>>>> CV[" + i + "]" + this.compilerTokens[i] );
-			}
-			System.out.println( ">>>>> >>>>> FLUSH DO" );
-			 </code> */
-			switch (operandCount) {
-				case 0 :
-					// System.out.println( ">>> >>> 0: " + token );
-					this.compilerPushValue(token);
-					break;
-				case 1 : {
-					final TokenInstruction argumentA = this.compilerPopValue(valueCount);
-					if (argumentA == null) {
-						this.compilerTruncateAll(operatorCount, valueCount);
-						this.compilerPushValue(
-								Report.MODE_ASSERT || Report.MODE_DEBUG
-									? new TKV_ERROR_A_C_E(
-											"Expression expected: operator '" + token.getNotation() + "' (class=" + token.getClass().getSimpleName() + ") needs one argument!")
-									: ParseConstants.TKV_ERROR_EXPRESSION_EXPECTED);
-						return false;
-					}
-					final TokenInstruction value = token.toStackValue(this, argumentA, sideEffectsOnly);
-					assert value.assertStackValue();
-					this.compilerPushValue(value);
-					continue;
-				}
-				case 2 : {
-					final TokenInstruction argumentB = this.compilerPopValue(valueCount);
-					final TokenInstruction argumentA = this.compilerPopValue(valueCount);
-					if (argumentA == null) {
-						this.compilerTruncateAll(operatorCount, valueCount);
-						this.compilerPushValue(
-								Report.MODE_ASSERT || Report.MODE_DEBUG
-									? new TKV_ERROR_A_C_E(
-											"Expression expected: operator '" + token.getNotation() + "' (class=" + token.getClass().getSimpleName() + ") needs two arguments!")
-									: ParseConstants.TKV_ERROR_EXPRESSION_EXPECTED);
-						return false;
-						/** MORE INFO<code>
-						throw new IllegalArgumentException( "Value expected, two operands required but only "
-								+ (argumentB == null
-										? "zero"
-										: "one")
-								+ " available, tokenClass="
-								+ token.getClass().getName()
-								+ ", token="
-								+ token );
-						</code> */
-					}
-					final TokenInstruction value = token.toStackValue(this, argumentA, argumentB, sideEffectsOnly);
-					assert value.assertStackValue();
-					this.compilerPushValue(value);
-					continue;
-				}
-				default :
-					assert false : "invalid operand count: " + operandCount + ", tokenClass=" + token.getClass().getName() + ", token=" + token;
-					this.compilerPushValue(token);
-			}
-		}
-		return true;
-	}
-	
-	private TokenInstruction compilerFlushToInstruction(final int operatorCount, final int valueCount, final BalanceType balanceType) throws Exception {
-		
-		final boolean sideEffectsOnly = balanceType == BalanceType.STATEMENT;
-		/** everything */
-		this.compilerFlushOperators(operatorCount, valueCount, -1, sideEffectsOnly);
-		final int count = this.compilerValueCount(valueCount);
-		if (count == 0) {
-			return sideEffectsOnly
-				? null
-				: ParseConstants.TKV_UNDEFINED;
-		}
-		if (count == 1) {
-			final TokenInstruction value = this.compilerPopValue(valueCount);
-			return sideEffectsOnly
-				? value.toConstantValue() != null
-					? null
-					: value
-				: balanceType == BalanceType.ARRAY_LITERAL
-					? value.getResultType() == InstructionResult.ARRAY
-						? value
-						: value.getResultType() == InstructionResult.NEVER
-							? value
-							: new TKV_CARRAY1(value)
-					: value;
-		}
-		if (count == 2) {
-			final TokenInstruction token2 = this.compilerPopValue(valueCount);
-			final TokenInstruction token1 = this.compilerPopValue(valueCount);
-			return new TKV_EFLOW2(token1, token2);
-		}
-		if (count == 3) {
-			final TokenInstruction token3 = this.compilerPopValue(valueCount);
-			final TokenInstruction token2 = this.compilerPopValue(valueCount);
-			final TokenInstruction token1 = this.compilerPopValue(valueCount);
-			return new TKV_EFLOW3(token1, token2, token3);
-		}
-		/** FIXME isn't it an opposite direction? */
-		final TokenInstruction[] result = new TokenInstruction[count];
-		for (int i = count, j = 0; i > 0; --i) {
-			final int index = this.compilerPointerValue++;
-			result[j++] = this.compilerTokens[index];
-			this.compilerTokens[index] = null;
-		}
-		/** just an assumption */
-		assert this.compilerValueCount(valueCount) == 0;
-		return new TKV_EFLOWX(result);
-	}
-	
-	private TokenInstruction compilerPopOperator(final int operatorCount) {
-		
-		if (this.compilerPointerOperator > operatorCount) {
-			try {
-				return this.compilerTokens[--this.compilerPointerOperator];
-			} finally {
-				this.compilerTokens[this.compilerPointerOperator] = null;
-			}
-		}
-		return null;
-	}
-	
-	private TokenInstruction compilerPopValue(final int valueCount) {
-		
-		if (this.compilerPointerValue < this.compilerTokens.length - valueCount) {
-			try {
-				return this.compilerTokens[this.compilerPointerValue++];
-			} finally {
-				this.compilerTokens[this.compilerPointerValue - 1] = null;
-			}
-		}
-		return null;
-	}
-	
-	private void compilerPushOperator(final TokenInstruction token) {
-		
-		assert this.compilerPointerOperator < this.compilerPointerValue : "capacity: " + this.compilerTokens.length + ", ptrO=" + this.compilerPointerOperator + ", ptrV="
-				+ this.compilerPointerValue;
-		assert token != null;
-		this.compilerTokens[this.compilerPointerOperator++] = token;
-	}
-	
-	private void compilerPushValue(final TokenInstruction value) {
-		
-		assert this.compilerPointerValue > this.compilerPointerOperator;
-		assert value != null;
-		this.compilerTokens[--this.compilerPointerValue] = value;
-	}
-	
-	private void compilerTruncateAll(final int operatorCount, final int valueCount) {
-		
-		/** truncate values */
-		while (this.compilerPointerValue < this.compilerTokens.length - valueCount) {
-			this.compilerTokens[this.compilerPointerValue++] = null;
-		}
-		/** truncate operators */
-		while (this.compilerPointerOperator > operatorCount) {
-			this.compilerTokens[--this.compilerPointerOperator] = null;
-		}
-	}
-	
-	private int compilerValueCount(final int valueCount) {
-		
-		return this.compilerTokens.length - this.compilerPointerValue - valueCount;
-	}
-	
+
 	/** Can be null if actually not a constant
 	 *
 	 * @param index
 	 * @return
 	 * @throws IllegalArgumentException */
 	public BaseObject constantRead(final int index) throws IllegalArgumentException {
-		
+
 		if (this.constants == null) {
 			throw new IllegalArgumentException("No constants!");
 		}
 		return this.constants.get(index).toConstantValue();
 	}
-	
+
 	/** Compares strings as strings - to be compatible and interchangeable with another variant of
 	 * this method.
 	 *
 	 * @param constant
 	 * @return */
 	public int constantRegister(final BaseObject constant) {
-		
+
 		if (this.constants == null) {
 			this.constants = new ArrayList<>();
 			this.constantMap = new HashMap<>();
@@ -1080,14 +1146,14 @@ public class ProgramAssembly {
 			return position;
 		}
 	}
-	
+
 	/** Compares with string - kind hope that it would save time on BasePrimitiveString.getString()
 	 * execution.
 	 *
 	 * @param constant
 	 * @return */
 	public int constantRegister(final String constant) {
-		
+
 		if (this.constants == null) {
 			this.constants = new ArrayList<>();
 			this.constantMap = new HashMap<>();
@@ -1101,14 +1167,14 @@ public class ProgramAssembly {
 		}
 		return position.intValue();
 	}
-	
+
 	/** Compares strings as strings - to be compatible and interchangeable with another variant of
 	 * this method.
 	 *
 	 * @param constant
 	 * @return */
 	public int constantRegister(final TokenValue constant) {
-		
+
 		if (this.constants == null) {
 			this.constants = new ArrayList<>();
 			this.constantMap = new HashMap<>();
@@ -1130,24 +1196,24 @@ public class ProgramAssembly {
 			return position;
 		}
 	}
-	
+
 	/** @param index
 	 * @return
 	 * @throws IllegalArgumentException */
 	public TokenValue constantToken(final int index) throws IllegalArgumentException {
-		
+
 		if (this.constants == null) {
 			throw new IllegalArgumentException("No constants!");
 		}
 		return this.constants.get(index);
 	}
-	
+
 	/** @param buffer
 	 * @param start
 	 * @param end
 	 * @return builder */
 	public final StringBuilder dumpCode(final StringBuilder buffer, final int start, final int end) {
-		
+
 		for (int j = start; j < end; j++) {
 			final String stringValue = this.assemblyCode[j].toCode();
 			final String code;
@@ -1163,67 +1229,17 @@ public class ProgramAssembly {
 		}
 		return buffer;
 	}
-	
-	private final void expandPrograms(final int offset) {
-		
-		final Instruction[] assemblyCode;
-		{
-			final int instructionCount = this.getInstructionCount(offset);
-			if (instructionCount + offset > this.assemblyCapacity) {
-				this.assemblyCapacity = instructionCount + offset;
-				final Instruction[] newCode = new Instruction[this.assemblyCapacity];
-				System.arraycopy(this.assemblyCode, 0, newCode, 0, this.assemblySize);
-				assemblyCode = this.assemblyCode = newCode;
-			} else {
-				assemblyCode = this.assemblyCode;
-			}
-		}
-		// TODO: optimise array-copying - go reverse and
-		int i = offset;
-		for (Instruction current; i < this.assemblySize; ++i) {
-			current = assemblyCode[i];
-			if (current instanceof final ProgramPart calc) {
-				final Instruction[] toInsert = calc.getInstructions();
-				if (toInsert == null) {
-					throw new NullPointerException();
-				}
-				final int length = toInsert.length;
-				if (length == 1) {
-					assemblyCode[i] = toInsert[0];
-					continue;
-				}
-				if (length > 0) {
-					System.arraycopy(assemblyCode, i + 1, assemblyCode, i + length, this.assemblySize - i - 1);
-					System.arraycopy(toInsert, 0, assemblyCode, i, length);
-					this.assemblySize += length - 1;
-					i--;
-					continue;
-				}
-				System.arraycopy(assemblyCode, i + 1, assemblyCode, i, this.assemblySize - i - 1);
-				this.assemblySize--;
-				i--;
-				continue;
-			}
-			
-			if (current instanceof final InstructionEditable instructionEditable) {
-				if (null != (current = instructionEditable.getFinalIfReady())) {
-					assemblyCode[i] = current;
-				}
-				continue;
-			}
-		}
-	}
-	
+
 	/** @return errors */
 	public Object getErrors() {
-		
+
 		return this.errors;
 	}
-	
+
 	/** @param offset
 	 * @return int */
 	public final int getInstructionCount(final int offset) {
-		
+
 		int counter = 0;
 		for (int i = offset; i < this.assemblySize; ++i) {
 			final Instruction instr = this.assemblyCode[i];
@@ -1235,36 +1251,36 @@ public class ProgramAssembly {
 		}
 		return counter;
 	}
-	
+
 	/** @param position
 	 * @param error
 	 * @throws Exception */
 	public void makeError(final int position, final Object error) throws Exception {
-		
+
 		if (!Report.MODE_DEVEL && position != -1) {
 			this.truncate(position);
 		}
 		this.addError(error);
 	}
-	
+
 	/** Default value is TRUE. When enabled, compilation errors will be logged.
 	 *
 	 * @param reportErrors */
 	public void setReportErrors(final boolean reportErrors) {
-		
+
 		this.reportErrors = reportErrors;
 	}
-	
+
 	/** @return size */
 	public final int size() {
-		
+
 		return this.assemblySize;
 	}
-	
+
 	/** @param offset
 	 * @return program */
 	public final Instruction toInstruction(final int offset) {
-		
+
 		if (offset == -1 && this.errors != null) {
 			throw new IllegalStateException("Unit has compile errors:\n" + this.errors);
 		}
@@ -1288,11 +1304,11 @@ public class ProgramAssembly {
 		this.assemblySize = offset;
 		return new ProgramPart(result);
 	}
-	
+
 	/** @param offset
 	 * @return program */
 	public final ProgramPart toProgram(final int offset) {
-		
+
 		if (offset == -1 && this.errors != null) {
 			throw new IllegalStateException("Unit has compile errors:\n" + this.errors);
 		}
@@ -1329,10 +1345,10 @@ public class ProgramAssembly {
 		this.assemblySize = offset;
 		return new ProgramPart(result);
 	}
-	
+
 	/** @param offset */
 	public void truncate(final int offset) {
-		
+
 		assert offset <= this.assemblySize : "Truncate should reduce size!";
 		assert offset >= 0 : "Truncation position should be non-negative!";
 		while (this.assemblySize > offset) {
