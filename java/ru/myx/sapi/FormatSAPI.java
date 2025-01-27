@@ -46,6 +46,172 @@ import ru.myx.util.Base58;
  *         Window - Preferences - Java - Code Style - Code Templates */
 public class FormatSAPI {
 	
+	private static final StringBuilder csvStringFragmentImpl(final String string, final StringBuilder builder) {
+		
+		if (string == null) {
+			return builder;
+		}
+		final int length = string.length();
+		for (int i = 0; i < length; ++i) {
+			final char c = string.charAt(i);
+			if (c == '\"') {
+				builder.append(c).append(c);
+			} else {
+				builder.append(c);
+			}
+		}
+		return builder;
+	}
+	
+	private static final StringBuilder sqlStringFragmentImpl(final String string, final StringBuilder builder) {
+		
+		if (string == null) {
+			return builder;
+		}
+		final int length = string.length();
+		loop : for (int i = 0; i < length; ++i) {
+			final char c = string.charAt(i);
+			if (c == '\'') {
+				builder.append(c).append(c);
+				continue loop;
+			}
+			if (c == 0) {
+				return builder;
+			}
+			{
+				builder.append(c);
+				continue loop;
+			}
+		}
+		return builder;
+	}
+	
+	private static final StringBuilder xmlAttributesImpl(final BaseObject object, final StringBuilder builder) throws IOException {
+		
+		for (final Iterator<String> iterator = Base.keys(object, BaseObject.PROTOTYPE); iterator.hasNext();) {
+			final String key = iterator.next();
+			Format.Xml.xmlAttributeImpl(key, object.baseGet(key, null), builder);
+		}
+		return builder;
+	}
+	
+	private static final <T extends Appendable> T xmlElementImpl(final String name, final BaseObject attributes, final T result) throws IOException {
+		
+		if (!Format.Xml.isValidName(name)) {
+			return result;
+		}
+		result.append('<').append(name);
+		StringBuilder body = null;
+		mapProperties : for (final Iterator<String> iterator = Base.keys(attributes, BaseObject.PROTOTYPE); iterator.hasNext();) {
+			final String key = iterator.next();
+			final BaseObject value = attributes.baseGet(key, null);
+			if (value == null || value == BaseObject.UNDEFINED || value == BaseObject.NULL) {
+				continue mapProperties;
+			}
+			if (value instanceof CharSequence || value.baseIsPrimitive()) {
+				Format.Xml.xmlAttributeImpl(key, value, result);
+				continue mapProperties;
+			}
+			if (value instanceof BaseDate) {
+				Format.Xml.xmlAttributeImpl(key, ((BaseDate) value).toISOString(), result);
+				continue mapProperties;
+			}
+			{
+				final Object base = value.baseValue();
+				if (base != value) {
+					if (base == null && base == BaseObject.UNDEFINED || base == BaseObject.NULL) {
+						continue mapProperties;
+					}
+					if (base instanceof CharSequence || base instanceof BaseObject && ((BaseObject) base).baseIsPrimitive()) {
+						Format.Xml.xmlAttributeImpl(key, base, result);
+						continue mapProperties;
+					}
+					if (base instanceof BaseDate) {
+						Format.Xml.xmlAttributeImpl(key, ((BaseDate) base).toISOString(), result);
+						continue mapProperties;
+					}
+				}
+			}
+			if (body == null) {
+				body = new StringBuilder(64);
+			}
+			{
+				final BaseArray array = value.baseArray();
+				if (array != null) {
+					final int length = array.length();
+					arrayElements : for (int i = 0; i < length; ++i) {
+						final BaseObject element = array.baseGet(i, null);
+						if (element == null || element == BaseObject.UNDEFINED || element == BaseObject.NULL) {
+							continue arrayElements;
+						}
+						if (!Format.Xml.isValidName(key)) {
+							continue arrayElements;
+						}
+						if (element instanceof CharSequence || element.baseIsPrimitive()) {
+							body.append('<').append(key).append('>');
+							Format.Xml.xmlNodeValueImpl(element, body);
+							body.append("</").append(key).append('>');
+							continue arrayElements;
+						}
+						if (element instanceof BaseDate) {
+							body.append('<').append(key).append('>');
+							Format.Xml.xmlNodeValueImpl(((BaseDate) element).toISOString(), body);
+							body.append("</").append(key).append('>');
+							continue arrayElements;
+						}
+						{
+							final Object base = element.baseValue();
+							if (base != element) {
+								if (base == null && base == BaseObject.UNDEFINED || base == BaseObject.NULL) {
+									continue arrayElements;
+								}
+								if (base instanceof CharSequence || base instanceof BaseObject && ((BaseObject) base).baseIsPrimitive()) {
+									body.append('<').append(key).append('>');
+									Format.Xml.xmlNodeValueImpl(base, body);
+									body.append("</").append(key).append('>');
+									continue arrayElements;
+								}
+								if (base instanceof BaseDate) {
+									body.append('<').append(key).append('>');
+									Format.Xml.xmlNodeValueImpl(((BaseDate) base).toISOString(), body);
+									body.append("</").append(key).append('>');
+									continue arrayElements;
+								}
+							}
+						}
+						FormatSAPI.xmlElementImpl(key, element, body);
+					}
+					continue mapProperties;
+				}
+			}
+			{
+				final String layout = Base.getString(value, "layout", null);
+				if (layout != null) {
+					if ("xml".equals(layout) || "xml-fragment".equals(layout) || "final".equals(layout) && "text/xml".equals(Base.getString(value, "type", null))) {
+						body.append('<').append(key).append('>');
+						
+						{
+							/** NOTE: unchecked XML fragment */
+							body.append(value.baseGet("content", BaseString.EMPTY));
+						}
+						
+						body.append("</").append(key).append('>');
+						continue mapProperties;
+					}
+				}
+			}
+			{
+				FormatSAPI.xmlElementImpl(key, value, body);
+			}
+		}
+		if (body == null || body.length() == 0) {
+			result.append("/>");
+			return result;
+		}
+		result.append('>').append(body).append("</").append(name).append('>');
+		return result;
+	}
+	
 	/** Formats bytes as base27, more compact and readable than base16/hex
 	 *
 	 * @param bytes
@@ -356,23 +522,6 @@ public class FormatSAPI {
 					.toString();
 	}
 	
-	private static final StringBuilder csvStringFragmentImpl(final String string, final StringBuilder builder) {
-		
-		if (string == null) {
-			return builder;
-		}
-		final int length = string.length();
-		for (int i = 0; i < length; ++i) {
-			final char c = string.charAt(i);
-			if (c == '\"') {
-				builder.append(c).append(c);
-			} else {
-				builder.append(c);
-			}
-		}
-		return builder;
-	}
-	
 	/** @param object
 	 * @return string */
 	public static final String date(final Object object) {
@@ -625,9 +774,9 @@ public class FormatSAPI {
 	/** @see isValidDnsLabelStrict for RFC 5890
 	 *
 	 *      format: [A-Za-z0-9] first character, [A-Za-z0-9\-] other characters
-	 * 		
+	 *
 	 *      lengths: >=1 and <=63
-	 * 		
+	 *
 	 * @param s
 	 * @return */
 	public static final boolean isValidDnsLabel(final CharSequence s) {
@@ -653,7 +802,7 @@ public class FormatSAPI {
 				return false;
 			}
 		}
-
+		
 		return true;
 	}
 	
@@ -720,7 +869,7 @@ public class FormatSAPI {
 				return false;
 			}
 		}
-
+		
 		return FormatSAPI.isValidDnsLabelStart(s.charAt(l - 1));
 	}
 	
@@ -1163,23 +1312,6 @@ public class FormatSAPI {
 					.toString();
 	}
 	
-	private static final StringBuilder sqlStringFragmentImpl(final String string, final StringBuilder builder) {
-		
-		if (string == null) {
-			return builder;
-		}
-		final int length = string.length();
-		for (int i = 0; i < length; ++i) {
-			final char c = string.charAt(i);
-			if (c == '\'') {
-				builder.append(c).append(c);
-			} else {
-				builder.append(c);
-			}
-		}
-		return builder;
-	}
-	
 	/** @param text
 	 * @return */
 	public static final byte[] stringAsAsciiBytes(final String text) {
@@ -1359,15 +1491,6 @@ public class FormatSAPI {
 		}
 	}
 	
-	private static final StringBuilder xmlAttributesImpl(final BaseObject object, final StringBuilder builder) throws IOException {
-		
-		for (final Iterator<String> iterator = Base.keys(object, BaseObject.PROTOTYPE); iterator.hasNext();) {
-			final String key = iterator.next();
-			Format.Xml.xmlAttributeImpl(key, object.baseGet(key, null), builder);
-		}
-		return builder;
-	}
-	
 	/** The while XML attribute including quotes and text.
 	 *
 	 * The Date instances are formatted as Format.Ecma.date( x )
@@ -1501,123 +1624,6 @@ public class FormatSAPI {
 		} catch (final IOException e) {
 			throw new RuntimeException(e);
 		}
-	}
-	
-	private static final <T extends Appendable> T xmlElementImpl(final String name, final BaseObject attributes, final T result) throws IOException {
-		
-		if (!Format.Xml.isValidName(name)) {
-			return result;
-		}
-		result.append('<').append(name);
-		StringBuilder body = null;
-		mapProperties : for (final Iterator<String> iterator = Base.keys(attributes, BaseObject.PROTOTYPE); iterator.hasNext();) {
-			final String key = iterator.next();
-			final BaseObject value = attributes.baseGet(key, null);
-			if (value == null || value == BaseObject.UNDEFINED || value == BaseObject.NULL) {
-				continue mapProperties;
-			}
-			if (value instanceof CharSequence || value.baseIsPrimitive()) {
-				Format.Xml.xmlAttributeImpl(key, value, result);
-				continue mapProperties;
-			}
-			if (value instanceof BaseDate) {
-				Format.Xml.xmlAttributeImpl(key, ((BaseDate) value).toISOString(), result);
-				continue mapProperties;
-			}
-			{
-				final Object base = value.baseValue();
-				if (base != value) {
-					if (base == null && base == BaseObject.UNDEFINED || base == BaseObject.NULL) {
-						continue mapProperties;
-					}
-					if (base instanceof CharSequence || base instanceof BaseObject && ((BaseObject) base).baseIsPrimitive()) {
-						Format.Xml.xmlAttributeImpl(key, base, result);
-						continue mapProperties;
-					}
-					if (base instanceof BaseDate) {
-						Format.Xml.xmlAttributeImpl(key, ((BaseDate) base).toISOString(), result);
-						continue mapProperties;
-					}
-				}
-			}
-			if (body == null) {
-				body = new StringBuilder(64);
-			}
-			{
-				final BaseArray array = value.baseArray();
-				if (array != null) {
-					final int length = array.length();
-					arrayElements : for (int i = 0; i < length; ++i) {
-						final BaseObject element = array.baseGet(i, null);
-						if (element == null || element == BaseObject.UNDEFINED || element == BaseObject.NULL) {
-							continue arrayElements;
-						}
-						if (!Format.Xml.isValidName(key)) {
-							continue arrayElements;
-						}
-						if (element instanceof CharSequence || element.baseIsPrimitive()) {
-							body.append('<').append(key).append('>');
-							Format.Xml.xmlNodeValueImpl(element, body);
-							body.append("</").append(key).append('>');
-							continue arrayElements;
-						}
-						if (element instanceof BaseDate) {
-							body.append('<').append(key).append('>');
-							Format.Xml.xmlNodeValueImpl(((BaseDate) element).toISOString(), body);
-							body.append("</").append(key).append('>');
-							continue arrayElements;
-						}
-						{
-							final Object base = element.baseValue();
-							if (base != element) {
-								if (base == null && base == BaseObject.UNDEFINED || base == BaseObject.NULL) {
-									continue arrayElements;
-								}
-								if (base instanceof CharSequence || base instanceof BaseObject && ((BaseObject) base).baseIsPrimitive()) {
-									body.append('<').append(key).append('>');
-									Format.Xml.xmlNodeValueImpl(base, body);
-									body.append("</").append(key).append('>');
-									continue arrayElements;
-								}
-								if (base instanceof BaseDate) {
-									body.append('<').append(key).append('>');
-									Format.Xml.xmlNodeValueImpl(((BaseDate) base).toISOString(), body);
-									body.append("</").append(key).append('>');
-									continue arrayElements;
-								}
-							}
-						}
-						FormatSAPI.xmlElementImpl(key, element, body);
-					}
-					continue mapProperties;
-				}
-			}
-			{
-				final String layout = Base.getString(value, "layout", null);
-				if (layout != null) {
-					if ("xml".equals(layout) || "xml-fragment".equals(layout) || "final".equals(layout) && "text/xml".equals(Base.getString(value, "type", null))) {
-						body.append('<').append(key).append('>');
-						
-						{
-							/** NOTE: unchecked XML fragment */
-							body.append(value.baseGet("content", BaseString.EMPTY));
-						}
-						
-						body.append("</").append(key).append('>');
-						continue mapProperties;
-					}
-				}
-			}
-			{
-				FormatSAPI.xmlElementImpl(key, value, body);
-			}
-		}
-		if (body == null || body.length() == 0) {
-			result.append("/>");
-			return result;
-		}
-		result.append('>').append(body).append("</").append(name).append('>');
-		return result;
 	}
 	
 	/** Executes xmlElement zero or more times to build an XML fragment string. No element is

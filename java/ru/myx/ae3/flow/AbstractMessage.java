@@ -17,9 +17,8 @@ import ru.myx.ae3.report.AbstractEvent;
 
 /** @author barachta
  *
- * myx - barachta 
- *         Window>Preferences>Java>Templates. To enable and disable the creation of type comments go
- *         to Window>Preferences>Java>Code Generation.
+ *         myx - barachta Window>Preferences>Java>Templates. To enable and disable the creation of
+ *         type comments go to Window>Preferences>Java>Code Generation.
  * @param <T> */
 @ReflectionIgnore
 public abstract class AbstractMessage<T extends BaseMessageEditable<T>> extends AbstractEvent implements BaseMessageEditable<T> {
@@ -31,7 +30,7 @@ public abstract class AbstractMessage<T extends BaseMessageEditable<T>> extends 
 			.putAppend("target", 0)//
 			.putAppend("attributes", 0)//
 	;
-
+	
 	/**
 	 *
 	 */
@@ -49,25 +48,31 @@ public abstract class AbstractMessage<T extends BaseMessageEditable<T>> extends 
 	}
 	
 	@Override
-	public T addAttribute(final String name, final int value) {
+	public final T addAttribute(final String name, final double value) {
+		
+		return this.addAttribute(name, Base.forDouble(value));
+	}
+	
+	@Override
+	public final T addAttribute(final String name, final int value) {
 		
 		return this.addAttribute(name, Base.forInteger(value));
 	}
 	
 	@Override
-	public T addAttribute(final String name, final long value) {
+	public final T addAttribute(final String name, final long value) {
 		
 		return this.addAttribute(name, Base.forLong(value));
 	}
 	
 	@Override
-	public T addAttribute(final String name, final Object value) {
+	public final T addAttribute(final String name, final Object value) {
 		
 		return this.addAttribute(name, Base.forUnknown(value));
 	}
 	
 	@Override
-	public T addAttribute(final String name, final String value) {
+	public final T addAttribute(final String name, final String value) {
 		
 		return this.addAttribute(name, Base.forString(value));
 	}
@@ -216,31 +221,31 @@ public abstract class AbstractMessage<T extends BaseMessageEditable<T>> extends 
 	}
 	
 	@Override
-	public T setAttribute(final String name, final double value) {
+	public final T setAttribute(final String name, final double value) {
 		
 		return this.setAttribute(name, Base.forDouble(value));
 	}
 	
 	@Override
-	public T setAttribute(final String name, final int value) {
+	public final T setAttribute(final String name, final int value) {
 		
 		return this.setAttribute(name, Base.forInteger(value));
 	}
 	
 	@Override
-	public T setAttribute(final String name, final long value) {
+	public final T setAttribute(final String name, final long value) {
 		
 		return this.setAttribute(name, Base.forLong(value));
 	}
 	
 	@Override
-	public T setAttribute(final String name, final Object value) {
+	public final T setAttribute(final String name, final Object value) {
 		
 		return this.setAttribute(name, Base.forUnknown(value));
 	}
 	
 	@Override
-	public T setAttribute(final String name, final String value) {
+	public final T setAttribute(final String name, final String value) {
 		
 		return this.setAttribute(name, Base.forString(value));
 	}
@@ -291,13 +296,13 @@ public abstract class AbstractMessage<T extends BaseMessageEditable<T>> extends 
 	@Override
 	public final T setEncoding(final Charset charset) {
 		
-		return this.setAttribute("Character-Encoding", charset.name());
+		return this.setAttribute("Content-Charset", charset.name());
 	}
 	
 	@Override
 	public final T setEncoding(final String encoding) {
 		
-		return this.setAttribute("Character-Encoding", encoding);
+		return this.setAttribute("Content-Charset", encoding);
 	}
 	
 	@Override

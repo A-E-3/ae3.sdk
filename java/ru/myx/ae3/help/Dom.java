@@ -33,7 +33,6 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import ru.myx.ae3.Engine;
 import ru.myx.ae3.binary.Transfer;
 import ru.myx.ae3.binary.TransferCollector;
 import ru.myx.ae3.binary.TransferCopier;
@@ -42,25 +41,25 @@ import ru.myx.sapi.FormatSAPI;
 
 /** @author myx */
 public final class Dom {
-
+	
 	private static final DocumentBuilderFactory factory;
-
+	
 	/** <= JAVA8 <code>
 	private static final OutputFormat formatXmlCompact;
-
+	
 	private static final OutputFormat formatXmlExternal;
-
+	
 	private static final OutputFormat formatXmlReadable;
 	</code> */
-
+	
 	private static final TransformerFactory transformerFactory;
-
+	
 	private static final Properties formatXmlCompact;
-
+	
 	private static final Properties formatXmlExternal;
-
+	
 	private static final Properties formatXmlReadable;
-
+	
 	static {
 		factory = DocumentBuilderFactory.newInstance();
 		Dom.factory.setCoalescing(true);
@@ -68,18 +67,18 @@ public final class Dom {
 		Dom.factory.setIgnoringElementContentWhitespace(false);
 		Dom.factory.setNamespaceAware(true);
 		Dom.factory.setValidating(false);
-
+		
 		transformerFactory = TransformerFactory.newInstance();
-
+		
 		formatXmlCompact = new Properties();
 		Dom.formatXmlCompact.setProperty(OutputKeys.INDENT, "no");
-		Dom.formatXmlCompact.setProperty(OutputKeys.ENCODING, Engine.ENCODING_UTF8);
+		Dom.formatXmlCompact.setProperty(OutputKeys.ENCODING, StandardCharsets.UTF_8.name());
 		Dom.formatXmlCompact.setProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
 		Dom.formatXmlCompact.setProperty(OutputKeys.STANDALONE, "yes");
 		Dom.formatXmlCompact.setProperty(OutputKeys.VERSION, "1.0");
 		Dom.formatXmlCompact.setProperty(OutputKeys.METHOD, "xml");
 		Dom.formatXmlCompact.setProperty(OutputKeys.MEDIA_TYPE, "text/xml");
-
+		
 		/** <= JAVA8 <code>
 		formatXmlCompact = new OutputFormat();
 		Dom.formatXmlCompact.setOmitXMLDeclaration(true);
@@ -92,16 +91,16 @@ public final class Dom {
 		Dom.formatXmlCompact.setStandalone(true);
 		Dom.formatXmlCompact.setMediaType("text/xml");
 		</code> */
-
+		
 		formatXmlExternal = new Properties();
 		Dom.formatXmlExternal.setProperty(OutputKeys.INDENT, "no");
-		Dom.formatXmlExternal.setProperty(OutputKeys.ENCODING, Engine.ENCODING_UTF8);
+		Dom.formatXmlExternal.setProperty(OutputKeys.ENCODING, StandardCharsets.UTF_8.name());
 		Dom.formatXmlExternal.setProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
 		Dom.formatXmlExternal.setProperty(OutputKeys.STANDALONE, "no");
 		Dom.formatXmlExternal.setProperty(OutputKeys.VERSION, "1.0");
 		Dom.formatXmlExternal.setProperty(OutputKeys.METHOD, "xml");
 		Dom.formatXmlExternal.setProperty(OutputKeys.MEDIA_TYPE, "text/xml");
-
+		
 		/** <= JAVA8 <code>
 		formatXmlExternal = new OutputFormat();
 		Dom.formatXmlExternal.setOmitXMLDeclaration(false);
@@ -114,16 +113,16 @@ public final class Dom {
 		Dom.formatXmlExternal.setStandalone(false);
 		Dom.formatXmlExternal.setMediaType("text/xml");
 		</code> */
-
+		
 		formatXmlReadable = new Properties();
 		Dom.formatXmlReadable.setProperty(OutputKeys.INDENT, "yes");
-		Dom.formatXmlReadable.setProperty(OutputKeys.ENCODING, Engine.ENCODING_UTF8);
+		Dom.formatXmlReadable.setProperty(OutputKeys.ENCODING, StandardCharsets.UTF_8.name());
 		Dom.formatXmlReadable.setProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
 		Dom.formatXmlReadable.setProperty(OutputKeys.STANDALONE, "yes");
 		Dom.formatXmlReadable.setProperty(OutputKeys.VERSION, "1.0");
 		Dom.formatXmlReadable.setProperty(OutputKeys.METHOD, "xml");
 		Dom.formatXmlReadable.setProperty(OutputKeys.MEDIA_TYPE, "text/xml");
-
+		
 		/** <= JAVA8 <code>
 		formatXmlReadable = new OutputFormat();
 		Dom.formatXmlReadable.setOmitXMLDeclaration(false);
@@ -137,10 +136,10 @@ public final class Dom {
 		Dom.formatXmlReadable.setMediaType("text/xml");
 		</code> */
 	}
-
+	
 	/** @return document with no elements */
 	public static final Document createDocument() {
-
+		
 		final DocumentBuilder builder;
 		try {
 			builder = Dom.factory.newDocumentBuilder();
@@ -149,11 +148,11 @@ public final class Dom {
 		}
 		return builder.newDocument();
 	}
-
+	
 	/** @param rootName
 	 * @return document */
 	public static final Document createDocument(final String rootName) {
-
+		
 		final DocumentBuilder builder;
 		try {
 			builder = Dom.factory.newDocumentBuilder();
@@ -165,7 +164,7 @@ public final class Dom {
 		result.appendChild(root);
 		return result;
 	}
-
+	
 	/** Creates an element with given name. When given name cannot be xml-element name, 'param'
 	 * element created with given name passed as 'key' attribute.
 	 *
@@ -173,7 +172,7 @@ public final class Dom {
 	 * @param name
 	 * @return */
 	public static final Element createElement(final Document doc, final String name) {
-
+		
 		{
 			final int length = name.length();
 			if (length > 0 && length < 128 && Format.Xml.isValidName(name)) {
@@ -190,7 +189,7 @@ public final class Dom {
 			return element;
 		}
 	}
-
+	
 	/** Returns node name for given element (considering namespace) and if this name is 'param'
 	 * checks for 'key' attribute as well.
 	 *
@@ -198,7 +197,7 @@ public final class Dom {
 	 * @param namespace
 	 * @return */
 	public static final String getNodeName(final Element e, final String namespace) {
-
+		
 		if (namespace != null) {
 			final String elementNamespace = e.getNamespaceURI();
 			if (elementNamespace != null && namespace != elementNamespace && !namespace.equals(elementNamespace)) {
@@ -218,20 +217,20 @@ public final class Dom {
 		}
 		return name;
 	}
-
+	
 	/** @param root
 	 * @return */
 	public static final String innerTextValue(final Node root) {
-
+		
 		final StringBuilder result = new StringBuilder();
 		Dom.innerTextValue(result, root.getFirstChild());
 		return result.toString();
 	}
-
+	
 	/** @param target
 	 * @param node */
 	public static final void innerTextValue(final StringBuilder target, final Node node) {
-
+		
 		for (Node current = node; current != null; current = current.getNextSibling()) {
 			if (current.getNodeType() == Node.ENTITY_NODE) {
 				target.append(((Entity) current).getNotationName());
@@ -243,22 +242,22 @@ public final class Dom {
 			}
 		}
 	}
-
+	
 	/** @param root
 	 * @param namespace
 	 * @return */
 	public static final String innerValue(final Node root, final String namespace) {
-
+		
 		final StringBuilder result = new StringBuilder();
 		Dom.innerValue(result, root.getFirstChild(), namespace);
 		return result.toString();
 	}
-
+	
 	/** @param target
 	 * @param node
 	 * @param namespace */
 	public static final void innerValue(final StringBuilder target, final Node node, final String namespace) {
-
+		
 		for (Node current = node; current != null; current = current.getNextSibling()) {
 			switch (current.getNodeType()) {
 				case Node.CDATA_SECTION_NODE :
@@ -298,22 +297,22 @@ public final class Dom {
 			}
 		}
 	}
-
+	
 	/** @param xml
 	 * @return document */
 	public static final Document toDocument(final File xml) {
-
+		
 		try (final FileInputStream input = new FileInputStream(xml)) {
 			return Dom.toDocument(input);
 		} catch (final IOException e) {
 			throw new RuntimeException(xml.getName(), e);
 		}
 	}
-
+	
 	/** @param xml
 	 * @return document */
 	public static final Document toDocument(final InputStream xml) {
-
+		
 		final DocumentBuilder builder;
 		try {
 			builder = Dom.factory.newDocumentBuilder();
@@ -328,11 +327,11 @@ public final class Dom {
 			throw new Error("I/O error while parsing XML: " + e.getMessage());
 		}
 	}
-
+	
 	/** @param xml
 	 * @return document */
 	public static final Document toDocument(final String xml) {
-
+		
 		final DocumentBuilder builder;
 		try {
 			builder = Dom.factory.newDocumentBuilder();
@@ -347,32 +346,32 @@ public final class Dom {
 			throw new Error("I/O error while parsing XML: " + e.getMessage());
 		}
 	}
-
+	
 	/** @param xml
 	 * @return element */
 	public static final Element toElement(final File xml) {
-
+		
 		return Dom.toDocument(xml).getDocumentElement();
 	}
-
+	
 	/** @param xml
 	 * @return element */
 	public static final Element toElement(final InputStream xml) {
-
+		
 		return Dom.toDocument(xml).getDocumentElement();
 	}
-
+	
 	/** @param xml
 	 * @return element */
 	public static final Element toElement(final String xml) {
-
+		
 		return Dom.toDocument(xml).getDocumentElement();
 	}
-
+	
 	/** @param root
 	 * @return string */
 	public static final String toXmlCompact(final Element root) {
-
+		
 		assert root != null : "NULL root element!";
 		final StringWriter stringOut = new StringWriter();
 		try {
@@ -390,11 +389,11 @@ public final class Dom {
 		}
 		return stringOut.toString();
 	}
-
+	
 	/** @param root
 	 * @return string */
 	public static final TransferCopier toXmlCompactBinary(final Element root) {
-
+		
 		assert root != null : "NULL root element!";
 		final TransferCollector collector = Transfer.createCollector();
 		final OutputStream output = collector.getOutputStream();
@@ -414,11 +413,11 @@ public final class Dom {
 		/** collector is closed by try ^^^ */
 		return collector.toCloneFactory();
 	}
-
+	
 	/** @param root
 	 * @param os */
 	public static final void toXmlCompactStream(final Element root, final OutputStream os) {
-
+		
 		assert root != null : "NULL root element!";
 		assert os != null : "NULL output stream!";
 		try {
@@ -435,11 +434,11 @@ public final class Dom {
 				: new Error(e.getMessage());
 		}
 	}
-
+	
 	/** @param root
 	 * @param os */
 	public static final void toXmlCompactWriter(final Element root, final Writer os) {
-
+		
 		assert root != null : "NULL root element!";
 		assert os != null : "NULL output stream!";
 		try {
@@ -456,11 +455,11 @@ public final class Dom {
 				: new Error(e.getMessage());
 		}
 	}
-
+	
 	/** @param root
 	 * @return string */
 	public static final String toXmlExternal(final Element root) {
-
+		
 		assert root != null : "NULL root element!";
 		final StringWriter stringOut = new StringWriter();
 		try {
@@ -478,11 +477,11 @@ public final class Dom {
 		}
 		return stringOut.toString();
 	}
-
+	
 	/** @param root
 	 * @return string */
 	public static final String toXmlReadable(final Element root) {
-
+		
 		assert root != null : "NULL root element!";
 		final StringWriter stringOut = new StringWriter();
 		try {
@@ -500,11 +499,11 @@ public final class Dom {
 		}
 		return stringOut.toString();
 	}
-
+	
 	/** @param root
 	 * @return string */
 	public static final TransferCopier toXmlReadableBinary(final Element root) {
-
+		
 		assert root != null : "NULL root element!";
 		final TransferCollector collector = Transfer.createCollector();
 		final OutputStream output = collector.getOutputStream();
@@ -524,11 +523,11 @@ public final class Dom {
 		/** collector is closed by try ^^^ */
 		return collector.toCloneFactory();
 	}
-
+	
 	/** @param root
 	 * @param os */
 	public static final void toXmlReadableStream(final Element root, final OutputStream os) {
-
+		
 		assert root != null : "NULL root element!";
 		assert os != null : "NULL output stream!";
 		try {
@@ -545,11 +544,11 @@ public final class Dom {
 				: new Error(e.getMessage());
 		}
 	}
-
+	
 	/** @param root
 	 * @param os */
 	public static final void toXmlReadableWriter(final Element root, final Writer os) {
-
+		
 		assert root != null : "NULL root element!";
 		assert os != null : "NULL output stream!";
 		try {
@@ -566,9 +565,9 @@ public final class Dom {
 				: new Error(e.getMessage());
 		}
 	}
-
+	
 	private Dom() {
-
+		
 		// ignore
 	}
 }

@@ -5,8 +5,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
-import ru.myx.ae3.Engine;
 import ru.myx.ae3.base.BaseObject;
 import ru.myx.ae3.binary.Transfer;
 import ru.myx.ae3.binary.TransferBuffer;
@@ -20,17 +20,17 @@ import ru.myx.io.DataInputByteArrayReusable;
 import ru.myx.io.OutputStreamCounter;
 
 final class RecordResources implements Value<RecordResources>, ArsRecord {
-
+	
 	Class<?> anchor;
-
+	
 	TransferCopier content;
-
+	
 	String key;
-
+	
 	URL url;
-
+	
 	RecordResources(final Class<?> anchor, final String key) {
-
+		
 		assert anchor != null : "NULL value";
 		this.anchor = anchor;
 		this.key = key;
@@ -38,29 +38,16 @@ final class RecordResources implements Value<RecordResources>, ArsRecord {
 			? null
 			: anchor.getResource(key);
 	}
-
+	
 	@Override
 	public RecordResources baseValue() {
-
+		
 		return this;
 	}
-
-	Value<TransferCopier> getBinaryContent() {
-
-		try {
-			return this.url == null
-				? null
-				: this.content == null
-					? this.content = Transfer.createCopier(this.url.openStream())
-					: this.content;
-		} catch (final IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
+	
 	@Override
 	public long getBinaryContentLength() {
-
+		
 		if (this.url == null) {
 			return 0;
 		}
@@ -85,46 +72,46 @@ final class RecordResources implements Value<RecordResources>, ArsRecord {
 			throw new RuntimeException(e);
 		}
 	}
-
+	
 	@Override
 	public String getKeyString() {
-
+		
 		return this.key;
 	}
-
+	
 	@Override
 	public BaseObject getPrimitiveBaseValue() {
-
+		
 		return BaseObject.UNDEFINED;
 	}
-
+	
 	@Override
 	public Guid getPrimitiveGuid() {
-
+		
 		return null;
 	}
-
+	
 	@Override
 	public Object getPrimitiveValue() {
-
+		
 		return null;
 	}
-
+	
 	@Override
 	public boolean isBinary() {
-
+		
 		return this.url != null && !this.isContainer();
 	}
-
+	
 	@Override
 	public boolean isCharacter() {
-
+		
 		return false;
 	}
-
+	
 	@Override
 	public boolean isContainer() {
-
+		
 		if (this.url == null) {
 			return true;
 		}
@@ -165,7 +152,7 @@ final class RecordResources implements Value<RecordResources>, ArsRecord {
 			}
 			final String check = (buffer.remaining() > 1024
 				? buffer.toSubBuffer(0, 1024)
-				: buffer).toString(Engine.ENCODING_UTF8);
+				: buffer).toString(StandardCharsets.UTF_8);
 			final int pos = check.indexOf('\n');
 			if (pos == -1) {
 				return false;
@@ -193,17 +180,30 @@ final class RecordResources implements Value<RecordResources>, ArsRecord {
 		}
 		return this.url == null;
 	}
-
+	
 	@Override
 	public boolean isPrimitive() {
-
+		
 		// TODO Auto-generated method stub
 		return false;
 	}
-
+	
 	@Override
 	public String toString() {
-
+		
 		return "RESFSREC{" + this.key + "}";
+	}
+	
+	Value<TransferCopier> getBinaryContent() {
+		
+		try {
+			return this.url == null
+				? null
+				: this.content == null
+					? this.content = Transfer.createCopier(this.url.openStream())
+					: this.content;
+		} catch (final IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 }

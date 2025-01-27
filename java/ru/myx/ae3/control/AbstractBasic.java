@@ -76,12 +76,6 @@ public abstract class AbstractBasic<T extends AbstractBasic<?>> implements BaseH
 			: title;
 	}
 
-	/** @throws IllegalArgumentException */
-	protected void recalculate() throws IllegalArgumentException {
-
-		// empty
-	}
-
 	@Override
 	@SuppressWarnings("unchecked")
 	public final T setAttribute(final String name, final BaseObject value) {
@@ -105,6 +99,32 @@ public abstract class AbstractBasic<T extends AbstractBasic<?>> implements BaseH
 			this.recalculate();
 		}
 		return (T) this;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public final T setAttributes(final BaseObject map) {
+
+		if (map != null && Base.hasKeys(map)) {
+			for (final Iterator<String> keys = map.baseKeysOwn(); keys.hasNext();) {
+				final String key = keys.next();
+				this.setAttributeIntern(key, map.baseGet(key, BaseObject.UNDEFINED));
+			}
+		}
+		this.recalculate();
+		return (T) this;
+	}
+
+	@Override
+	public String toString() {
+
+		return "[object " + this.baseClass() + "(" + this.toStringDetails() + ")]";
+	}
+
+	/** @throws IllegalArgumentException */
+	protected void recalculate() throws IllegalArgumentException {
+
+		// empty
 	}
 
 	/** Call this method to prevent recalculation. Don't forget to call recalculate() explicitly.
@@ -180,26 +200,6 @@ public abstract class AbstractBasic<T extends AbstractBasic<?>> implements BaseH
 		if ("id".equals(name)) {
 			this.key = null;
 		}
-	}
-
-	@Override
-	@SuppressWarnings("unchecked")
-	public final T setAttributes(final BaseObject map) {
-
-		if (map != null && Base.hasKeys(map)) {
-			for (final Iterator<String> keys = map.baseKeysOwn(); keys.hasNext();) {
-				final String key = keys.next();
-				this.setAttributeIntern(key, map.baseGet(key, BaseObject.UNDEFINED));
-			}
-		}
-		this.recalculate();
-		return (T) this;
-	}
-
-	@Override
-	public String toString() {
-
-		return "[object " + this.baseClass() + "(" + this.toStringDetails() + ")]";
 	}
 
 	protected String toStringDetails() {

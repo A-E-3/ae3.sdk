@@ -31,31 +31,31 @@ import ru.myx.io.InputStreamNoCloseFilter;
 
 /** @author myx */
 public class SkinScanner extends BaseHostEmpty implements Runnable {
-	
+
 	private static final String OWNER = "SKIN-SCANNER";
-	
+
 	private static final SkinScanner SKIN_PRIVATE;
-	
+
 	private static final SkinScanner SKIN_PROTECTED;
-	
+
 	private static final SkinScanner SKIN_PUBLIC;
-	
+
 	static {
 		final Entry skinPrivate = Storage.PRIVATE.relative("resources/skin", TreeLinkType.PUBLIC_TREE_REFERENCE);
 		final Entry skinProtected = Storage.PROTECTED.relative("resources/skin", TreeLinkType.PUBLIC_TREE_REFERENCE);
 		final Entry skinPublic = Storage.PUBLIC.relative("resources/skin", TreeLinkType.PUBLIC_TREE_REFERENCE);
-		
+
 		SKIN_PRIVATE = new SkinScanner(skinPrivate, new TreeMap<String, Skinner>());
 		SKIN_PROTECTED = new SkinScanner(skinProtected, new TreeMap<String, Skinner>());
 		SKIN_PUBLIC = new SkinScanner(skinPublic, new TreeMap<String, Skinner>());
-		
+
 		SkinScanner.SKIN_PRIVATE.start();
 		SkinScanner.SKIN_PROTECTED.start();
 		SkinScanner.SKIN_PUBLIC.start();
 	}
-	
+
 	private static BaseObject getSkinSettingsForFile(final Entry file) throws Throwable {
-		
+
 		final Entry settingsFile = file.relative("skin.settings.xml", null);
 		if (settingsFile == null || !settingsFile.isExist()) {
 			return null;
@@ -63,14 +63,14 @@ public class SkinScanner extends BaseHostEmpty implements Runnable {
 		return Xml.toBase(
 				"skin: " + file.getLocation(),
 				settingsFile.toBinary().getBinaryContent().baseValue(),
-				null/* Engine.CHARSET_DEFAULT */,
+				null/* Charset.defaultCharset() */,
 				null,
 				null,
 				null);
 	}
-	
+
 	private static BaseObject getSkinSettingsForZip(final Entry file) throws Throwable {
-		
+
 		final InputStream inputStream = file.toBinary().getBinaryContent().baseValue().nextInputStream();
 		try (final ZipInputStream zipFile = new ZipInputStream(inputStream)) {
 			try (final InputStream filter = new InputStreamNoCloseFilter(zipFile)) {
@@ -85,12 +85,12 @@ public class SkinScanner extends BaseHostEmpty implements Runnable {
 			return null;
 		}
 	}
-	
+
 	/** @param ctx
 	 * @param name
 	 * @return */
 	public static final Skinner getContextSkinner(final ExecProcess ctx, final String name) {
-		
+
 		if (ctx != null) {
 			final BaseObject candidate = ctx.baseGet("$skins", BaseObject.UNDEFINED);
 			if (candidate instanceof SkinScanner) {
@@ -104,14 +104,14 @@ public class SkinScanner extends BaseHostEmpty implements Runnable {
 			return SkinScanner.getSystemSkinner(name);
 		}
 	}
-	
+
 	/** Searches among private (instance), protected (cluster) and public (bundled) skin sets in the
 	 * order of appearance.
 	 *
 	 * @param name
 	 * @return */
 	public static final Skinner getSystemSkinner(final String name) {
-		
+
 		{
 			final Skinner skinner = SkinScanner.SKIN_PRIVATE.getSkinner(name);
 			if (skinner != null) {
@@ -134,42 +134,42 @@ public class SkinScanner extends BaseHostEmpty implements Runnable {
 			return null;
 		}
 	}
-	
+
 	/** @param names
 	 *            - can be null
 	 * @return */
 	public static final Set<String> getSystemSkinnerNames(final Set<String> names) {
-		
+
 		SkinScanner.SKIN_PRIVATE.getSkinnerNames(names);
 		SkinScanner.SKIN_PROTECTED.getSkinnerNames(names);
 		SkinScanner.SKIN_PUBLIC.getSkinnerNames(names);
 		return names;
 	}
-	
+
 	private final Entry folder;
-	
+
 	private final Map<String, Skinner> previousSkinners;
-	
+
 	private final Map<String, Skinner> currentSkinners;
-	
+
 	private final Map<String, Skinner> target;
-	
+
 	private boolean started = false;
-	
+
 	private final Set<String> ignored = new TreeSet<>();
-	
+
 	/** @param folder
 	 * @param target */
 	public SkinScanner(final Entry folder, final Map<String, Skinner> target) {
-		
+
 		this.folder = folder;
 		this.currentSkinners = new TreeMap<>();
 		this.previousSkinners = new TreeMap<>();
 		this.target = target;
 	}
-	
+
 	private Skinner createSkinner(final String name, final boolean zip, final Entry file) {
-		
+
 		try {
 			final BaseObject settings = zip
 				? SkinScanner.getSkinSettingsForZip(file)
@@ -213,9 +213,9 @@ public class SkinScanner extends BaseHostEmpty implements Runnable {
 			return null;
 		}
 	}
-	
+
 	private final void scan() {
-		
+
 		final Set<String> left = Create.tempSet(this.currentSkinners.keySet());
 		final Set<String> invalid = Create.tempSet();
 		for (final Map.Entry<String, Skinner> current : this.currentSkinners.entrySet()) {
@@ -260,12 +260,12 @@ public class SkinScanner extends BaseHostEmpty implements Runnable {
 			Report.info(SkinScanner.OWNER, "Skin '" + remove + "' removed");
 		}
 	}
-	
+
 	/**
 	 *
 	 */
 	public void destroy() {
-		
+
 		if (this.started) {
 			for (final String remove : this.currentSkinners.keySet()) {
 				this.target.put(remove, this.previousSkinners.remove(remove));
@@ -275,19 +275,19 @@ public class SkinScanner extends BaseHostEmpty implements Runnable {
 			this.started = false;
 		}
 	}
-	
+
 	/** @param name
 	 * @return */
 	public Skinner getSkinner(final String name) {
-		
+
 		return this.currentSkinners.get(name);
 	}
-	
+
 	/** @param names
 	 *            - can be null
 	 * @return */
 	public Set<String> getSkinnerNames(Set<String> names) {
-		
+
 		if (!this.currentSkinners.isEmpty()) {
 			if (names == null) {
 				names = new TreeSet<>();
@@ -296,10 +296,10 @@ public class SkinScanner extends BaseHostEmpty implements Runnable {
 		}
 		return names;
 	}
-	
+
 	@Override
 	public final void run() {
-		
+
 		if (!this.started) {
 			return;
 		}
@@ -308,21 +308,21 @@ public class SkinScanner extends BaseHostEmpty implements Runnable {
 			Act.later(null, this, 15_000L + Engine.createRandom(10000));
 		}
 	}
-	
+
 	/**
 	 *
 	 */
 	public void start() {
-		
+
 		if (!this.started) {
 			this.started = true;
 			this.run();
 		}
 	}
-	
+
 	@Override
 	public String toString() {
-		
+
 		return this.getClass().getSimpleName() + "(" + this.folder.getLocation() + ")";
 	}
 }

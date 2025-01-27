@@ -28,6 +28,11 @@ class PropertiesStringHashMap extends HashMap<String, BasePropertyData<String>> 
 		this.add(name2, property2);
 	}
 
+	PropertiesStringHashMap(final int initialCapacity, final float loadFactor) {
+		
+		super(initialCapacity, loadFactor);
+	}
+
 	@Override
 	public BaseProperties<String> add(final BaseObject instance, final BasePrimitiveString name, final BaseProperty property, final short attributes) {
 
@@ -119,17 +124,19 @@ class PropertiesStringHashMap extends HashMap<String, BasePropertyData<String>> 
 				} else {
 					replaced.prev.next = replaced.next;
 					replaced.next.prev = replaced.prev;
-					replaced.prev = null;
-					/** don't clear removed.next here used for enumeration:
-					 * <p>
-					 * Properties of the object being enumerated may be deleted during enumeration.
-					 * If a property that has not yet been visited during enumeration is deleted,
-					 * then it will not be visited. If new properties are added to the object being
-					 * enumerated during enumeration, the newly added properties are not guaranteed
-					 * to be visited in the active enumeration. Deleted: The mechanics of
-					 * enumerating the properties (step 5 in the first algorithm, step 6 in the
-					 * second) is implementation dependent. The order of enumeration is defined by
-					 * the object. */
+					replaced.prev = null;/** don't clear removed.next here used for enumeration:
+											 * <p>
+											 * Properties of the object being enumerated may be
+											 * deleted during enumeration. If a property that has
+											 * not yet been visited during enumeration is deleted,
+											 * then it will not be visited. If new properties are
+											 * added to the object being enumerated during
+											 * enumeration, the newly added properties are not
+											 * guaranteed to be visited in the active enumeration.
+											 * Deleted: The mechanics of enumerating the properties
+											 * (step 5 in the first algorithm, step 6 in the second)
+											 * is implementation dependent. The order of enumeration
+											 * is defined by the object. */
 				}
 			}
 		}

@@ -22,33 +22,33 @@ import ru.myx.ae3.base.BasePrimitiveString;
 import ru.myx.ae3.help.Format;
 
 final class CopierFileComplete implements BaseObjectNoOwnProperties, TransferCopier {
-	
+
 	private final File file;
-
+	
 	CopierFileComplete(final File file) throws IllegalArgumentException {
-
+		
 		assert file != null : "file is null";
 		if (!file.isFile()) {
 			throw new IllegalArgumentException("file '" + file.getAbsolutePath() + "' doesn't exist or not a file!");
 		}
 		this.file = file;
 	}
-
+	
 	@Override
 	public BasePrimitiveString baseToString() {
-		
+
 		return Base.forString("[" + this.getClass().getSimpleName() + " size=" + Format.Compact.toBytes(this.file.length()) + "]");
 	}
-
+	
 	@Override
 	public final CopierFileComplete baseValue() {
-		
+
 		return this;
 	}
-
+	
 	@Override
 	public int compareTo(final TransferCopier o) {
-		
+
 		if (o == null) {
 			return 1;
 		}
@@ -63,10 +63,10 @@ final class CopierFileComplete implements BaseObjectNoOwnProperties, TransferCop
 			throw new RuntimeException(e);
 		}
 	}
-
+	
 	@Override
 	public int copy(final long start, final byte[] target, final int offset, final int count) throws ConcurrentModificationException {
-		
+
 		final long available = this.file.length();
 		if (start >= available) {
 			return 0;
@@ -82,28 +82,28 @@ final class CopierFileComplete implements BaseObjectNoOwnProperties, TransferCop
 			throw new RuntimeException("Error reading file contents", e);
 		}
 	}
-
+	
 	@Override
 	public final MessageDigest getMessageDigest() {
-		
+
 		return this.updateMessageDigest(Engine.getMessageDigestInstance());
 	}
-
+	
 	@Override
 	public final long length() {
-		
+
 		return this.file.length();
 	}
-
+	
 	@Override
 	public final TransferBuffer nextCopy() {
-		
+
 		return new BufferFileComplete(this.file);
 	}
-
+	
 	@Override
 	public byte[] nextDirectArray() throws ConcurrentModificationException {
-		
+
 		try (final RandomAccessFile in = new RandomAccessFile(this.file, "r")) {
 			final long remaining = in.length();
 			if (remaining > Integer.MAX_VALUE) {
@@ -116,56 +116,50 @@ final class CopierFileComplete implements BaseObjectNoOwnProperties, TransferCop
 			throw new RuntimeException("Error reading file contents", e);
 		}
 	}
-
+	
 	@Override
 	public final FileInputStream nextInputStream() throws FileNotFoundException {
-		
+
 		return new FileInputStream(this.file);
 	}
-
+	
 	@Override
 	public final InputStreamReader nextReaderUtf8() throws FileNotFoundException {
-		
+
 		return new InputStreamReader(new FileInputStream(this.file), StandardCharsets.UTF_8);
 	}
-
+	
 	@Override
 	public TransferCopier slice(final long start, final long count) throws ConcurrentModificationException {
-		
+
 		final long length = this.file.length();
 		if (start >= length) {
 			return TransferCopier.NUL_COPIER;
 		}
 		return new CopierFilePart(this.file, start, Math.min(start + count, length));
 	}
-
+	
 	@Override
 	public final String toString() {
-		
+
 		return this.toString(Charset.defaultCharset());
 	}
-
+	
 	@Override
 	public final String toString(final Charset charset) {
-		
+
 		return this.nextCopy().toString(charset);
 	}
-
+	
 	@Override
 	public final String toString(final String encoding) throws UnsupportedEncodingException {
-		
+
 		return this.nextCopy().toString(encoding);
 	}
-
-	@Override
-	public String toStringUtf8() {
-		
-		return this.nextCopy().toString(StandardCharsets.UTF_8);
-	}
-
+	
 	@Override
 	public final MessageDigest updateMessageDigest(final MessageDigest digest) {
-		
+
 		return this.nextCopy().updateMessageDigest(digest);
 	}
 }
