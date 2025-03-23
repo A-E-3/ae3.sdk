@@ -29,14 +29,14 @@ final class TKO_ACALLS_CBA_AVS_S extends TokenOperator {
 
 	private final int constant;
 
-	TKO_ACALLS_CBA_AVS_S(final TokenInstruction callPropertyName, final TokenInstruction arguments, final int constant) {
+	TKO_ACALLS_CBA_AVS_S(final TokenInstruction accessProperty, final TokenInstruction arguments, final int constant) {
 
 		assert constant > 1 : constant == 0
 			? "Use " + TKO_ACALLV_BA_VS_S.class.getSimpleName() + " then"
 			: "Use " + TKO_ACALLO_CBA_AVS_S.class.getSimpleName() + " then";
 		assert arguments.assertZeroStackOperands();
-		assert callPropertyName.assertStackValue();
-		this.accessProperty = callPropertyName;
+		assert accessProperty.assertStackValue();
+		this.accessProperty = accessProperty;
 		this.arguments = arguments;
 		this.constant = constant;
 	}
@@ -44,7 +44,7 @@ final class TKO_ACALLS_CBA_AVS_S extends TokenOperator {
 	@Override
 	public final String getNotation() {
 
-		return "[" + this.accessProperty.getNotation() + "]( " + this.arguments.getNotation() + " )";
+		return this.accessProperty.getNotationAccess() + "( " + this.arguments.getNotation() + " )";
 	}
 
 	@Override
@@ -86,18 +86,18 @@ final class TKO_ACALLS_CBA_AVS_S extends TokenOperator {
 	@Override
 	public void toAssembly(final ProgramAssembly assembly, final ModifierArgument argumentA, final ModifierArgument argumentB, final ResultHandlerBasic store) {
 
-		/** argumentA is access source, this.argumentB is access key */
+		/** argumentA is access object */
 		assert argumentA != null;
 		assert argumentB == null;
 		
-		assert argumentA != ModifierArguments.AA0RB;
+		assert argumentA != ModifierArguments.AA0RB : "this.isDirectSupported: " + this.isDirectSupported();
 
-		final ModifierArgument accessPropertyModifier = this.accessProperty.toDirectModifier();
-		final boolean accessPropertyDirect = accessPropertyModifier == ModifierArguments.AA0RB;
+		final ModifierArgument modifierProperty = this.accessProperty.toDirectModifier();
+		final boolean directProperty = modifierProperty == ModifierArguments.AA0RB;
 
 		if (argumentA == ModifierArguments.AE21POP) {
-			if (accessPropertyDirect) {
-				this.accessProperty.toAssembly(assembly, null, null, ResultHandler.FB_BSN_NXT);
+			if (directProperty) {
+				this.accessProperty.toAssembly(assembly, null, null, ResultHandler.FA_BNN_NXT);
 			}
 			assembly.addInstruction(
 					(this.accessProperty.getResultType() == InstructionResult.STRING
@@ -105,9 +105,9 @@ final class TKO_ACALLS_CBA_AVS_S extends TokenOperator {
 						: OperationsA2X.XACCESS_D)//
 								.instruction(
 										ModifierArguments.AE22PEEK, //
-										accessPropertyDirect
-											? ModifierArguments.AE21POP
-											: accessPropertyModifier,
+										directProperty
+											? ModifierArguments.AA0RB
+											: modifierProperty,
 										0,
 										ResultHandler.FB_BSN_NXT));
 			this.arguments.toAssembly(assembly, null, null, ResultHandler.FB_BSN_NXT);
@@ -116,7 +116,7 @@ final class TKO_ACALLS_CBA_AVS_S extends TokenOperator {
 		}
 
 		if (this.constant > VIFmtA21.CNST_MAX) {
-			if (accessPropertyDirect) {
+			if (directProperty) {
 				this.accessProperty.toAssembly(assembly, null, null, ResultHandler.FB_BSN_NXT);
 			}
 			this.arguments.toAssembly(assembly, null, null, ResultHandler.FB_BSN_NXT);
@@ -125,16 +125,16 @@ final class TKO_ACALLS_CBA_AVS_S extends TokenOperator {
 					OperationsA3X.XACALLM//
 							.instruction(
 									argumentA, //
-									accessPropertyDirect
+									directProperty
 										? ModifierArguments.AE21POP
-										: accessPropertyModifier,
+										: modifierProperty,
 									ModifierArguments.AA0RB,
 									0,
 									store));
 			return;
 		}
 
-		if (accessPropertyDirect) {
+		if (directProperty) {
 			this.arguments.toAssembly(assembly, null, null, ResultHandler.FB_BSN_NXT);
 			this.accessProperty.toAssembly(assembly, null, null, ResultHandler.FA_BNN_NXT);
 			assembly.addInstruction(
@@ -166,7 +166,7 @@ final class TKO_ACALLS_CBA_AVS_S extends TokenOperator {
 					: OperationsA2X.XACALLS)//
 							.instruction(
 									useArgumentA, //
-									accessPropertyModifier,
+									modifierProperty,
 									this.constant,
 									store));
 		// assert false : "this=" + assembly.toProgram( start ).toCode();

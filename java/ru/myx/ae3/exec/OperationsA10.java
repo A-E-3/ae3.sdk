@@ -220,7 +220,7 @@ public enum OperationsA10 implements OperationA10 {
 
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final int constant, final ResultHandler store) {
 
-			return ctx.vmCallTS(argumentA, constant, store);
+			return ctx.vmCall_RCALL_SaS(argumentA, constant, store);
 		}
 
 		@Override
@@ -257,7 +257,7 @@ public enum OperationsA10 implements OperationA10 {
 				}
 				return ctx.vmRaise("Not a function: class=" + argumentA.getClass().getName());
 			}
-			return ctx.vmCallS(callee, ctx.contextImplicitThisValue(), constant, store);
+			return ctx.vmCall_Generic_StackArgs(callee, ctx.contextImplicitThisValue(), constant, store);
 		}
 
 		@Override
@@ -401,6 +401,38 @@ public enum OperationsA10 implements OperationA10 {
 
 			return true;
 		}
+	},
+	/** SKIP CHECK ACCESS for RCALLA
+	 *
+	 * get 2 arguments, make 2 stack (thisValue and callee)
+	 *
+	 * if callee is undefined, do STORE, otherwise return null and IGNORE store **/
+	XFCALLPREP {
+
+		@Override
+		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final int constant, final ResultHandler store) {
+
+			if (argumentA.baseValue() == null) {
+				return store.execReturnUndefined(ctx);
+			}
+
+			final BaseObject candidate = argumentA.baseCall();
+
+			ctx.stackPush(ctx.contextImplicitThisValue());
+			ctx.stackPush(
+					ctx.ra0RB = candidate == null
+						? BaseObject.UNDEFINED
+						: candidate);
+
+			return null;
+		}
+
+		@Override
+		public final InstructionResult getResultType() {
+
+			return null;
+		}
+
 	},
 	/**
 	 *
@@ -640,6 +672,68 @@ public enum OperationsA10 implements OperationA10 {
 		@SuppressWarnings("boxing")
 		private final Integer ZERO = 0;
 
+		private final ExecStateCode executeJava(final ExecProcess ctx, final Object argumentA, final int constant, final ResultHandler store) {
+
+			if (argumentA instanceof final Object[] array) {
+				/** only for ITRPREPV - java array values */
+				ctx.ri11II = this.IMPL_BASE_ITERATOR;
+				ctx.ri13IV = Arrays.asList(array).iterator();
+				return null;
+			}
+			if (argumentA instanceof final Value<?> valueObject) {
+				final Object baseValue = valueObject.baseValue();
+				if (baseValue != null && baseValue != argumentA) {
+					if (baseValue instanceof final BaseObject baseObject) {
+						return this.execute(ctx, baseObject, constant, store);
+					}
+					if (baseValue instanceof final Object[] array) {
+						/** only for ITRPREPV - java array values */
+						ctx.ri11II = this.IMPL_BASE_ITERATOR;
+						ctx.ri13IV = Arrays.asList(array).iterator();
+						return null;
+					}
+					if (baseValue instanceof final Map<?, ?> baseMap) {
+						// old ORDER implementation - must be supported here or
+						// on
+						// ObjectCreation stage
+						// Map
+						ctx.ri11II = this.IMPL_BASE_ITERATOR_VALUE;
+						final Object order = baseMap.get("$ORDER");
+						if (order != null) {
+							if (order instanceof final Object[] array) {
+								if (array.length + 1 == ((Map<?, ?>) baseValue).size()) {
+									ctx.ri13IV = Arrays.asList((Object[]) order).iterator();
+									return null;
+								}
+							} else //
+							if (order instanceof final Collection<?> collection) {
+								if (collection.size() + 1 == ((Map<?, ?>) baseValue).size()) {
+									ctx.ri13IV = collection.iterator();
+									return null;
+								}
+							}
+						}
+						{
+							ctx.ri13IV = Base.forUnknown(baseMap.keySet().iterator());
+							return null;
+						}
+					}
+					if (baseValue instanceof final Iterable<?> iterable) {
+						/** only for ITRPREPV - collection values */
+						ctx.ri11II = this.IMPL_BASE_ITERATOR;
+						ctx.ri13IV = iterable.iterator();
+						return null;
+					}
+				}
+			}
+			{
+				ctx.ri12IA = BaseObject.NULL;
+				ctx.ri11II = null;
+				ctx.ri13IV = null;
+				return null;
+			}
+		}
+
 		@Override
 
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final int constant, final ResultHandler store) {
@@ -726,68 +820,6 @@ public enum OperationsA10 implements OperationA10 {
 					ctx.ri11II = null;
 					ctx.ri13IV = null;
 				}
-				return null;
-			}
-		}
-
-		private final ExecStateCode executeJava(final ExecProcess ctx, final Object argumentA, final int constant, final ResultHandler store) {
-
-			if (argumentA instanceof final Object[] array) {
-				/** only for ITRPREPV - java array values */
-				ctx.ri11II = this.IMPL_BASE_ITERATOR;
-				ctx.ri13IV = Arrays.asList(array).iterator();
-				return null;
-			}
-			if (argumentA instanceof final Value<?> valueObject) {
-				final Object baseValue = valueObject.baseValue();
-				if (baseValue != null && baseValue != argumentA) {
-					if (baseValue instanceof final BaseObject baseObject) {
-						return this.execute(ctx, baseObject, constant, store);
-					}
-					if (baseValue instanceof final Object[] array) {
-						/** only for ITRPREPV - java array values */
-						ctx.ri11II = this.IMPL_BASE_ITERATOR;
-						ctx.ri13IV = Arrays.asList(array).iterator();
-						return null;
-					}
-					if (baseValue instanceof final Map<?, ?> baseMap) {
-						// old ORDER implementation - must be supported here or
-						// on
-						// ObjectCreation stage
-						// Map
-						ctx.ri11II = this.IMPL_BASE_ITERATOR_VALUE;
-						final Object order = baseMap.get("$ORDER");
-						if (order != null) {
-							if (order instanceof final Object[] array) {
-								if (array.length + 1 == ((Map<?, ?>) baseValue).size()) {
-									ctx.ri13IV = Arrays.asList((Object[]) order).iterator();
-									return null;
-								}
-							} else //
-							if (order instanceof final Collection<?> collection) {
-								if (collection.size() + 1 == ((Map<?, ?>) baseValue).size()) {
-									ctx.ri13IV = collection.iterator();
-									return null;
-								}
-							}
-						}
-						{
-							ctx.ri13IV = Base.forUnknown(baseMap.keySet().iterator());
-							return null;
-						}
-					}
-					if (baseValue instanceof final Iterable<?> iterable) {
-						/** only for ITRPREPV - collection values */
-						ctx.ri11II = this.IMPL_BASE_ITERATOR;
-						ctx.ri13IV = iterable.iterator();
-						return null;
-					}
-				}
-			}
-			{
-				ctx.ri12IA = BaseObject.NULL;
-				ctx.ri11II = null;
-				ctx.ri13IV = null;
 				return null;
 			}
 		}
@@ -1213,7 +1245,7 @@ public enum OperationsA10 implements OperationA10 {
 				}
 				return ctx.vmRaise("Not a function: key=" + argumentB.baseToString() + ", class=" + candidate.getClass().getName());
 			}
-			return ctx.vmCallS(callee, argumentA, constant, store);
+			return ctx.vmCall_Generic_StackArgs(callee, argumentA, constant, store);
 		}
 
 		@Override
@@ -1295,17 +1327,17 @@ public enum OperationsA10 implements OperationA10 {
 	 * @return */
 	public abstract InstructionResult getResultType();
 
+	@Override
+	public boolean isConstantForArguments() {
+
+		return false;
+	}
+
 	Instruction instructionCached(//
 			final ModifierArgument argumentA,
 			final int constant,
 			final ResultHandler store) {
 
 		return InstructionA10.instructionCached(this.instruction(argumentA, constant, store));
-	}
-
-	@Override
-	public boolean isConstantForArguments() {
-
-		return false;
 	}
 }

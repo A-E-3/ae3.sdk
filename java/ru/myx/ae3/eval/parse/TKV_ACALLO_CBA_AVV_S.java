@@ -53,21 +53,21 @@ final class TKV_ACALLO_CBA_AVV_S extends TokenValue {
 		assert argumentB == null;
 		
 		final ModifierArgument modifierArgument = this.argument.toDirectModifier();
-		final ModifierArgument modifierB = this.accessProperty.toDirectModifier();
-		final ModifierArgument modifierA = this.accessObject.toDirectModifier();
+		final ModifierArgument modifierProperty = this.accessProperty.toDirectModifier();
+		final ModifierArgument modifierObject = this.accessObject.toDirectModifier();
 		final boolean directArgument = modifierArgument == ModifierArguments.AA0RB;
-		final boolean directB = modifierB == ModifierArguments.AA0RB;
-		final boolean directA = modifierA == ModifierArguments.AA0RB;
-		if (directA) {
+		final boolean directProperty = modifierProperty == ModifierArguments.AA0RB;
+		final boolean directObject = modifierObject == ModifierArguments.AA0RB;
+		if (directObject) {
 			this.accessObject.toAssembly(
 					assembly, //
 					null,
 					null,
-					directB || directArgument
+					directProperty || directArgument
 						? ResultHandler.FB_BSN_NXT
 						: ResultHandler.FA_BNN_NXT);
 		}
-		if (directB) {
+		if (directProperty) {
 			this.accessProperty.toAssembly(
 					assembly, //
 					null,
@@ -83,12 +83,12 @@ final class TKV_ACALLO_CBA_AVV_S extends TokenValue {
 		assembly.addInstruction(
 				OperationsA3X.XACALLO//
 						.instruction(
-								directA && (directB || directArgument)
+								directObject && (directProperty || directArgument)
 									? ModifierArguments.AE21POP
-									: modifierA, //
-								directB && directArgument
+									: modifierObject, //
+								directProperty && directArgument
 									? ModifierArguments.AE21POP
-									: modifierB,
+									: modifierProperty,
 								modifierArgument,
 								0,
 								store));

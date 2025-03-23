@@ -12,7 +12,7 @@ import ru.myx.ae3.eval.tokens.TokenSyntax;
 import ru.myx.ae3.exec.ProgramAssembly;
 
 /** @author myx */
-final class TKS_EOCO extends TokenSyntax {
+final class TKS_EOCO extends TokenSyntax implements TokenSyntax.ConditionalStackValuable {
 
 	@Override
 	public final String getNotation() {
@@ -33,19 +33,22 @@ final class TKS_EOCO extends TokenSyntax {
 	}
 
 	@Override
+	public ConditionType getSkipCondition() {
+
+		return TokenInstruction.ConditionType.NULLISH_YES;
+	}
+
+	@Override
 	public final boolean isConstantForArguments() {
 
 		/** ??? constant for constant arguments ??? false maybe: it could be anything on right-hand
 		 * side... */
 		return true;
 	}
-
+	
 	@Override
 	public final TokenInstruction toStackValue(final ProgramAssembly assembly, final TokenInstruction argumentA, final TokenInstruction argumentB, final boolean sideEffectsOnly)
 			throws Evaluate.CompilationException {
-
-		// System.out.println(">>> >>> TKS_EOCO TSV: a: " + argumentA + ", b: " + argumentB + ",
-		// effectsOnly: " + sideEffectsOnly + ", bClass: " + argumentB.getClass().getName());
 
 		return new TKV_EOCO(argumentA.toExecDetachableResult(), argumentB);
 	}

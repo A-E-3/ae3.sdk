@@ -42,13 +42,16 @@ public enum OperationsS2X implements OperationA2X {
 			if (callee == null) {
 				if (candidate == BaseObject.UNDEFINED) {
 					return ctx.vmRaise(
-							Format.Compact.baseObject(argumentA) + " has no property called " //
-									+ Format.Compact.baseObject(argumentB));
+							(argumentA == ctx
+								? "Context has no property called "
+								: Format.Compact.baseObject(argumentA) + " has no property called ") //
+									+ Format.Compact.baseObject(argumentB))//
+					;
 				}
 				return ctx.vmRaise("Not a function: key=" + argumentB.baseToJavaString() + ", class=" + candidate.getClass().getName());
 			}
 
-			return ctx.vmCallS(callee, argumentA, constant, store);
+			return ctx.vmCall_Generic_StackArgs(callee, argumentA, constant, store);
 		}
 
 		@Override
@@ -82,8 +85,6 @@ public enum OperationsS2X implements OperationA2X {
 
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
 
-			assert argumentA != ctx : "Use LOAD";
-
 			return argumentA.vmPropertyRead(ctx, argumentB.baseToJavaInteger(), argumentB, BaseObject.UNDEFINED, store);
 		}
 
@@ -111,8 +112,6 @@ public enum OperationsS2X implements OperationA2X {
 		@Override
 
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
-
-			assert argumentA != ctx : "Use LOAD";
 
 			return argumentA.vmPropertyRead(ctx, (CharSequence) argumentB, argumentB, BaseObject.UNDEFINED, store);
 		}
@@ -171,8 +170,6 @@ public enum OperationsS2X implements OperationA2X {
 
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
 
-			assert argumentA != ctx : "Use LOAD";
-
 			return argumentA.vmPropertyRead(ctx, argumentB, BaseObject.UNDEFINED, store);
 		}
 
@@ -207,8 +204,6 @@ public enum OperationsS2X implements OperationA2X {
 
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
 
-			assert argumentA != ctx : "Use LOAD";
-
 			return argumentA.vmPropertyRead(ctx, (CharSequence) argumentB, argumentB, BaseObject.UNDEFINED, store);
 		}
 
@@ -242,8 +237,6 @@ public enum OperationsS2X implements OperationA2X {
 		@Override
 
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
-
-			assert argumentA != ctx : "Use LOAD";
 
 			return argumentA.vmPropertyRead(ctx, argumentB.baseToJavaInteger(), argumentB, BaseObject.UNDEFINED, store);
 		}

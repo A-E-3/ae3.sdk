@@ -20,24 +20,24 @@ final class TKV_ACALLO_CBA_AVM_S extends TokenValue {
 	
 	private final ModifierArgument accessObjectModifier;
 	
-	private final TokenInstruction argumentB;
+	private final TokenInstruction accessProperty;
 	
 	private final TokenInstruction argument;
 	
-	TKV_ACALLO_CBA_AVM_S(final ModifierArgument accessObjectModifier, final TokenInstruction argumentB, final TokenInstruction argument) {
+	TKV_ACALLO_CBA_AVM_S(final ModifierArgument accessObjectModifier, final TokenInstruction accessProperty, final TokenInstruction argument) {
 		assert argument.assertStackValue();
 		assert accessObjectModifier != null;
-		assert argumentB.assertStackValue();
+		assert accessProperty.assertStackValue();
 		assert accessObjectModifier != ModifierArguments.AE21POP && accessObjectModifier != ModifierArguments.AA0RB;
 		this.accessObjectModifier = accessObjectModifier;
-		this.argumentB = argumentB;
+		this.accessProperty = accessProperty;
 		this.argument = argument.toExecDetachableResult();
 	}
 	
 	@Override
 	public final String getNotation() {
 		
-		return "" + this.accessObjectModifier + "." + this.argumentB.getNotation() + "( " + this.argument.getNotation() + " )";
+		return "" + this.accessObjectModifier + "." + this.accessProperty.getNotation() + "( " + this.argument.getNotation() + " )";
 	}
 	
 	@Override
@@ -53,11 +53,11 @@ final class TKV_ACALLO_CBA_AVM_S extends TokenValue {
 		assert argumentB == null;
 		
 		final ModifierArgument modifierArgument = this.argument.toDirectModifier();
-		final ModifierArgument modifierB = this.argumentB.toDirectModifier();
+		final ModifierArgument modifierProperty = this.accessProperty.toDirectModifier();
 		final boolean directArgument = modifierArgument == ModifierArguments.AA0RB;
-		final boolean directB = modifierB == ModifierArguments.AA0RB;
-		if (directB) {
-			this.argumentB.toAssembly(
+		final boolean directProperty = modifierProperty == ModifierArguments.AA0RB;
+		if (directProperty) {
+			this.accessProperty.toAssembly(
 					assembly, //
 					null,
 					null,
@@ -72,9 +72,9 @@ final class TKV_ACALLO_CBA_AVM_S extends TokenValue {
 		assembly.addInstruction(OperationsA3X.XACALLO//
 				.instruction(
 						this.accessObjectModifier, //
-						directB && directArgument
+						directProperty && directArgument
 							? ModifierArguments.AE21POP
-							: modifierB,
+							: modifierProperty,
 						modifierArgument,
 						0,
 						store));

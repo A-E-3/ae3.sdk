@@ -21,7 +21,7 @@ public enum OperationsS10 implements OperationA10 {
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final int constant, final ResultHandler store) {
 
 			/** sorry, no gain from knowing that argumentA instance of CHarSequence 8( **/
-			return ctx.vmCallTS(argumentA, constant, store);
+			return ctx.vmCall_RCALL_SaS(argumentA, constant, store);
 		}
 
 		@Override

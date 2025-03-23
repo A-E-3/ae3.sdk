@@ -18,17 +18,17 @@ import ru.myx.ae3.exec.ResultHandlerBasic;
 
 final class TKV_ZTCALLV_A_V_S extends TokenValue {
 	
-	private final TokenInstruction argumentA;
+	private final TokenInstruction accessProperty;
 	
-	TKV_ZTCALLV_A_V_S(final TokenInstruction argumentA) {
-		assert argumentA.assertStackValue();
-		this.argumentA = argumentA;
+	TKV_ZTCALLV_A_V_S(final TokenInstruction accessProperty) {
+		assert accessProperty.assertStackValue();
+		this.accessProperty = accessProperty;
 	}
 	
 	@Override
 	public final String getNotation() {
 		
-		return "this." + this.argumentA.getNotation() + "()";
+		return "this." + this.accessProperty.getNotation() + "()";
 	}
 	
 	@Override
@@ -51,12 +51,12 @@ final class TKV_ZTCALLV_A_V_S extends TokenValue {
 		 */
 		assert store != null;
 		
-		final ModifierArgument modifierB = this.argumentA.toDirectModifier();
-		if (modifierB == ModifierArguments.AA0RB) {
-			this.argumentA.toAssembly(assembly, null, null, ResultHandler.FA_BNN_NXT);
+		final ModifierArgument modifierProperty = this.accessProperty.toDirectModifier();
+		if (modifierProperty == ModifierArguments.AA0RB) {
+			this.accessProperty.toAssembly(assembly, null, null, ResultHandler.FA_BNN_NXT);
 		}
 		assembly.addInstruction(OperationsA10.ZTCALLS //
-				.instruction(modifierB, 0, store));
+				.instruction(modifierProperty, 0, store));
 	}
 	
 	@Override

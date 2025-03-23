@@ -66,140 +66,6 @@ public class Shell extends AbstractShellCommand {
 		Shell.registerCommand(new Shell());
 	}
 
-	/** @param argument
-	 * @return */
-	// TODO: use context pwd etc for argument expansion?
-	public static final Set<String> calculateOptions(final String argument) {
-
-		final Set<String> result = new TreeSet<>();
-		for (final char c : argument.toCharArray()) {
-			result.add(String.valueOf(c));
-		}
-		return result;
-	}
-
-	/** @param ctx
-	 * @param args
-	 * @return Anything but REPEAT */
-	public static final ExecStateCode exec(final ExecProcess ctx, final BaseArray args) {
-
-		if (args == null || args.length() == 0) {
-			return ctx.vmSetCallResultFalse();
-		}
-		final String name = Base.getFirstString(args, null);
-		final ShellCommand cmd = Shell.getCommand(name);
-		if (cmd == null) {
-			return ctx.vmRaise("unknown command: " + name);
-		}
-		final ExecArguments arguments = ExecArgumentsListXWrapped.createArguments(args);
-		for (;;) {
-			final ExecStateCode code = cmd.execCallPrepare(ctx, ctx, ResultHandler.FA_BNN_NXT, true, arguments);
-			if (code != ExecStateCode.REPEAT) {
-				return code;
-			}
-		}
-	}
-
-	/** @param ctx
-	 * @param commandLine
-	 * @return */
-	public static final ExecStateCode exec(final ExecProcess ctx, final String commandLine) {
-
-		final BaseList<String> argumentList = BaseObject.createArray(4);
-		final ExecStateCode code = Shell.parseCommandLine(ctx, commandLine, argumentList);
-		if (code != null) {
-			return code;
-		}
-		if (argumentList.isEmpty()) {
-			ctx.vmRaise("Command-line is empty!");
-		}
-		return Shell.exec(ctx, argumentList);
-	}
-
-	/** @param ctx
-	 * @param args
-	 * @return */
-	public static final ExecStateCode exec(final ExecProcess ctx, final String[] args) {
-
-		if (args == null || args.length == 0) {
-			return ctx.vmSetCallResultFalse();
-		}
-		final String name = args[0];
-		final ShellCommand cmd = Shell.getCommand(name);
-		if (cmd == null) {
-			return ctx.vmRaise("unknown command: " + name);
-		}
-		final ExecArguments arguments = ExecArgumentsListXWrapped.createArguments(Base.forArray(args));
-		for (;;) {
-			final ExecStateCode code = cmd.execCallPrepare(ctx, ctx, ResultHandler.FA_BNN_NXT, true, arguments);
-			if (code != ExecStateCode.REPEAT) {
-				return code;
-			}
-		}
-	}
-
-	/** @param ctx
-	 * @param args
-	 * @return
-	 * @throws Exception */
-	public static final BaseObject execNative(final ExecProcess ctx, final BaseArray args) throws Exception {
-
-		final ExecStateCode code = Shell.exec(ctx, args);
-		if (code == null || code == ExecStateCode.NEXT) {
-			return ctx.vmGetResultDetachable();
-		}
-		if (code == ExecStateCode.ERROR) {
-			final BaseObject result = ctx.vmGetResultDetachable();
-			if (result instanceof Exception) {
-				throw (Exception) result;
-			}
-			if (result instanceof Error) {
-				throw (Error) result;
-			}
-			throw Exec.createThrown(result, ctx.contextGetDebug(), null);
-		}
-		throw new RuntimeException("Illegal state code: " + code);
-	}
-
-	/** @param ctx
-	 * @param commandLine
-	 * @return
-	 * @throws Exception */
-	public static final BaseObject execParse(final ExecProcess ctx, final String commandLine) throws Exception {
-
-		final ExecStateCode code = Shell.exec(ctx, commandLine);
-		if (code == null || code == ExecStateCode.NEXT) {
-			return ctx.vmGetResultDetachable();
-		}
-		if (code == ExecStateCode.ERROR) {
-			final BaseObject result = ctx.vmGetResultDetachable();
-			if (result instanceof Exception) {
-				throw (Exception) result;
-			}
-			if (result instanceof Error) {
-				throw (Error) result;
-			}
-			throw Exec.createThrown(result, ctx.contextGetDebug(), null);
-		}
-		throw new RuntimeException("Illegal state code: " + code);
-	}
-
-	/** @param ctx
-	 * @param console
-	 * @param commandLine
-	 * @return
-	 * @throws Exception */
-	public static final BaseObject executeNativeCommandWithConsole(final ExecProcess ctx, final Console console, final String commandLine) throws Exception {
-
-		final Console prev = ctx.getConsole();
-		try {
-			ctx.setConsole(console);
-			return Shell.execParse(ctx, commandLine);
-		} finally {
-			ctx.setConsole(prev);
-		}
-	}
-
 	/** @param ctx
 	 * @param pathCurrent
 	 * @param argumentList
@@ -405,60 +271,6 @@ public class Shell extends AbstractShellCommand {
 		return;
 	}
 
-	/** @param name
-	 * @return */
-	public static final ShellCommand getCommand(final String name) {
-
-		final ShellCommand command = Shell.COMMANDS.get(name);
-		if (command != null) {
-			return command.clone();
-		}
-		/** check for extension commands. */
-		{
-			final Entry e = Storage.UNION.relative("settings/shell/" + name + ".json", null);
-			if (e != null /* && e.isExist() */) {
-				final String source = e.toBinary().getBinaryContent().baseValue().toString(StandardCharsets.UTF_8);
-				final BaseObject o = LayoutEngine.parseJSLD(source);
-				final String type = Base.getString(o, "type", "");
-				if (!"ae3/Executable".equals(type)) {
-					Report.exception("SHELL", "invalid command", new Error("invalid command type: " + name + ", type=" + type));
-					return null;
-				}
-				final String reference = Base.getString(o, "reference", "");
-				if (reference.length() == 0) {
-					Report.exception("SHELL", "invalid command", new Error("command reference is empty: " + name));
-					return null;
-				}
-				return new ShellJsCommand(name, reference);
-			}
-		}
-
-		return null;
-	}
-
-	static final Map<String, ShellCommand> getCommands() {
-
-		final Entry e = Storage.UNION.relative("settings/shell/", null);
-		if (e == null || !e.isExist()) {
-			return Shell.COMMANDS;
-		}
-
-		final BaseList<Entry> children = e.toContainer().getContentCollection(null).baseValue();
-		if (children == null || children.length() == 0) {
-			return Shell.COMMANDS;
-		}
-
-		final Map<String, ShellCommand> result = Create.tempMap(Shell.COMMANDS);
-		for (final Entry child : children) {
-			final String key = child.getKey();
-			if (key.endsWith(".json")) {
-				final String name = key.substring(0, key.length() - 5);
-				result.put(name, Shell.getCommand(name));
-			}
-		}
-		return result;
-	}
-
 	/** @param ctx
 	 * @param commandLine
 	 * @param argumentList
@@ -549,10 +361,198 @@ public class Shell extends AbstractShellCommand {
 		return null;
 	}
 
+	/** @param argument
+	 * @return */
+	// TODO: use context pwd etc for argument expansion?
+	public static final Set<String> calculateOptions(final String argument) {
+
+		final Set<String> result = new TreeSet<>();
+		for (final char c : argument.toCharArray()) {
+			result.add(String.valueOf(c));
+		}
+		return result;
+	}
+
+	/** @param ctx
+	 * @param args
+	 * @return Anything but REPEAT */
+	public static final ExecStateCode exec(final ExecProcess ctx, final BaseArray args) {
+
+		if (args == null || args.length() == 0) {
+			return ctx.vmSetCallResultFalse();
+		}
+		final String name = Base.getFirstString(args, null);
+		final ShellCommand cmd = Shell.getCommand(name);
+		if (cmd == null) {
+			return ctx.vmRaise("unknown command: " + name);
+		}
+		final ExecArguments arguments = ExecArgumentsListXWrapped.createArguments(args);
+		for (;;) {
+			final ExecStateCode code = cmd.execCallPrepare(ctx, ctx, ResultHandler.FA_BNN_NXT, true, arguments);
+			if (code != ExecStateCode.REPEAT) {
+				return code;
+			}
+		}
+	}
+
+	/** @param ctx
+	 * @param commandLine
+	 * @return */
+	public static final ExecStateCode exec(final ExecProcess ctx, final String commandLine) {
+
+		final BaseList<String> argumentList = BaseObject.createArray(4);
+		final ExecStateCode code = Shell.parseCommandLine(ctx, commandLine, argumentList);
+		if (code != null) {
+			return code;
+		}
+		if (argumentList.isEmpty()) {
+			ctx.vmRaise("Command-line is empty!");
+		}
+		return Shell.exec(ctx, argumentList);
+	}
+
+	/** @param ctx
+	 * @param args
+	 * @return */
+	public static final ExecStateCode exec(final ExecProcess ctx, final String[] args) {
+
+		if (args == null || args.length == 0) {
+			return ctx.vmSetCallResultFalse();
+		}
+		final String name = args[0];
+		final ShellCommand cmd = Shell.getCommand(name);
+		if (cmd == null) {
+			return ctx.vmRaise("unknown command: " + name);
+		}
+		final ExecArguments arguments = ExecArgumentsListXWrapped.createArguments(Base.forArray(args));
+		for (;;) {
+			final ExecStateCode code = cmd.execCallPrepare(ctx, ctx, ResultHandler.FA_BNN_NXT, true, arguments);
+			if (code != ExecStateCode.REPEAT) {
+				return code;
+			}
+		}
+	}
+
+	/** @param ctx
+	 * @param args
+	 * @return
+	 * @throws Exception */
+	public static final BaseObject execNative(final ExecProcess ctx, final BaseArray args) throws Exception {
+
+		final ExecStateCode code = Shell.exec(ctx, args);
+		if (code == null || code == ExecStateCode.NEXT) {
+			return ctx.vmGetResultDetachable();
+		}
+		if (code == ExecStateCode.ERROR) {
+			final BaseObject result = ctx.vmGetResultDetachable();
+			if (result instanceof final Exception ee) {
+				throw ee;
+			}
+			if (result instanceof final Error ee) {
+				throw ee;
+			}
+			throw Exec.createThrown(result, ctx.contextGetDebug(), null);
+		}
+		throw new RuntimeException("Illegal state code: " + code);
+	}
+
+	/** @param ctx
+	 * @param commandLine
+	 * @return
+	 * @throws Exception */
+	public static final BaseObject execParse(final ExecProcess ctx, final String commandLine) throws Exception {
+
+		final ExecStateCode code = Shell.exec(ctx, commandLine);
+		if (code == null || code == ExecStateCode.NEXT) {
+			return ctx.vmGetResultDetachable();
+		}
+		if (code == ExecStateCode.ERROR) {
+			final BaseObject result = ctx.vmGetResultDetachable();
+			if (result instanceof final Exception ee) {
+				throw ee;
+			}
+			if (result instanceof final Error ee) {
+				throw ee;
+			}
+			throw Exec.createThrown(result, ctx.contextGetDebug(), null);
+		}
+		throw new RuntimeException("Illegal state code: " + code);
+	}
+
+	/** @param ctx
+	 * @param console
+	 * @param commandLine
+	 * @return
+	 * @throws Exception */
+	public static final BaseObject executeNativeCommandWithConsole(final ExecProcess ctx, final Console console, final String commandLine) throws Exception {
+
+		final Console prev = ctx.getConsole();
+		try {
+			ctx.setConsole(console);
+			return Shell.execParse(ctx, commandLine);
+		} finally {
+			ctx.setConsole(prev);
+		}
+	}
+
+	/** @param name
+	 * @return */
+	public static final ShellCommand getCommand(final String name) {
+
+		final ShellCommand command = Shell.COMMANDS.get(name);
+		if (command != null) {
+			return command.clone();
+		}
+		/** check for extension commands. */
+		{
+			final Entry e = Storage.UNION.relative("settings/shell/" + name + ".json", null);
+			if (e != null /* && e.isExist() */) {
+				final String source = e.toBinary().getBinaryContent().baseValue().toString(StandardCharsets.UTF_8);
+				final BaseObject o = LayoutEngine.parseJSLD(source);
+				final String type = Base.getString(o, "type", "");
+				if (!"ae3/Executable".equals(type)) {
+					Report.exception("SHELL", "invalid command", new Error("invalid command type: " + name + ", type=" + type));
+					return null;
+				}
+				final String reference = Base.getString(o, "reference", "");
+				if (reference.length() == 0) {
+					Report.exception("SHELL", "invalid command", new Error("command reference is empty: " + name));
+					return null;
+				}
+				return new ShellJsCommand(name, reference);
+			}
+		}
+
+		return null;
+	}
+
 	/** @param command */
 	public static final void registerCommand(final AbstractShellCommand command) {
 
 		Shell.COMMANDS.put(command.getName(), command);
+	}
+
+	static final Map<String, ShellCommand> getCommands() {
+
+		final Entry e = Storage.UNION.relative("settings/shell/", null);
+		if (e == null || !e.isExist()) {
+			return Shell.COMMANDS;
+		}
+
+		final BaseList<Entry> children = e.toContainer().getContentCollection(null).baseValue();
+		if (children == null || children.length() == 0) {
+			return Shell.COMMANDS;
+		}
+
+		final Map<String, ShellCommand> result = Create.tempMap(Shell.COMMANDS);
+		for (final Entry child : children) {
+			final String key = child.getKey();
+			if (key.endsWith(".json")) {
+				final String name = key.substring(0, key.length() - 5);
+				result.put(name, Shell.getCommand(name));
+			}
+		}
+		return result;
 	}
 
 	/** default constructor */

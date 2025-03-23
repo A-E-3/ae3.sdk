@@ -25,13 +25,13 @@ final class TKO_ACALLM_CBA_AVS_S extends TokenOperator {
 	
 	private final Instruction carguments;
 	
-	TKO_ACALLM_CBA_AVS_S(final TokenInstruction callPropertyName, final TokenInstruction arguments, final Instruction carguments) {
+	TKO_ACALLM_CBA_AVS_S(final TokenInstruction accessProperty, final TokenInstruction arguments, final Instruction carguments) {
 		
 		assert carguments != null;
 		assert arguments.assertZeroStackOperands();
 		assert arguments.getResultCount() == carguments.getOperandCount();
-		assert callPropertyName.assertStackValue();
-		this.accessProperty = callPropertyName;
+		assert accessProperty.assertStackValue();
+		this.accessProperty = accessProperty;
 		this.arguments = arguments;
 		this.carguments = carguments;
 	}
@@ -39,7 +39,7 @@ final class TKO_ACALLM_CBA_AVS_S extends TokenOperator {
 	@Override
 	public final String getNotation() {
 
-		return "[" + this.accessProperty.getNotation() + "]( " + this.arguments.getNotation() + " )";
+		return this.accessProperty.getNotationAccess() + "( " + this.arguments.getNotation() + " )";
 	}
 	
 	@Override
@@ -81,10 +81,12 @@ final class TKO_ACALLM_CBA_AVS_S extends TokenOperator {
 	@Override
 	public void toAssembly(final ProgramAssembly assembly, final ModifierArgument argumentA, final ModifierArgument argumentB, final ResultHandlerBasic store) {
 
-		/** argumentA is access source, this.argumentB is access key */
+		/** argumentA is access object */
 		assert argumentA != null;
 		assert argumentB == null;
 		
+		assert argumentA != ModifierArguments.AA0RB : "this.isDirectSupported: " + this.isDirectSupported();
+
 		final ModifierArgument modifierB = this.accessProperty.toDirectModifier();
 		final boolean directB = modifierB == ModifierArguments.AA0RB;
 		if (directB) {

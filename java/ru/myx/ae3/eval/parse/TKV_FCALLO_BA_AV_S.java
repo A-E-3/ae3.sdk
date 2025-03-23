@@ -15,26 +15,25 @@ import ru.myx.ae3.exec.OperationsA2X;
 import ru.myx.ae3.exec.ProgramAssembly;
 import ru.myx.ae3.exec.ResultHandler;
 import ru.myx.ae3.exec.ResultHandlerBasic;
-import ru.myx.vm_vliw32_2010.OperationA2X;
 
 final class TKV_FCALLO_BA_AV_S extends TokenValue {
 
-	private final TokenInstruction argumentA;
+	private final TokenInstruction accessProperty;
 
-	private final TokenInstruction argumentB;
+	private final TokenInstruction argument;
 
-	TKV_FCALLO_BA_AV_S(final TokenInstruction argumentA, final TokenInstruction argumentB) {
+	TKV_FCALLO_BA_AV_S(final TokenInstruction accessProperty, final TokenInstruction argument) {
 
-		assert argumentB.assertStackValue();
-		assert argumentA.assertStackValue();
-		this.argumentA = argumentA;
-		this.argumentB = argumentB.toExecDetachableResult();
+		assert argument.assertStackValue();
+		assert accessProperty.assertStackValue();
+		this.accessProperty = accessProperty;
+		this.argument = argument.toExecDetachableResult();
 	}
 
 	@Override
 	public final String getNotation() {
 
-		return this.argumentA.getNotation() + "( " + this.argumentB.getNotation() + " )";
+		return this.accessProperty.getNotation() + "( " + this.argument.getNotation() + " )";
 	}
 
 	@Override
@@ -53,12 +52,12 @@ final class TKV_FCALLO_BA_AV_S extends TokenValue {
 		/** valid store */
 		assert store != null;
 
-		final ModifierArgument modifierArgument = this.argumentB.toDirectModifier();
-		final ModifierArgument modifierB = this.argumentA.toDirectModifier();
+		final ModifierArgument modifierArgument = this.argument.toDirectModifier();
+		final ModifierArgument modifierProperty = this.accessProperty.toDirectModifier();
 		final boolean directArgument = modifierArgument == ModifierArguments.AA0RB;
-		final boolean directB = modifierB == ModifierArguments.AA0RB;
-		if (directB) {
-			this.argumentA.toAssembly(
+		final boolean directProperty = modifierProperty == ModifierArguments.AA0RB;
+		if (directProperty) {
+			this.accessProperty.toAssembly(
 					assembly, //
 					null,
 					null,
@@ -67,14 +66,14 @@ final class TKV_FCALLO_BA_AV_S extends TokenValue {
 						: ResultHandler.FA_BNN_NXT);
 		}
 		if (directArgument) {
-			this.argumentB.toAssembly(assembly, null, null, ResultHandler.FA_BNN_NXT);
+			this.argument.toAssembly(assembly, null, null, ResultHandler.FA_BNN_NXT);
 		}
 
 		assembly.addInstruction(
-				((OperationA2X) OperationsA2X.XFCALLO).instruction(
-						directB && directArgument
+				OperationsA2X.XFCALLO.instruction(
+						directProperty && directArgument
 							? ModifierArguments.AE21POP
-							: modifierB,
+							: modifierProperty,
 						modifierArgument,
 						0,
 						store));

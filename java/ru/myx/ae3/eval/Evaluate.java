@@ -7,13 +7,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-
 import java.util.function.Function;
+
 import ru.myx.ae3.base.Base;
 import ru.myx.ae3.base.BaseList;
 import ru.myx.ae3.base.BaseObject;
 import ru.myx.ae3.eval.tokens.TokenInstruction;
-import ru.myx.ae3.exec.ExecNonMaskedException;
 import ru.myx.ae3.exec.ExecProcess;
 import ru.myx.ae3.exec.OperationsA10;
 import ru.myx.ae3.exec.ProgramAssembly;
@@ -23,14 +22,29 @@ import ru.myx.ae3.exec.ResultHandlerBasic;
 import ru.myx.ae3.report.Report;
 import ru.myx.renderer.ecma.AcmEcmaLanguageImpl;
 
-/**
- * Title: Base Implementations Description: Copyright: Copyright (c) 2001
- * Company: -= MyX =-
+/** Title: Base Implementations Description: Copyright: Copyright (c) 2001 Company: -= MyX =-
  *
  * @author Alexander I. Kharitchev
- * @version 1.0
- */
+ * @version 1.0 */
 public final class Evaluate {
+	
+	/** @author myx */
+	@SuppressWarnings("serial")
+	public static class CompilationException extends RuntimeException {
+		
+		/** @param message
+		 * @param parent */
+		public CompilationException(final String message, final Throwable parent) {
+
+			super(message, parent);
+		}
+		
+		/** @param parent */
+		public CompilationException(final Throwable parent) {
+
+			super(parent);
+		}
+	}
 	
 	private static final StackTraceElement[] EMPTY_STACK_TRACE = new StackTraceElement[0];
 	
@@ -55,21 +69,17 @@ public final class Evaluate {
 		
 		Evaluate.registerLanguage(Evaluate.EVALUATE_LANGUAGE_IMPL);
 		
-		/**
-		 * TODO: move to SDK later Same code is defined: RendererEcmaMain
-		 */
+		/** TODO: move to SDK later Same code is defined: RendererEcmaMain */
 		Evaluate.registerLanguage(AcmEcmaLanguageImpl.INSTANCE);
 	}
 	
-	/**
-	 * The result is: NN / NEXT
+	/** The result is: NN / NEXT
 	 *
 	 * @param assembly
 	 * @param startOffset
 	 *            - program start point, lowest address to optimize till.
 	 * @param expression
-	 * @throws Evaluate.CompilationException
-	 */
+	 * @throws Evaluate.CompilationException */
 	public static final void compileDeclaration(final ProgramAssembly assembly, final int startOffset, final String expression) throws Evaluate.CompilationException {
 		
 		final TokenInstruction token = Evaluate.PRECOMPILER.parse(assembly, expression, BalanceType.DECLARATION);
@@ -79,12 +89,10 @@ public final class Evaluate {
 		}
 	}
 	
-	/**
-	 * @param assembly
+	/** @param assembly
 	 * @param expression
 	 * @param store
-	 * @throws Evaluate.CompilationException
-	 */
+	 * @throws Evaluate.CompilationException */
 	public static final void compileExpression(final ProgramAssembly assembly, final String expression, final ResultHandlerBasic store) throws Evaluate.CompilationException {
 		
 		final TokenInstruction token = Evaluate.compileToken(assembly, expression, BalanceType.EXPRESSION);
@@ -92,14 +100,12 @@ public final class Evaluate {
 		token.toAssembly(assembly, null, null, store);
 	}
 	
-	/**
-	 * @param language
+	/** @param language
 	 * @param identity
 	 * @param folder
 	 * @param name
 	 * @return
-	 * @throws Evaluate.CompilationException
-	 */
+	 * @throws Evaluate.CompilationException */
 	public static final ProgramPart compileProgram(final LanguageImpl language, final String identity, final Function<String, String> folder, final String name)
 			throws Evaluate.CompilationException {
 		
@@ -110,66 +116,22 @@ public final class Evaluate {
 		return assembly.toProgram(0);
 	}
 	
-	/**
-	 *
-	 * @author myx
-	 *
-	 */
-	@SuppressWarnings("serial")
-	public static class CompilationException extends RuntimeException {
-		
-		/**
-		 *
-		 * @param message
-		 * @param parent
-		 */
-		public CompilationException(final String message, final Throwable parent) {
-			super(message, parent);
-		}
-		
-		/**
-		 *
-		 * @param parent
-		 */
-		public CompilationException(final Throwable parent) {
-			super(parent);
-		}
-	}
-	
-	/**
-	 * @param language
+	/** @param language
 	 * @param identity
 	 * @param source
 	 * @return
-	 * @throws Evaluate.CompilationException
-	 */
+	 * @throws Evaluate.CompilationException */
 	public static final ProgramPart compileProgram(final LanguageImpl language, final String identity, final String source) //
 			throws Evaluate.CompilationException {
 		
 		return Evaluate.compileProgram(language, identity, new FolderOneSource("anonymous", source), "anonymous");
 	}
 	
-	/**
-	 * @param language
+	/** @param language
 	 * @param identity
 	 * @param source
 	 * @param assembly
-	 * @throws Evaluate.CompilationException
-	 */
-	public static final void compileProgramInline(final LanguageImpl language, final String identity, final String source, final ProgramAssembly assembly) //
-			throws Evaluate.CompilationException {
-		
-		assert language != null : "Language is NULL";
-		language.compile(identity, new FolderOneSource("anonymous", source), "anonymous", assembly, CompileTargetMode.INLINE);
-	}
-	
-	/**
-	 * @param language
-	 * @param identity
-	 * @param source
-	 * @param assembly
-	 * @throws Evaluate.CompilationException
-	 */
+	 * @throws Evaluate.CompilationException */
 	public static final void compileProgramBlock(final LanguageImpl language, final String identity, final String source, final ProgramAssembly assembly) //
 			throws Evaluate.CompilationException {
 		
@@ -177,12 +139,22 @@ public final class Evaluate {
 		language.compile(identity, new FolderOneSource("anonymous", source), "anonymous", assembly, CompileTargetMode.BLOCK);
 	}
 	
-	/**
-	 * @param language
+	/** @param language
 	 * @param identity
 	 * @param source
-	 * @return
-	 */
+	 * @param assembly
+	 * @throws Evaluate.CompilationException */
+	public static final void compileProgramInline(final LanguageImpl language, final String identity, final String source, final ProgramAssembly assembly) //
+			throws Evaluate.CompilationException {
+		
+		assert language != null : "Language is NULL";
+		language.compile(identity, new FolderOneSource("anonymous", source), "anonymous", assembly, CompileTargetMode.INLINE);
+	}
+	
+	/** @param language
+	 * @param identity
+	 * @param source
+	 * @return */
 	public static ProgramPart compileProgramSilent(final LanguageImpl language, final String identity, final String source) {
 		
 		try {
@@ -203,15 +175,13 @@ public final class Evaluate {
 		}
 	}
 	
-	/**
-	 * Returns: NN / NEXT
+	/** Returns: NN / NEXT
 	 *
 	 * @param assembly
 	 * @param startOffset
 	 *            - program start point, lowest address to optimize till.
 	 * @param expression
-	 * @throws Evaluate.CompilationException
-	 */
+	 * @throws Evaluate.CompilationException */
 	public static final void compileStatement(final ProgramAssembly assembly, final int startOffset, final String expression) //
 			throws Evaluate.CompilationException {
 		
@@ -222,23 +192,19 @@ public final class Evaluate {
 		}
 	}
 	
-	/**
-	 * @param assembly
+	/** @param assembly
 	 * @param expression
 	 * @param balanceType
-	 * @return
-	 */
+	 * @return */
 	public static final TokenInstruction compileToken(final ProgramAssembly assembly, final String expression, final BalanceType balanceType) {
 		
 		return Evaluate.PRECOMPILER.parse(assembly, expression, balanceType);
 	}
 	
-	/**
-	 * @param expression
+	/** @param expression
 	 * @param ctx
 	 * @param constants
-	 * @return boolean
-	 */
+	 * @return boolean */
 	public static final boolean evaluateBoolean(final String expression, final ExecProcess ctx, final List<Object> constants) {
 		
 		final ProgramAssembly assembly = new ProgramAssembly(ctx);
@@ -248,10 +214,7 @@ public final class Evaluate {
 			}
 		}
 		try {
-			/**
-			 * TODO add BOOLEAN balance type, reason: to skip creation of {} or
-			 * [].
-			 */
+			/** TODO add BOOLEAN balance type, reason: to skip creation of {} or []. */
 			final TokenInstruction token = Evaluate.PRECOMPILER.parse(assembly, expression, BalanceType.EXPRESSION);
 			assert token.assertStackValue();
 			final BaseObject constant = token.toConstantValue();
@@ -265,21 +228,17 @@ public final class Evaluate {
 			
 			// return assembly.toProgram(0).callN(ctx,
 			// ctx.rb4CT).baseToJavaBoolean();
-		} catch (final ExecNonMaskedException e) {
-			throw e;
-		} catch (final Error e) {
+		} catch (final Error | RuntimeException e) {
 			throw e;
 		} catch (final Throwable e) {
 			throw new RuntimeException("Expression: " + expression, e);
 		}
 	}
 	
-	/**
-	 * @param expression
+	/** @param expression
 	 * @param ctx
 	 * @param constants
-	 * @return object array
-	 */
+	 * @return object array */
 	public static final BaseList<?> evaluateList(final String expression, final ExecProcess ctx, final List<Object> constants) {
 		
 		final ProgramAssembly assembly = new ProgramAssembly(ctx);
@@ -303,21 +262,17 @@ public final class Evaluate {
 				? null
 				: object.getClass().getName());
 			return (BaseList<?>) object;
-		} catch (final RuntimeException e) {
-			throw e;
-		} catch (final Error e) {
+		} catch (final Error | RuntimeException e) {
 			throw e;
 		} catch (final Throwable e) {
 			throw new RuntimeException("Expression: " + expression, e);
 		}
 	}
 	
-	/**
-	 * @param expression
+	/** @param expression
 	 * @param ctx
 	 * @param constants
-	 * @return object
-	 */
+	 * @return object */
 	public static final BaseObject evaluateObject(final String expression, final ExecProcess ctx, final List<Object> constants) {
 		
 		final ProgramAssembly assembly = new ProgramAssembly(ctx);
@@ -341,20 +296,16 @@ public final class Evaluate {
 			// token.toAssembly(assembly, null, null, ResultHandler.FC_PNN_RET);
 			
 			// return assembly.toProgram(0).callN(ctx, ctx.rb4CT);
-		} catch (final ExecNonMaskedException e) {
-			throw e;
-		} catch (final Error e) {
+		} catch (final Error | RuntimeException e) {
 			throw e;
 		} catch (final Throwable e) {
 			throw new RuntimeException("Expression: " + expression, e);
 		}
 	}
 	
-	/**
-	 * @param expression
+	/** @param expression
 	 * @param ctx
-	 * @param constants
-	 */
+	 * @param constants */
 	public static final void evaluateVoid(final String expression, final ExecProcess ctx, final List<Object> constants) {
 		
 		final ProgramAssembly assembly = new ProgramAssembly(ctx);
@@ -384,37 +335,29 @@ public final class Evaluate {
 			// token.toAssembly(assembly, null, null, ResultHandler.FC_PNN_RET);
 			
 			// assembly.toProgram(0).callV(ctx, ctx.rb4CT);
-		} catch (final ExecNonMaskedException e) {
-			throw e;
-		} catch (final Error e) {
+		} catch (final Error | RuntimeException e) {
 			throw e;
 		} catch (final Throwable e) {
 			throw new RuntimeException("Expression: " + expression, e);
 		}
 	}
 	
-	/**
-	 * @param alias
-	 * @return
-	 */
+	/** @param alias
+	 * @return */
 	public static final LanguageImpl getLanguageImpl(final String alias) {
 		
 		return Evaluate.RENDERERS_ALL.get(alias);
 	}
 	
-	/**
-	 * @return renderers map
-	 */
+	/** @return renderers map */
 	public static final Set<Map.Entry<String, LanguageImpl>> getRenderers() {
 		
 		return Collections.unmodifiableSet(Evaluate.RENDERERS_BY_KEY.entrySet());
 	}
 	
-	/**
-	 * @param expression
+	/** @param expression
 	 * @param constants
-	 * @return instruction
-	 */
+	 * @return instruction */
 	public static final ProgramPart prepareFunctionObjectForExpression(final String expression, final List<Object> constants) {
 		
 		final ProgramAssembly assembly = new ProgramAssembly();
@@ -433,9 +376,7 @@ public final class Evaluate {
 		}
 	}
 	
-	/**
-	 * @param language
-	 */
+	/** @param language */
 	public static final void registerLanguage(final LanguageImpl language) {
 		
 		assert language != null;
@@ -466,6 +407,7 @@ public final class Evaluate {
 	}
 	
 	private Evaluate() {
+
 		// empty
 	}
 	

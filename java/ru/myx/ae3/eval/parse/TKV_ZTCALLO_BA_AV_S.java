@@ -15,50 +15,49 @@ import ru.myx.ae3.exec.OperationsA2X;
 import ru.myx.ae3.exec.ProgramAssembly;
 import ru.myx.ae3.exec.ResultHandler;
 import ru.myx.ae3.exec.ResultHandlerBasic;
-import ru.myx.vm_vliw32_2010.OperationA2X;
 
 final class TKV_ZTCALLO_BA_AV_S extends TokenValue {
-	
-	private final TokenInstruction argumentA;
-	
-	private final TokenInstruction argumentB;
-	
-	TKV_ZTCALLO_BA_AV_S(final TokenInstruction argumentA, final TokenInstruction argumentB) {
-		
-		assert argumentB.assertStackValue();
-		assert argumentA.assertStackValue();
-		this.argumentA = argumentA;
-		this.argumentB = argumentB.toExecDetachableResult();
+
+	private final TokenInstruction accessProperty;
+
+	private final TokenInstruction argument;
+
+	TKV_ZTCALLO_BA_AV_S(final TokenInstruction accessProperty, final TokenInstruction argument) {
+
+		assert argument.assertStackValue();
+		assert accessProperty.assertStackValue();
+		this.accessProperty = accessProperty;
+		this.argument = argument.toExecDetachableResult();
 	}
-	
+
 	@Override
 	public final String getNotation() {
-		
-		return "this." + this.argumentA.getNotation() + "( " + this.argumentB.getNotation() + " )";
+
+		return "this." + this.accessProperty.getNotation() + "( " + this.argument.getNotation() + " )";
 	}
-	
+
 	@Override
 	public final InstructionResult getResultType() {
-		
+
 		return InstructionResult.OBJECT;
 	}
-	
+
 	@Override
 	public void toAssembly(final ProgramAssembly assembly, final ModifierArgument argumentA, final ModifierArgument argumentB, final ResultHandlerBasic store) {
-		
+
 		/** zero operands (both operands are already embedded in this token) */
 		assert argumentA == null;
 		assert argumentB == null;
-		
+
 		/** valid store */
 		assert store != null;
-		
-		final ModifierArgument modifierArgument = this.argumentB.toDirectModifier();
-		final ModifierArgument modifierB = this.argumentA.toDirectModifier();
+
+		final ModifierArgument modifierArgument = this.argument.toDirectModifier();
+		final ModifierArgument modifierProperty = this.accessProperty.toDirectModifier();
 		final boolean directArgument = modifierArgument == ModifierArguments.AA0RB;
-		final boolean directB = modifierB == ModifierArguments.AA0RB;
-		if (directB) {
-			this.argumentA.toAssembly(
+		final boolean directProperty = modifierProperty == ModifierArguments.AA0RB;
+		if (directProperty) {
+			this.accessProperty.toAssembly(
 					assembly, //
 					null,
 					null,
@@ -67,22 +66,22 @@ final class TKV_ZTCALLO_BA_AV_S extends TokenValue {
 						: ResultHandler.FA_BNN_NXT);
 		}
 		if (directArgument) {
-			this.argumentB.toAssembly(assembly, null, null, ResultHandler.FA_BNN_NXT);
+			this.argument.toAssembly(assembly, null, null, ResultHandler.FA_BNN_NXT);
 		}
-		
+
 		assembly.addInstruction(
-				((OperationA2X) OperationsA2X.ZTCALLO).instruction(
-						directB && directArgument
+				OperationsA2X.ZTCALLO.instruction(
+						directProperty && directArgument
 							? ModifierArguments.AE21POP
-							: modifierB,
+							: modifierProperty,
 						modifierArgument,
 						0,
 						store));
 	}
-	
+
 	@Override
 	public final String toCode() {
-		
+
 		return OperationsA2X.ZTCALLO + "\t0\tAV->S;";
 	}
 }

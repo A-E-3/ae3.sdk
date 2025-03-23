@@ -18,21 +18,22 @@ import ru.myx.ae3.exec.ResultHandlerBasic;
 
 final class TKO_ACALLO_CBA_AVS_S extends TokenOperator {
 	
-	private final TokenInstruction callPropertyName;
+	private final TokenInstruction accessProperty;
 	
 	private final TokenInstruction argument;
 	
-	TKO_ACALLO_CBA_AVS_S(final TokenInstruction callPropertyName, final TokenInstruction argument) {
-		assert callPropertyName.assertStackValue();
+	TKO_ACALLO_CBA_AVS_S(final TokenInstruction accessProperty, final TokenInstruction argument) {
+
+		assert accessProperty.assertStackValue();
 		assert argument.assertStackValue();
-		this.callPropertyName = callPropertyName;
+		this.accessProperty = accessProperty;
 		this.argument = argument.toExecDetachableResult();
 	}
 	
 	@Override
 	public final String getNotation() {
 		
-		return "[" + this.callPropertyName.getNotation() + "]( " + this.argument.getNotation() + " )";
+		return this.accessProperty.getNotationAccess() + "( " + this.argument.getNotation() + " )";
 	}
 	
 	@Override
@@ -62,7 +63,7 @@ final class TKO_ACALLO_CBA_AVS_S extends TokenOperator {
 	@Override
 	public boolean isDirectSupported() {
 		
-		return this.argument.toDirectModifier() != ModifierArguments.AA0RB && this.callPropertyName.toDirectModifier() != ModifierArguments.AA0RB;
+		return this.argument.toDirectModifier() != ModifierArguments.AA0RB && this.accessProperty.toDirectModifier() != ModifierArguments.AA0RB;
 	}
 	
 	@Override
@@ -74,18 +75,17 @@ final class TKO_ACALLO_CBA_AVS_S extends TokenOperator {
 	@Override
 	public void toAssembly(final ProgramAssembly assembly, final ModifierArgument argumentA, final ModifierArgument argumentB, final ResultHandlerBasic store) {
 		
-		/**
-		 * argumentA is access source, this.argumentB is access key
-		 */
+		/** argumentA is access object */
 		assert argumentA != null;
 		assert argumentB == null;
-		
+
 		final ModifierArgument modifierArgument = this.argument.toDirectModifier();
-		final ModifierArgument modifierB = this.callPropertyName.toDirectModifier();
+		final ModifierArgument modifierProperty = this.accessProperty.toDirectModifier();
 		final boolean directArgument = modifierArgument == ModifierArguments.AA0RB;
-		final boolean directB = modifierB == ModifierArguments.AA0RB;
-		if (directB) {
-			this.callPropertyName.toAssembly(
+		final boolean directProperty = modifierProperty == ModifierArguments.AA0RB;
+		if (directProperty) {
+			assert argumentA != ModifierArguments.AA0RB : "this.isDirectSupported: " + this.isDirectSupported();
+			this.accessProperty.toAssembly(
 					assembly, //
 					null,
 					null,
@@ -94,18 +94,20 @@ final class TKO_ACALLO_CBA_AVS_S extends TokenOperator {
 						: ResultHandler.FA_BNN_NXT);
 		}
 		if (directArgument) {
+			assert argumentA != ModifierArguments.AA0RB : "this.isDirectSupported: " + this.isDirectSupported();
 			this.argument.toAssembly(assembly, null, null, ResultHandler.FA_BNN_NXT);
 		}
 		
-		assembly.addInstruction(OperationsA3X.XACALLO//
-				.instruction(
-						argumentA, //
-						directB && directArgument
-							? ModifierArguments.AE21POP
-							: modifierB,
-						modifierArgument,
-						0,
-						store));
+		assembly.addInstruction(
+				OperationsA3X.XACALLO//
+						.instruction(
+								argumentA, //
+								directProperty && directArgument
+									? ModifierArguments.AE21POP
+									: modifierProperty,
+								modifierArgument,
+								0,
+								store));
 	}
 	
 	@Override
@@ -118,11 +120,11 @@ final class TKO_ACALLO_CBA_AVS_S extends TokenOperator {
 	public TokenInstruction toStackValue(final ProgramAssembly assembly, final TokenInstruction argumentA, final boolean sideEffectsOnly) {
 		
 		if (argumentA.toDirectModifier() == ModifierArguments.AB4CT) {
-			return new TKV_ZTCALLO_BA_AV_S(this.callPropertyName, this.argument);
+			return new TKV_ZTCALLO_BA_AV_S(this.accessProperty, this.argument);
 		}
 		if (argumentA.toDirectModifier() == ModifierArguments.AB7FV) {
-			return new TKV_FCALLO_BA_AV_S(this.callPropertyName, this.argument);
+			return new TKV_FCALLO_BA_AV_S(this.accessProperty, this.argument);
 		}
-		return new TKV_ACALLO_CBA_AVV_S(argumentA.toExecDetachableResult(), this.callPropertyName, this.argument);
+		return new TKV_ACALLO_CBA_AVV_S(argumentA.toExecDetachableResult(), this.accessProperty, this.argument);
 	}
 }

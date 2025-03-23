@@ -812,36 +812,38 @@ public final class ExpressionParser {
 					return;
 				}
 				if (length == 2) {
-					final char second = token.charAt(1);
-					if (second == '+') {
-						/** ++ */
-						final int size = precompiled.size();
-						final TokenInstruction last = size == 0
-							? null
-							: precompiled.get(size - 1);
-						if (last instanceof TKV_FLOAD_A_Cs_S) {
-							precompiled.set(size - 1, new TKV_FRAMEPOSTINC(last.toContextPropertyName()));
+					switch (token.charAt(1)) {
+						case '+' : {
+							/** ++ */
+							final int size = precompiled.size();
+							final TokenInstruction last = size == 0
+								? null
+								: precompiled.get(size - 1);
+							if (last instanceof TKV_FLOAD_A_Cs_S) {
+								precompiled.set(size - 1, new TKV_FRAMEPOSTINC(last.toContextPropertyName()));
+								return;
+							}
+							if (last != null && last.isAccessReference()) {
+								precompiled.add(ParseConstants.TKO_POSTINC_A_L);
+								return;
+							}
+							precompiled.add(ParseConstants.TKO_PREINC_A_L_S);
 							return;
 						}
-						if (last != null && last.isAccessReference()) {
-							precompiled.add(ParseConstants.TKO_POSTINC_A_L);
-							return;
+						case '=' : {
+							/** += */
+							final int size = precompiled.size();
+							if (size == 0) {
+								throw new RuntimeException("Addressable value required!!");
+							}
+							final TokenInstruction last = precompiled.get(size - 1);
+							if (last.isAccessReference()) {
+								precompiled.add(ParseConstants.TKA_ASSIGN_MADD);
+								return;
+							}
+							throw new RuntimeException("Invalid = operator usage, previous token type=" + last.getClass().getName() + "!");
 						}
-						precompiled.add(ParseConstants.TKO_PREINC_A_L_S);
-						return;
-					}
-					if (second == '=') {
-						/** += */
-						final int size = precompiled.size();
-						if (size == 0) {
-							throw new RuntimeException("Addressable value required!!");
-						}
-						final TokenInstruction last = precompiled.get(size - 1);
-						if (last.isAccessReference()) {
-							precompiled.add(ParseConstants.TKA_ASSIGN_MADD);
-							return;
-						}
-						throw new RuntimeException("Invalid = operator usage, previous token type=" + last.getClass().getName() + "!");
+						default :
 					}
 				}
 				break;
@@ -856,62 +858,38 @@ public final class ExpressionParser {
 					return;
 				}
 				if (length == 2) {
-					final char second = token.charAt(1);
-					if (second == '-') {
-						/** -- */
-						final int size = precompiled.size();
-						final TokenInstruction last = size == 0
-							? null
-							: precompiled.get(size - 1);
-						if (last instanceof TKV_FLOAD_A_Cs_S) {
-							precompiled.set(size - 1, new TKV_FRAMEPOSTDEC(last.toContextPropertyName()));
-							return;
-						}
-						if (last != null && last.isAccessReference()) {
-							precompiled.add(ParseConstants.TKO_POSTDEC_A_L);
-							return;
-							/** <code>
-							final AccessReference reference = (AccessReference) last;
-							final int start = assembly.size();
-							reference.toReferenceRead( start, assembly );
-							assembly.addInstruction( start, Instructions.INSTR_MSUB_BA_1S_S );
-							reference.toReferenceWrite( start, assembly );
-							precompiled.set( size - 1, assembly.toTokenAssignment( start,
-									0 + last.getOperandCount(),
-									InstructionResult.NUMBER ) );
-							return;
-							</code> */
-						}
-						precompiled.add(ParseConstants.TKO_PREDEC_A_L_S);
-						return;
-					}
-					if (second == '=') {
-						/** -= */
-						final int size = precompiled.size();
-						if (size > 0) {
-							final TokenInstruction last = precompiled.get(size - 1);
-							if (last.isAccessReference()) {
-								precompiled.add(ParseConstants.TKA_ASSIGN_MSUB);
+					switch (token.charAt(1)) {
+						case '-' : {
+							/** -- */
+							final int size = precompiled.size();
+							final TokenInstruction last = size == 0
+								? null
+								: precompiled.get(size - 1);
+							if (last instanceof TKV_FLOAD_A_Cs_S) {
+								precompiled.set(size - 1, new TKV_FRAMEPOSTDEC(last.toContextPropertyName()));
 								return;
-								/** <code>
-								final AccessReference reference = (AccessReference) last;
-								final int start = assembly.size();
-								reference.toReferenceRead( start, assembly );
-								assembly.addInstruction( start, ParseConstants.TOKEN_MSUB_BA_SS_S
-										.getInstruction( assembly.ctx,
-												ModifierArguments.AASP_POP,
-												ModifierArguments.AASP_POP,
-												null ) );
-								reference.toReferenceWrite( start, assembly );
-								precompiled.set( size - 1, assembly.toTokenAssignment( start,
-										1 + last.getOperandCount(),
-										InstructionResult.OBJECT ) );
-								return;
-								</code> */
 							}
-							throw new RuntimeException("Invalid = operator usage, previous token type=" + last.getClass().getName() + "!");
+							if (last != null && last.isAccessReference()) {
+								precompiled.add(ParseConstants.TKO_POSTDEC_A_L);
+								return;
+							}
+							precompiled.add(ParseConstants.TKO_PREDEC_A_L_S);
+							return;
 						}
-						throw new RuntimeException("Addressable value required!!");
+						case '=' : {
+							/** -= */
+							final int size = precompiled.size();
+							if (size > 0) {
+								final TokenInstruction last = precompiled.get(size - 1);
+								if (last.isAccessReference()) {
+									precompiled.add(ParseConstants.TKA_ASSIGN_MSUB);
+									return;
+								}
+								throw new RuntimeException("Invalid = operator usage, previous token type=" + last.getClass().getName() + "!");
+							}
+							throw new RuntimeException("Addressable value required!!");
+						}
+						default :
 					}
 				}
 				break;
@@ -922,38 +900,24 @@ public final class ExpressionParser {
 					return;
 				}
 				if (length == 2) {
-					final char second = token.charAt(1);
-					if (second == '*') {
-						/** ** */
-						precompiled.add(ParseConstants.TKO_MPOW_BA_SS);
-						return;
-					}
-					if (second == '=') {
-						/** *= */
-						final int size = precompiled.size();
-						if (size > 0) {
-							final TokenInstruction last = precompiled.get(size - 1);
-							if (last.isAccessReference()) {
-								precompiled.add(ParseConstants.TKA_ASSIGN_MMUL);
-								return;
-								/** <code>
-								final AccessReference reference = (AccessReference) last;
-								final int start = assembly.size();
-								reference.toReferenceRead( start, assembly );
-								assembly.addInstruction( start, ParseConstants.TOKEN_MMUL_BA_SS_S.getInstruction( null,
-										ModifierArguments.AASP_POP,
-										ModifierArguments.AASP_POP,
-										null ) );
-								reference.toReferenceWrite( start, assembly );
-								precompiled.set( size - 1, assembly.toTokenAssignment( start,
-										1 + last.getOperandCount(),
-										InstructionResult.OBJECT ) );
-								return;
-								</code> */
+					switch (token.charAt(1)) {
+						case '*' :
+							/** ** */
+							precompiled.add(ParseConstants.TKO_MPOW_BA_SS);
+							return;
+						case '=' :
+							/** *= */
+							final int size = precompiled.size();
+							if (size > 0) {
+								final TokenInstruction last = precompiled.get(size - 1);
+								if (last.isAccessReference()) {
+									precompiled.add(ParseConstants.TKA_ASSIGN_MMUL);
+									return;
+								}
+								throw new RuntimeException("Invalid = operator usage, previous token type=" + last.getClass().getName() + "!");
 							}
-							throw new RuntimeException("Invalid = operator usage, previous token type=" + last.getClass().getName() + "!");
-						}
-						throw new RuntimeException("Addressable value required!!");
+							throw new RuntimeException("Addressable value required!!");
+						default :
 					}
 				}
 				break;
@@ -1012,38 +976,80 @@ public final class ExpressionParser {
 				}
 				return;
 			case '?' :
+				if (length >= 3) {
+					switch (token.charAt(1)) {
+						case '?' :
+							switch (token.charAt(2)) {
+								case '=' : {
+									/** ??= */
+									final int size = precompiled.size();
+									if (size == 0) {
+										throw new RuntimeException("Addressable value required!!");
+									}
+									final TokenInstruction last = precompiled.get(size - 1);
+									if (last.isAccessReference()) {
+										precompiled.add(ParseConstants.TKA_ASSIGN_ELNA_A_S_S);
+										if (length > 3) {
+											ExpressionParser.addOperator(assembly, precompiled, token.substring(3));
+										}
+										return;
+									}
+									throw new RuntimeException("Invalid " + token + " operator usage, previous token type=" + last.getClass().getName() + "!");
+								}
+								default :
+							}
+							break;
+						case '.' :
+							switch (token.charAt(2)) {
+								case '(' : {
+									/** ?.( */
+									precompiled.add(ParseConstants.TKS_EOCO);
+									precompiled.add(ParseConstants.TKS_BRACE_OPEN);
+									if (length > 3) {
+										ExpressionParser.addOperator(assembly, precompiled, token.substring(3));
+									}
+									return;
+								}
+								case '[' : {
+									/** ?.[ */
+									precompiled.add(ParseConstants.TKS_EOCO);
+									precompiled.add(ParseConstants.TKV_DIRECT);
+									precompiled.add(ParseConstants.TKS_INDEX_OPEN);
+									if (length > 3) {
+										ExpressionParser.addOperator(assembly, precompiled, token.substring(3));
+									}
+									return;
+								}
+								default :
+							}
+							break;
+						default :
+					}
+				}
+				if (length >= 2) {
+					switch (token.charAt(1)) {
+						case '?' :
+							/** ?? */
+							precompiled.add(ParseConstants.TKS_ENCO);
+							if (length > 2) {
+								ExpressionParser.addOperator(assembly, precompiled, token.substring(2));
+							}
+							return;
+						case '.' :
+							/** ?. */
+							precompiled.add(ParseConstants.TKS_EOCO);
+							precompiled.add(ParseConstants.TKV_DIRECT);
+							if (length > 2) {
+								ExpressionParser.addOperator(assembly, precompiled, token.substring(2));
+							}
+							return;
+						default :
+					}
+				}
 				if (length == 1) {
 					/** ? */
 					precompiled.add(ParseConstants.TKS_QUESTION_MARK);
 					return;
-				}
-				if (length == 2) {
-					if (token.charAt(1) == '?') {
-						/** ?? */
-						precompiled.add(ParseConstants.TKS_ENCO);
-						return;
-					}
-					if (token.charAt(1) == '.') {
-						/** ?. */
-						precompiled.add(ParseConstants.TKS_EOCO);
-						precompiled.add(ParseConstants.TKV_DIRECT);
-						return;
-					}
-				}
-				if (length == 3) {
-					if (token.charAt(1) == '?' && token.charAt(2) == '=') {
-						/** ??= */
-						final int size = precompiled.size();
-						if (size == 0) {
-							throw new RuntimeException("Addressable value required!!");
-						}
-						final TokenInstruction last = precompiled.get(size - 1);
-						if (last.isAccessReference()) {
-							precompiled.add(ParseConstants.TKA_ASSIGN_ELNA_A_S_S);
-							return;
-						}
-						throw new RuntimeException("Invalid " + token + " operator usage, previous token type=" + last.getClass().getName() + "!");
-					}
 				}
 				precompiled.add(ParseConstants.TKS_QUESTION_MARK);
 				ExpressionParser.addOperator(assembly, precompiled, token.substring(1));
@@ -1098,8 +1104,13 @@ public final class ExpressionParser {
 			: Arrays.asList(new TokenInstruction[]{
 					pattern, ParseConstants.TKS_COMMA, ParseConstants.getConstantValue(Base.forString(flags)),
 			});
-		final TokenInstruction call = ExpressionParser.encodeCallAccessCXE(assembly, constructor, ExpressionParser.MA_CONSTRUCTOR, sub);
-		precompiled.add(call);
+
+		precompiled.add(//
+				new TKV_COBJECT_NEW(//
+						constructor,
+						ExpressionParser.encodeCallAccessDXE(assembly, ExpressionParser.MA_CONSTRUCTOR, sub)//
+				)//
+		);
 	}
 
 	/** @param assembly
@@ -1110,6 +1121,7 @@ public final class ExpressionParser {
 
 		final int preparedPosition = precompiled.lastIndexOf(ParseConstants.TKS_BRACE_OPEN);
 		if (preparedPosition == -1) {
+			/** oops, no opening brace **/
 			precompiled.clear();
 			precompiled.add(ParseConstants.TKV_ERROR_UNMATCHED_BRACE_CLOSE);
 			return false;
@@ -1124,24 +1136,22 @@ public final class ExpressionParser {
 			precompiled.remove(--precompiledSize);
 		}
 		if (precompiledSize == 0) {
+			/** expression in round braces **/
 			precompiled.add(assembly.compileExpression(sub, BalanceType.EXPRESSION));
 			return true;
 		}
+
 		final TokenInstruction last = precompiled.get(precompiledSize - 1);
+
 		/** TODO: not working, unfinished!!! */
 		if (last == ParseConstants.TKS_EOCO) {
-			// System.out.println(">>>>>> CLOSEBRACE EOCO: " + precompiled + ", sub: " + sub);
-			precompiled.add(
-					ExpressionParser.encodeCallAccessXXE(
+			/** object is on stack for this token */
+			precompiled.set(
+					precompiledSize - 1,
+					ExpressionParser.encodeCallAccessOXE(
 							assembly, //
-							ModifierArguments.AB7FV,
-							ParseConstants.TKV_DIRECT,
 							sub));
-			// precompiled.add(
-			// ExpressionParser.encodeCallAccessDXE(
-			// assembly, //
-			// ParseConstants.TKV_DIRECT,
-			// sub));
+			precompiled.add(ParseConstants.TKV_DIRECT);
 			return true;
 		}
 
@@ -1353,7 +1363,7 @@ public final class ExpressionParser {
 		final TokenInstruction last = precompiled.get(precompiledSize - 1);
 		// System.out.println(">>>>>> CLOSEINDEX precompiled size: " + precompiledSize + ", list: "
 		// + precompiled + ", last: " + last + ", sub: " + sub);
-		if (last == ParseConstants.TKS_EOCO) {
+		if (false && last == ParseConstants.TKS_EOCO) {
 			ExpressionParser.EXPR_PRIVATE_COUNT++;
 			/** TODO: optimize please, kinda shit, why should I check it here? */
 			precompiled.add(new TKV_ACCESS_BA_VV_S(ParseConstants.TKV_DIRECT, assembly.compileExpression(sub, BalanceType.EXPRESSION)));
@@ -1420,115 +1430,66 @@ public final class ExpressionParser {
 		}
 	}
 
-	/** constructor call */
-	private static final TKV_COBJECT_NEW encodeCallAccessCXE(final ProgramAssembly assembly,
-			final TokenInstruction constructedClassAccess,
-			final TokenInstruction constructorPropertyName,
-			final List<TokenInstruction> callArguments) throws Exception {
-
-		assert constructorPropertyName != null;
-		assert constructorPropertyName.assertStackValue();
-		if (callArguments == null || callArguments.size() == 0) {
-			return new TKV_COBJECT_NEW(constructedClassAccess, new TKO_ACALLV_BA_VS_S(constructorPropertyName));
-		}
-		Map<String, Integer> nameToIndex = null;
-		{
-			int tokenCount = callArguments.size();
-			boolean argumentStart = true;
-			for (int i = 0, param = 0; i < tokenCount; ++i) {
-				final Object current = callArguments.get(i);
-				if (current == ParseConstants.TKS_COMMA) {
-					argumentStart = true;
-					param++;
-				} else //
-				if (argumentStart) {
-					if (current instanceof TKA_ASSIGN_FSTORE_BA_SC_S) {
-						if (nameToIndex == null) {
-							nameToIndex = Create.treeMap();
-						}
-						final String name = ((TKA_ASSIGN_FSTORE_BA_SC_S) current).getName();
-						nameToIndex.put(name, Reflect.getInteger(param));
-						callArguments.remove(i);
-						tokenCount--;
-					}
-					argumentStart = false;
-				}
-			}
-			if (argumentStart && tokenCount > 0) {
-				callArguments.remove(tokenCount - 1);
-			}
-		}
-		ExpressionParser.EXPR_PRIVATE_COUNT++;
-		final TokenInstruction arguments = assembly.compileExpression(callArguments, BalanceType.ARGUMENT_LIST);
-		final int paramCount = arguments.getResultCount();
-		if (nameToIndex == null) {
-			if (paramCount == 1) {
-				return new TKV_COBJECT_NEW(constructedClassAccess, new TKO_ACALLO_CBA_AVS_S(constructorPropertyName, arguments));
-			}
-			{
-				// paramCount > 1
-				return new TKV_COBJECT_NEW(constructedClassAccess, new TKO_ACALLS_CBA_AVS_S(constructorPropertyName, arguments, paramCount));
-			}
-		}
-		{
-			/** nameToIndex != null && paramCount > 0 */
-			final Instruction carguments = new IAVV_ARGS_CREATEN_X_X_R(paramCount, nameToIndex);
-			return new TKV_COBJECT_NEW(constructedClassAccess, new TKO_ACALLM_CBA_AVS_S(constructorPropertyName, arguments, carguments));
-		}
-	}
-
 	/** DIRECT (r7RR) */
-	private static final TokenInstruction encodeCallAccessDXE(final ProgramAssembly assembly, final TokenInstruction accessProperty, final List<TokenInstruction> callArguments)
-			throws Exception {
+	private static final TokenInstruction encodeCallAccessDXE(//
+			final ProgramAssembly assembly,
+			final TokenInstruction accessProperty,
+			final List<TokenInstruction> callArguments) throws Exception {
 
 		assert accessProperty != null;
 		assert accessProperty.assertStackValue();
 		if (callArguments == null || callArguments.size() == 0) {
 			return new TKO_ACALLV_BA_VS_S(accessProperty);
 		}
-		Map<String, Integer> nameToIndex = null;
-		{
-			int tokenCount = callArguments.size();
-			boolean argumentStart = true;
-			for (int i = 0, param = 0; i < tokenCount; ++i) {
-				final Object current = callArguments.get(i);
-				if (current == ParseConstants.TKS_COMMA) {
-					argumentStart = true;
-					param++;
-				} else //
-				if (argumentStart) {
-					if (current instanceof TKA_ASSIGN_FSTORE_BA_SC_S) {
-						if (nameToIndex == null) {
-							nameToIndex = Create.treeMap();
-						}
-						final String name = ((TKA_ASSIGN_FSTORE_BA_SC_S) current).getName();
-						nameToIndex.put(name, Reflect.getInteger(param));
-						callArguments.remove(i);
-						tokenCount--;
-					}
-					argumentStart = false;
-				}
-			}
-			if (argumentStart && tokenCount > 0) {
-				callArguments.remove(tokenCount - 1);
-			}
-		}
+
+		final Map<String, Integer> nameToIndex = ExpressionParser.extractNameToIndex(callArguments);
 		ExpressionParser.EXPR_PRIVATE_COUNT++;
 		final TokenInstruction arguments = assembly.compileExpression(callArguments, BalanceType.ARGUMENT_LIST);
 		final int paramCount = arguments.getResultCount();
+
 		if (nameToIndex == null) {
-			if (paramCount == 1) {
-				return new TKO_ACALLO_CBA_AVS_S(accessProperty, arguments);
+			switch (paramCount) {
+				case 0 :
+					return new TKO_ACALLV_BA_VS_S(accessProperty);
+				case 1 :
+					return new TKO_ACALLO_CBA_AVS_S(accessProperty, arguments);
+				default :
 			}
-			{
-				// paramCount > 1
-				return new TKO_ACALLS_CBA_AVS_S(accessProperty, arguments, paramCount);
-			}
+			return new TKO_ACALLS_CBA_AVS_S(accessProperty, arguments, paramCount);
 		}
 		{
 			/** nameToIndex != null && paramCount > 0 */
 			final Instruction carguments = new IAVV_ARGS_CREATEN_X_X_R(paramCount, nameToIndex);
 			return new TKO_ACALLM_CBA_AVS_S(accessProperty, arguments, carguments);
+		}
+	}
+
+	/** EOCO CALL */
+	private static final TokenInstruction encodeCallAccessOXE(//
+			final ProgramAssembly assembly,
+			final List<TokenInstruction> callArguments) throws Exception {
+
+		if (callArguments == null || callArguments.size() == 0) {
+			return new TKS_ACALL_OCO(null, 0, null);
+		}
+
+		final Map<String, Integer> nameToIndex = ExpressionParser.extractNameToIndex(callArguments);
+		ExpressionParser.EXPR_PRIVATE_COUNT++;
+		final TokenInstruction arguments = assembly.compileExpression(callArguments, BalanceType.ARGUMENT_LIST);
+		final int paramCount = arguments.getResultCount();
+
+		if (nameToIndex == null) {
+			switch (paramCount) {
+				case 0 :
+					return new TKS_ACALL_OCO(null, 0, null);
+				default :
+			}
+			return new TKS_ACALL_OCO(arguments, paramCount, null);
+		}
+		{
+			/** nameToIndex != null && paramCount > 0 */
+			final Instruction carguments = new IAVV_ARGS_CREATEN_X_X_R(paramCount, nameToIndex);
+			return new TKS_ACALL_OCO(arguments, paramCount, carguments);
 		}
 	}
 
@@ -1546,15 +1507,62 @@ public final class ExpressionParser {
 		assert accessProperty.assertStackValue();
 
 		if (callArguments == null || callArguments.size() == 0) {
-			// System.out.println(">>>>>> CALLXXE_V, callee: " + accessObjectModifier + ", prop: "
-			// + accessProperty);
-
-			return accessObjectModifier == ModifierArguments.AB7FV
-				? new TKV_FCALLV_A_V_S(accessProperty)
-				: accessObjectModifier == ModifierArguments.AB4CT
-					? new TKV_ZTCALLV_A_V_S(accessProperty)
-					: new TKV_ACALLV_BA_VM_S(accessObjectModifier, accessProperty);
+			if (accessObjectModifier == ModifierArguments.AB7FV) {
+				return new TKV_FCALLV_A_V_S(accessProperty);
+			}
+			if (accessObjectModifier == ModifierArguments.AB4CT) {
+				return new TKV_ZTCALLV_A_V_S(accessProperty);
+			}
+			return new TKV_ACALLV_BA_VM_S(accessObjectModifier, accessProperty);
 		}
+
+		final Map<String, Integer> nameToIndex = ExpressionParser.extractNameToIndex(callArguments);
+
+		ExpressionParser.EXPR_PRIVATE_COUNT++;
+		final TokenInstruction arguments = assembly.compileExpression(callArguments, BalanceType.ARGUMENT_LIST);
+		final int paramCount = arguments.getResultCount();
+		if (nameToIndex == null) {
+			switch (paramCount) {
+				case 0 :
+					if (accessObjectModifier == ModifierArguments.AB7FV) {
+						return new TKV_FCALLV_A_V_S(accessProperty);
+					}
+					if (accessObjectModifier == ModifierArguments.AB4CT) {
+						return new TKV_ZTCALLV_A_V_S(accessProperty);
+					}
+					return new TKV_ACALLV_BA_VM_S(accessObjectModifier, accessProperty);
+				case 1 :
+					if (accessObjectModifier == ModifierArguments.AB7FV) {
+						return new TKV_FCALLO_BA_AV_S(accessProperty, arguments);
+					}
+					if (accessObjectModifier == ModifierArguments.AB4CT) {
+						return new TKV_ZTCALLO_BA_AV_S(accessProperty, arguments);
+					}
+					return new TKV_ACALLO_CBA_AVM_S(accessObjectModifier, accessProperty, arguments);
+				default :
+			}
+			if (accessObjectModifier == ModifierArguments.AB7FV) {
+				return new TKV_FCALLS_BA_AV_S(accessProperty, arguments, paramCount);
+			}
+			if (accessObjectModifier == ModifierArguments.AB4CT) {
+				return new TKV_ZTCALLS_BA_AV_S(accessProperty, arguments, paramCount);
+			}
+			return new TKV_ACALLS_CBA_AVM_S(accessObjectModifier, accessProperty, arguments, paramCount);
+		}
+
+		/** nameToIndex != null && paramCount > 0 */
+		final Instruction carguments = new IAVV_ARGS_CREATEN_X_X_R(paramCount, nameToIndex);
+		return accessObjectModifier == ModifierArguments.AB7FV
+			? new TKV_FCALLM_BA_AV_S(accessProperty, arguments, carguments)
+			: accessObjectModifier == ModifierArguments.AB4CT
+				? new TKV_ZTCALLM_BA_AV_S(accessProperty, arguments, carguments)
+				: new TKV_ACALLM_CBA_AVM_S(accessObjectModifier, accessProperty, arguments, carguments);
+	}
+
+	/** @param callArguments
+	 * @return */
+	private static Map<String, Integer> extractNameToIndex(final List<TokenInstruction> callArguments) {
+
 		Map<String, Integer> nameToIndex = null;
 		{
 			int tokenCount = callArguments.size();
@@ -1582,45 +1590,7 @@ public final class ExpressionParser {
 				callArguments.remove(tokenCount - 1);
 			}
 		}
-
-		ExpressionParser.EXPR_PRIVATE_COUNT++;
-		final TokenInstruction arguments = assembly.compileExpression(callArguments, BalanceType.ARGUMENT_LIST);
-		final int paramCount = arguments.getResultCount();
-		if (nameToIndex == null) {
-			if (paramCount == 1) {
-				return accessObjectModifier == ModifierArguments.AB7FV
-					? new TKV_FCALLO_BA_AV_S(accessProperty, arguments)
-					: accessObjectModifier == ModifierArguments.AB4CT
-						? new TKV_ZTCALLO_BA_AV_S(accessProperty, arguments)
-						: new TKV_ACALLO_CBA_AVM_S(accessObjectModifier, accessProperty, arguments);
-			}
-			{
-				/** paramCount > 1 */
-				return accessObjectModifier == ModifierArguments.AB7FV
-					? new TKV_FCALLS_BA_AV_S(
-							accessProperty, //
-							arguments,
-							paramCount)
-					: accessObjectModifier == ModifierArguments.AB4CT
-						? new TKV_ZTCALLS_BA_AV_S(
-								accessProperty, //
-								arguments,
-								paramCount)
-						: new TKV_ACALLS_CBA_AVM_S(
-								accessObjectModifier, //
-								accessProperty,
-								arguments,
-								paramCount);
-			}
-		}
-
-		/** nameToIndex != null && paramCount > 0 */
-		final Instruction carguments = new IAVV_ARGS_CREATEN_X_X_R(paramCount, nameToIndex);
-		return accessObjectModifier == ModifierArguments.AB7FV
-			? new TKV_FCALLM_BA_AV_S(accessProperty, arguments, carguments)
-			: accessObjectModifier == ModifierArguments.AB4CT
-				? new TKV_ZTCALLM_BA_AV_S(accessProperty, arguments, carguments)
-				: new TKV_ACALLM_CBA_AVM_S(accessObjectModifier, accessProperty, arguments, carguments);
+		return nameToIndex;
 	}
 
 	private static final boolean isIdentifierPart(final char c) {
@@ -2692,6 +2662,9 @@ public final class ExpressionParser {
 								final int codeCollected = current.length();
 								if (codeCollected > 0) {
 									if (current.charAt(codeCollected - 1) == '?') {
+										current.append('.');
+										continue code;
+										/** <code>
 										if (codeCollected > 1) {
 											ExpressionParser.addOperator(assembly, precompiled, current.substring(0, codeCollected - 1));
 										}
@@ -2699,6 +2672,7 @@ public final class ExpressionParser {
 										precompiled.add(ParseConstants.TKV_DIRECT);
 										current.setLength(0);
 										continue code;
+										</code> **/
 									}
 								}
 								state = ExpressionParser.ST_IDENTIFIER_ACCS;
@@ -2868,10 +2842,12 @@ public final class ExpressionParser {
 								final List<TokenInstruction> sub = parameters.isBlank()
 									? null
 									: ExpressionParser.prepare(assembly, parameters);
-								{
-									final TokenInstruction call = ExpressionParser.encodeCallAccessCXE(assembly, constructor, ExpressionParser.MA_CONSTRUCTOR, sub);
-									precompiled.add(call);
-								}
+								precompiled.add(//
+										new TKV_COBJECT_NEW(//
+												constructor,
+												ExpressionParser.encodeCallAccessDXE(assembly, ExpressionParser.MA_CONSTRUCTOR, sub)//
+										)//
+								);
 								identifier = null;
 								current.setLength(0);
 								state = ExpressionParser.ST_WHITESPACE;

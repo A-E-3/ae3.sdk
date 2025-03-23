@@ -18,29 +18,29 @@ import ru.myx.ae3.exec.ResultHandlerBasic;
 
 final class TKV_FCALLS_BA_AV_S extends TokenValue {
 
-	private final TokenInstruction argumentA;
+	private final TokenInstruction accessProperty;
 
-	private final TokenInstruction argument;
+	private final TokenInstruction arguments;
 
 	private final int constant;
 
-	TKV_FCALLS_BA_AV_S(final TokenInstruction argumentA, final TokenInstruction argument, final int constant) {
+	TKV_FCALLS_BA_AV_S(final TokenInstruction accessProperty, final TokenInstruction arguments, final int constant) {
 
-		assert argumentA.assertStackValue();
-		assert argument.assertZeroStackOperands();
-		assert argument.getResultCount() == constant;
+		assert accessProperty.assertStackValue();
+		assert arguments.assertZeroStackOperands();
+		assert arguments.getResultCount() == constant;
 		assert constant > 1 : constant == 0
 			? "Use " + TKV_FCALLV_A_V_S.class.getSimpleName() + " then"
 			: "Use " + TKV_FCALLO_BA_AV_S.class.getSimpleName() + " then";
-		this.argumentA = argumentA;
-		this.argument = argument;
+		this.accessProperty = accessProperty;
+		this.arguments = arguments;
 		this.constant = constant;
 	}
 
 	@Override
 	public final String getNotation() {
 
-		return this.argumentA.getNotation() + "( " + this.argument.getNotation() + " )";
+		return this.accessProperty.getNotation() + "( " + this.arguments.getNotation() + " )";
 	}
 
 	@Override
@@ -60,12 +60,12 @@ final class TKV_FCALLS_BA_AV_S extends TokenValue {
 		assert store != null;
 
 		/** Anyway in stack, constant is expected to be more than zero */
-		this.argument.toAssembly(assembly, null, null, ResultHandler.FB_BSN_NXT);
+		this.arguments.toAssembly(assembly, null, null, ResultHandler.FB_BSN_NXT);
 
-		final ModifierArgument modifierB = this.argumentA.toDirectModifier();
-		final boolean directB = modifierB == ModifierArguments.AA0RB;
+		final ModifierArgument modifierProperty = this.accessProperty.toDirectModifier();
+		final boolean directB = modifierProperty == ModifierArguments.AA0RB;
 		if (directB) {
-			this.argumentA.toAssembly(
+			this.accessProperty.toAssembly(
 					assembly, //
 					null,
 					null,
@@ -74,7 +74,7 @@ final class TKV_FCALLS_BA_AV_S extends TokenValue {
 
 		assembly.addInstruction(
 				OperationsA10.XFCALLS//
-						.instruction(modifierB, this.constant, store));
+						.instruction(modifierProperty, this.constant, store));
 	}
 
 	@Override

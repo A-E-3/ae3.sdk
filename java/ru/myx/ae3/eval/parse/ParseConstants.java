@@ -371,6 +371,11 @@ public class ParseConstants {
 	/**
 	 *
 	 */
+	public static final TokenValue TKV_ERROR_REFERENCE_EXPECTED = new TKV_ERROR_A_C_E("Reference expected!");
+
+	/**
+	 *
+	 */
 	public static final TokenValue TKV_ERROR_EXPRESSION_EXPECTED = new TKV_ERROR_A_C_E("Expression expected!");
 
 	/**
@@ -457,6 +462,11 @@ public class ParseConstants {
 	 *
 	 */
 	public static final TokenValue TKV_THIS = new TKV_LTHIS();
+
+	/**
+	 *
+	 */
+	public static final TokenValue TKV_FRAME = new TKV_LFRAME();
 
 	/**
 	 *

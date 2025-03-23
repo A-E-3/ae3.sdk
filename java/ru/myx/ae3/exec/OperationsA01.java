@@ -3,8 +3,6 @@
  */
 package ru.myx.ae3.exec;
 
-import ru.myx.ae3.base.BaseFunction;
-import ru.myx.ae3.base.BaseNativeArray;
 import ru.myx.ae3.base.BaseObject;
 import ru.myx.vm_vliw32_2010.InstructionIA;
 import ru.myx.vm_vliw32_2010.OperationA01;
@@ -14,38 +12,38 @@ import ru.myx.vm_vliw32_2010.OperationA01;
  *
  * @author myx */
 public enum OperationsA01 implements OperationA01 {
-
+	
 	/**
 	 *
 	 */
 	XEENTRCTCH_P {
-
+		
 		final InstructionA01[] cache = new InstructionA01[256];
 		{
 			for (int i = 255; i > 0; --i) {
 				this.cache[i] = new IA01_XEENTRCTCH_C_NN_NXT(i);
 			}
 		}
-
+		
 		@Override
 		public final ExecStateCode execute(final ExecProcess ctx, final int constant, final ResultHandler store) {
-
+			
 			assert store instanceof ResultHandlerDirect;
-
+			
 			return constant > 0
 				? ctx.vmFrameEntryOpCatch(ctx.ri08IP + 1 + constant)
 				: ctx.vmRaise("Incorrect frame size!");
 		}
-
+		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return null;
 		}
-
+		
 		@Override
 		public final InstructionIA instruction(final int constant, final ResultHandler store) {
-
+			
 			if (store == ResultHandler.FA_BNN_NXT) {
 				return constant > 0 && constant < 256
 					? this.cache[constant]
@@ -53,10 +51,10 @@ public enum OperationsA01 implements OperationA01 {
 			}
 			return super.instruction(constant, store);
 		}
-
+		
 		@Override
 		public final boolean isRelativeAddressInConstant() {
-
+			
 			return true;
 		}
 	},
@@ -64,33 +62,33 @@ public enum OperationsA01 implements OperationA01 {
 	 *
 	 */
 	XEENTRCTRL_P {
-
+		
 		final InstructionA01[] cache = new InstructionA01[256];
 		{
 			for (int i = 255; i > 0; --i) {
 				this.cache[i] = new IA01_XEENTRCTRL_C_NN_NXT(i);
 			}
 		}
-
+		
 		@Override
 		public final ExecStateCode execute(final ExecProcess process, final int constant, final ResultHandler store) {
-
+			
 			assert store instanceof ResultHandlerDirect;
-
+			
 			return constant > 0
 				? process.vmFrameEntryOpCtrl(process.ri08IP + 1 + constant)
 				: process.vmRaise("Incorrect frame size!");
 		}
-
+		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return null;
 		}
-
+		
 		@Override
 		public final InstructionIA instruction(final int constant, final ResultHandler store) {
-
+			
 			if (store == ResultHandler.FA_BNN_NXT) {
 				return constant > 0 && constant < 256
 					? this.cache[constant]
@@ -98,10 +96,10 @@ public enum OperationsA01 implements OperationA01 {
 			}
 			return super.instruction(constant, store);
 		}
-
+		
 		@Override
 		public final boolean isRelativeAddressInConstant() {
-
+			
 			return true;
 		}
 	},
@@ -109,33 +107,33 @@ public enum OperationsA01 implements OperationA01 {
 	 *
 	 */
 	XEENTRFULL_P {
-
+		
 		final InstructionA01[] cache = new InstructionA01[256];
 		{
 			for (int i = 255; i > 0; --i) {
 				this.cache[i] = new IA01_XEENTRFULL_C_NN_NXT(i);
 			}
 		}
-
+		
 		@Override
 		public final ExecStateCode execute(final ExecProcess process, final int constant, final ResultHandler store) {
-
+			
 			assert store instanceof ResultHandlerDirect;
-
+			
 			return constant > 0
 				? process.vmFrameEntryOpFull(process.ri08IP + 1 + constant)
 				: process.vmRaise("Incorrect frame size!");
 		}
-
+		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return null;
 		}
-
+		
 		@Override
 		public final InstructionIA instruction(final int constant, final ResultHandler store) {
-
+			
 			if (store == ResultHandler.FA_BNN_NXT) {
 				return constant > 0 && constant < 256
 					? this.cache[constant]
@@ -143,10 +141,10 @@ public enum OperationsA01 implements OperationA01 {
 			}
 			return super.instruction(constant, store);
 		}
-
+		
 		@Override
 		public final boolean isRelativeAddressInConstant() {
-
+			
 			return true;
 		}
 	},
@@ -154,33 +152,33 @@ public enum OperationsA01 implements OperationA01 {
 	 *
 	 */
 	XEENTRITER_I {
-
+		
 		final InstructionA01[] cache = new InstructionA01[256];
 		{
 			for (int i = 255; i > 0; --i) {
 				this.cache[i] = new IA01_XEENTRITER_C_NN_NXT(i);
 			}
 		}
-
+		
 		@Override
 		public final ExecStateCode execute(final ExecProcess process, final int constant, final ResultHandler store) {
-
+			
 			assert store instanceof ResultHandlerDirect;
-
+			
 			return constant > 0
 				? process.vmFrameEntryOpIterCtrl(process.ri08IP + 1 + constant)
 				: process.vmRaise("Incorrect frame size!");
 		}
-
+		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return null;
 		}
-
+		
 		@Override
 		public final InstructionIA instruction(final int constant, final ResultHandler store) {
-
+			
 			if (store == ResultHandler.FA_BNN_NXT) {
 				return constant > 0 && constant < 256
 					? this.cache[constant]
@@ -188,10 +186,10 @@ public enum OperationsA01 implements OperationA01 {
 			}
 			return super.instruction(constant, store);
 		}
-
+		
 		@Override
 		public final boolean isRelativeAddressInConstant() {
-
+			
 			return true;
 		}
 	},
@@ -199,33 +197,33 @@ public enum OperationsA01 implements OperationA01 {
 	 *
 	 */
 	XEENTRITRV_P {
-
+		
 		final InstructionA01[] cache = new InstructionA01[256];
 		{
 			for (int i = 255; i > 0; --i) {
 				this.cache[i] = new IA01_XEENTRITRV_C_NN_NXT(i);
 			}
 		}
-
+		
 		@Override
 		public final ExecStateCode execute(final ExecProcess process, final int constant, final ResultHandler store) {
-
+			
 			assert store instanceof ResultHandlerDirect;
-
+			
 			return constant > 0
 				? process.vmFrameEntryOpIterCtrlNewVars(process.ri08IP + 1 + constant)
 				: process.vmRaise("Incorrect frame size!");
 		}
-
+		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return null;
 		}
-
+		
 		@Override
 		public final InstructionIA instruction(final int constant, final ResultHandler store) {
-
+			
 			if (store == ResultHandler.FA_BNN_NXT) {
 				return constant > 0 && constant < 256
 					? this.cache[constant]
@@ -233,10 +231,10 @@ public enum OperationsA01 implements OperationA01 {
 			}
 			return super.instruction(constant, store);
 		}
-
+		
 		@Override
 		public final boolean isRelativeAddressInConstant() {
-
+			
 			return true;
 		}
 	},
@@ -244,33 +242,33 @@ public enum OperationsA01 implements OperationA01 {
 	 *
 	 */
 	XEENTRLOOP_P {
-
+		
 		final InstructionA01[] cache = new InstructionA01[256];
 		{
 			for (int i = 255; i > 0; --i) {
 				this.cache[i] = new IA01_XEENTRLOOP_C_NN_NXT(i);
 			}
 		}
-
+		
 		@Override
 		public final ExecStateCode execute(final ExecProcess process, final int constant, final ResultHandler store) {
-
+			
 			assert store instanceof ResultHandlerDirect;
-
+			
 			return constant > 0
 				? process.vmFrameEntryOpCtrlNewVars(process.ri08IP + 1 + constant)
 				: process.vmRaise("Incorrect frame size!");
 		}
-
+		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return null;
 		}
-
+		
 		@Override
 		public final InstructionIA instruction(final int constant, final ResultHandler store) {
-
+			
 			if (store == ResultHandler.FA_BNN_NXT) {
 				return constant > 0 && constant < 256
 					? this.cache[constant]
@@ -278,10 +276,10 @@ public enum OperationsA01 implements OperationA01 {
 			}
 			return super.instruction(constant, store);
 		}
-
+		
 		@Override
 		public final boolean isRelativeAddressInConstant() {
-
+			
 			return true;
 		}
 	},
@@ -289,33 +287,33 @@ public enum OperationsA01 implements OperationA01 {
 	 *
 	 */
 	XEENTRNONE_P {
-
+		
 		final InstructionA01[] cache = new InstructionA01[256];
 		{
 			for (int i = 255; i > 0; --i) {
 				this.cache[i] = new IA01_XEENTRNONE_C_NN_NXT(i);
 			}
 		}
-
+		
 		@Override
 		public final ExecStateCode execute(final ExecProcess process, final int constant, final ResultHandler store) {
-
+			
 			assert store instanceof ResultHandlerDirect;
-
+			
 			return constant > 0
 				? process.vmFrameEntryOpNone(process.ri08IP + 1 + constant)
 				: process.vmRaise("Incorrect frame size!");
 		}
-
+		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return null;
 		}
-
+		
 		@Override
 		public final InstructionIA instruction(final int constant, final ResultHandler store) {
-
+			
 			if (store == ResultHandler.FA_BNN_NXT) {
 				return constant > 0 && constant < 256
 					? this.cache[constant]
@@ -323,10 +321,10 @@ public enum OperationsA01 implements OperationA01 {
 			}
 			return super.instruction(constant, store);
 		}
-
+		
 		@Override
 		public final boolean isRelativeAddressInConstant() {
-
+			
 			return true;
 		}
 	},
@@ -334,33 +332,33 @@ public enum OperationsA01 implements OperationA01 {
 	 *
 	 */
 	XEENTRVARS_P {
-
+		
 		final InstructionA01[] cache = new InstructionA01[256];
 		{
 			for (int i = 255; i > 0; --i) {
 				this.cache[i] = new IA01_XEENTRVARS_C_NN_NXT(i);
 			}
 		}
-
+		
 		@Override
 		public final ExecStateCode execute(final ExecProcess process, final int constant, final ResultHandler store) {
-
+			
 			assert store instanceof ResultHandlerDirect;
-
+			
 			return constant > 0
 				? process.vmFrameEntryOpNewVars(process.ri08IP + 1 + constant)
 				: process.vmRaise("Incorrect frame size!");
 		}
-
+		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return null;
 		}
-
+		
 		@Override
 		public final InstructionIA instruction(final int constant, final ResultHandler store) {
-
+			
 			if (store == ResultHandler.FA_BNN_NXT) {
 				return constant > 0 && constant < 256
 					? this.cache[constant]
@@ -368,10 +366,10 @@ public enum OperationsA01 implements OperationA01 {
 			}
 			return super.instruction(constant, store);
 		}
-
+		
 		@Override
 		public final boolean isRelativeAddressInConstant() {
-
+			
 			return true;
 		}
 	},
@@ -379,33 +377,33 @@ public enum OperationsA01 implements OperationA01 {
 	 *
 	 */
 	XELEAVE_P {
-
+		
 		final InstructionA01[] cache = new InstructionA01[256];
 		{
 			for (int i = 255; i >= 0; --i) {
 				this.cache[i] = new IA01_XELEAVE_C_NN_NXT(i);
 			}
 		}
-
+		
 		@Override
 		public final ExecStateCode execute(final ExecProcess process, final int constant, final ResultHandler store) {
-
+			
 			assert store instanceof ResultHandlerDirect;
-
+			
 			return process.ri0BSB == process.ri0ASP
 				? process.vmFrameLeave()
 				: process.vmRaise("Stack disbalance on frame leave!");
 		}
-
+		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return null;
 		}
-
+		
 		@Override
 		public final InstructionIA instruction(final int constant, final ResultHandler store) {
-
+			
 			if (store == ResultHandler.FA_BNN_NXT) {
 				return constant >= 0 && constant < 256
 					? this.cache[constant]
@@ -418,9 +416,9 @@ public enum OperationsA01 implements OperationA01 {
 	 *
 	 */
 	XESKIP_P {
-
+		
 		final InstructionA01[] cacheNN = new InstructionA01[256];
-
+		
 		final InstructionA01[] cachePN = new InstructionA01[256];
 		{
 			for (int i = 255; i >= 0; --i) {
@@ -429,26 +427,26 @@ public enum OperationsA01 implements OperationA01 {
 			}
 			this.cachePN[1] = IA01_XESKIP_1_NN_NXT.INSTANCE;
 		}
-
+		
 		@Override
 		public final ExecStateCode execute(final ExecProcess process, final int constant, final ResultHandler store) {
-
+			
 			assert store instanceof ResultHandlerDirect;
-
+			
 			process.ri08IP += constant;
 			/** return NEXT - skip other VLIW command parts */
 			return null;
 		}
-
+		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return null;
 		}
-
+		
 		@Override
 		public final InstructionIA instruction(final int constant, final ResultHandler store) {
-
+			
 			if (store == ResultHandler.FA_BNN_NXT) {
 				return constant >= 0 && constant < 256
 					? this.cachePN[constant]
@@ -458,10 +456,10 @@ public enum OperationsA01 implements OperationA01 {
 			}
 			return super.instruction(constant, store);
 		}
-
+		
 		@Override
 		public final boolean isRelativeAddressInConstant() {
-
+			
 			return true;
 		}
 	},
@@ -469,15 +467,15 @@ public enum OperationsA01 implements OperationA01 {
 	 *
 	 */
 	XESKIPRL0_P {
-
+		
 		final InstructionA01[] cacheNN = new InstructionA01[256];
-
+		
 		final InstructionA01[] cacheNR = new InstructionA01[256];
-
+		
 		final InstructionA01[] cachePN = new InstructionA01[256];
-
+		
 		final InstructionA01[] cachePR = new InstructionA01[256];
-
+		
 		{
 			for (int i = 255; i >= 0; --i) {
 				this.cachePN[i] = new IA01_XESKIPRL0_C_NN_NXT(i);
@@ -486,10 +484,10 @@ public enum OperationsA01 implements OperationA01 {
 				this.cacheNR[i] = new IA01_XESKIPRL0_C_NN_RET(-i - 1);
 			}
 		}
-
+		
 		@Override
 		public final ExecStateCode execute(final ExecProcess process, final int constant, final ResultHandler store) {
-
+			
 			if (process.ra1RL == 0) {
 				process.ri08IP += constant;
 				/** return NEXT - skip other VLIW command parts */
@@ -497,16 +495,16 @@ public enum OperationsA01 implements OperationA01 {
 			}
 			return store.execReturn(process);
 		}
-
+		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return null;
 		}
-
+		
 		@Override
 		public InstructionIA instruction(final int constant, final ResultHandler store) {
-
+			
 			if (store == ResultHandler.FA_BNN_NXT) {
 				return constant >= 0 && constant < 256
 					? this.cachePN[constant]
@@ -523,10 +521,10 @@ public enum OperationsA01 implements OperationA01 {
 			}
 			return super.instruction(constant, store);
 		}
-
+		
 		@Override
 		public final boolean isRelativeAddressInConstant() {
-
+			
 			return true;
 		}
 	},
@@ -534,15 +532,15 @@ public enum OperationsA01 implements OperationA01 {
 	 *
 	 */
 	XESKIPRL1_P {
-
+		
 		final InstructionA01[] cacheNN = new InstructionA01[256];
-
+		
 		final InstructionA01[] cacheNR = new InstructionA01[256];
-
+		
 		final InstructionA01[] cachePN = new InstructionA01[256];
-
+		
 		final InstructionA01[] cachePR = new InstructionA01[256];
-
+		
 		{
 			for (int i = 255; i >= 0; --i) {
 				this.cachePN[i] = new IA01_XESKIPRL1_C_NN_NXT(i);
@@ -551,10 +549,10 @@ public enum OperationsA01 implements OperationA01 {
 				this.cacheNR[i] = new IA01_XESKIPRL1_C_NN_RET(-i - 1);
 			}
 		}
-
+		
 		@Override
 		public final ExecStateCode execute(final ExecProcess process, final int constant, final ResultHandler store) {
-
+			
 			if (process.ra1RL != 0) {
 				process.ri08IP += constant;
 				/** return NEXT - skip other VLIW command parts */
@@ -562,16 +560,16 @@ public enum OperationsA01 implements OperationA01 {
 			}
 			return store.execReturn(process);
 		}
-
+		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return null;
 		}
-
+		
 		@Override
 		public InstructionIA instruction(final int constant, final ResultHandler store) {
-
+			
 			if (store == ResultHandler.FA_BNN_NXT) {
 				return constant >= 0 && constant < 256
 					? this.cachePN[constant]
@@ -588,10 +586,10 @@ public enum OperationsA01 implements OperationA01 {
 			}
 			return super.instruction(constant, store);
 		}
-
+		
 		@Override
 		public final boolean isRelativeAddressInConstant() {
-
+			
 			return true;
 		}
 	},
@@ -599,15 +597,15 @@ public enum OperationsA01 implements OperationA01 {
 	 *
 	 */
 	XESKIPRB0_P {
-
+		
 		final InstructionA01[] cacheNN = new InstructionA01[256];
-
+		
 		final InstructionA01[] cacheNR = new InstructionA01[256];
-
+		
 		final InstructionA01[] cachePN = new InstructionA01[256];
-
+		
 		final InstructionA01[] cachePR = new InstructionA01[256];
-
+		
 		{
 			for (int i = 255; i >= 0; --i) {
 				this.cachePN[i] = new IA01_XESKIPRB0_C_NN_NXT(i);
@@ -616,10 +614,10 @@ public enum OperationsA01 implements OperationA01 {
 				this.cacheNR[i] = new IA01_XESKIPRB0_C_NN_RET(-i - 1);
 			}
 		}
-
+		
 		@Override
 		public final ExecStateCode execute(final ExecProcess process, final int constant, final ResultHandler store) {
-
+			
 			if (process.ra0RB.baseToBoolean() == BaseObject.FALSE) {
 				process.ri08IP += constant;
 				/** return NEXT - skip other VLIW command parts */
@@ -627,16 +625,16 @@ public enum OperationsA01 implements OperationA01 {
 			}
 			return store.execReturn(process);
 		}
-
+		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return null;
 		}
-
+		
 		@Override
 		public InstructionIA instruction(final int constant, final ResultHandler store) {
-
+			
 			if (store == ResultHandler.FA_BNN_NXT) {
 				return constant >= 0 && constant < 256
 					? this.cachePN[constant]
@@ -653,10 +651,10 @@ public enum OperationsA01 implements OperationA01 {
 			}
 			return super.instruction(constant, store);
 		}
-
+		
 		@Override
 		public final boolean isRelativeAddressInConstant() {
-
+			
 			return true;
 		}
 	},
@@ -664,15 +662,15 @@ public enum OperationsA01 implements OperationA01 {
 	 *
 	 */
 	XNSKIPRB0_P {
-
+		
 		final InstructionA01[] cacheNN = new InstructionA01[256];
-
+		
 		final InstructionA01[] cacheNR = new InstructionA01[256];
-
+		
 		final InstructionA01[] cachePN = new InstructionA01[256];
-
+		
 		final InstructionA01[] cachePR = new InstructionA01[256];
-
+		
 		{
 			for (int i = 255; i >= 0; --i) {
 				this.cachePN[i] = new IA01_XNSKIPRB0_C_NN_NXT(i);
@@ -681,10 +679,10 @@ public enum OperationsA01 implements OperationA01 {
 				this.cacheNR[i] = new IA01_XNSKIPRB0_C_NN_RET(-i - 1);
 			}
 		}
-
+		
 		@Override
 		public final ExecStateCode execute(final ExecProcess process, final int constant, final ResultHandler store) {
-
+			
 			if (process.ra0RB.baseValue() == null) {
 				process.ri08IP += constant;
 				/** return NEXT - skip other VLIW command parts */
@@ -692,16 +690,16 @@ public enum OperationsA01 implements OperationA01 {
 			}
 			return store.execReturn(process);
 		}
-
+		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return null;
 		}
-
+		
 		@Override
 		public InstructionIA instruction(final int constant, final ResultHandler store) {
-
+			
 			if (store == ResultHandler.FA_BNN_NXT) {
 				return constant >= 0 && constant < 256
 					? this.cachePN[constant]
@@ -718,10 +716,10 @@ public enum OperationsA01 implements OperationA01 {
 			}
 			return super.instruction(constant, store);
 		}
-
+		
 		@Override
 		public final boolean isRelativeAddressInConstant() {
-
+			
 			return true;
 		}
 	},
@@ -729,15 +727,15 @@ public enum OperationsA01 implements OperationA01 {
 	 *
 	 */
 	XESKIPRB1_P {
-
+		
 		final InstructionA01[] cacheNN = new InstructionA01[256];
-
+		
 		final InstructionA01[] cacheNR = new InstructionA01[256];
-
+		
 		final InstructionA01[] cachePN = new InstructionA01[256];
-
+		
 		final InstructionA01[] cachePR = new InstructionA01[256];
-
+		
 		{
 			for (int i = 255; i >= 0; --i) {
 				this.cachePN[i] = new IA01_XESKIPRB1_C_NN_NXT(i);
@@ -746,10 +744,10 @@ public enum OperationsA01 implements OperationA01 {
 				this.cacheNR[i] = new IA01_XESKIPRB1_C_NN_RET(-i - 1);
 			}
 		}
-
+		
 		@Override
 		public final ExecStateCode execute(final ExecProcess process, final int constant, final ResultHandler store) {
-
+			
 			if (process.ra0RB.baseToBoolean() == BaseObject.TRUE) {
 				process.ri08IP += constant;
 				/** return NEXT - skip other VLIW command parts */
@@ -757,16 +755,16 @@ public enum OperationsA01 implements OperationA01 {
 			}
 			return store.execReturn(process);
 		}
-
+		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return null;
 		}
-
+		
 		@Override
 		public InstructionIA instruction(final int constant, final ResultHandler store) {
-
+			
 			if (store == ResultHandler.FA_BNN_NXT) {
 				return constant >= 0 && constant < 256
 					? this.cachePN[constant]
@@ -783,10 +781,10 @@ public enum OperationsA01 implements OperationA01 {
 			}
 			return super.instruction(constant, store);
 		}
-
+		
 		@Override
 		public final boolean isRelativeAddressInConstant() {
-
+			
 			return true;
 		}
 	},
@@ -794,15 +792,15 @@ public enum OperationsA01 implements OperationA01 {
 	 *
 	 */
 	XNSKIPRB1_P {
-
+		
 		final InstructionA01[] cacheNN = new InstructionA01[256];
-
+		
 		final InstructionA01[] cacheNR = new InstructionA01[256];
-
+		
 		final InstructionA01[] cachePN = new InstructionA01[256];
-
+		
 		final InstructionA01[] cachePR = new InstructionA01[256];
-
+		
 		{
 			for (int i = 255; i >= 0; --i) {
 				this.cachePN[i] = new IA01_XNSKIPRB1_C_NN_NXT(i);
@@ -811,10 +809,10 @@ public enum OperationsA01 implements OperationA01 {
 				this.cacheNR[i] = new IA01_XNSKIPRB1_C_NN_RET(-i - 1);
 			}
 		}
-
+		
 		@Override
 		public final ExecStateCode execute(final ExecProcess process, final int constant, final ResultHandler store) {
-
+			
 			if (process.ra0RB.baseValue() != null) {
 				process.ri08IP += constant;
 				/** return NEXT - skip other VLIW command parts */
@@ -822,16 +820,16 @@ public enum OperationsA01 implements OperationA01 {
 			}
 			return store.execReturn(process);
 		}
-
+		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return null;
 		}
-
+		
 		@Override
 		public InstructionIA instruction(final int constant, final ResultHandler store) {
-
+			
 			if (store == ResultHandler.FA_BNN_NXT) {
 				return constant >= 0 && constant < 256
 					? this.cachePN[constant]
@@ -848,10 +846,10 @@ public enum OperationsA01 implements OperationA01 {
 			}
 			return super.instruction(constant, store);
 		}
-
+		
 		@Override
 		public final boolean isRelativeAddressInConstant() {
-
+			
 			return true;
 		}
 	},
@@ -859,23 +857,23 @@ public enum OperationsA01 implements OperationA01 {
 	 *
 	 */
 	XFBTGT_P {
-
+		
 		@Override
 		public final ExecStateCode execute(final ExecProcess process, final int constant, final ResultHandler store) {
-
+			
 			process.ri0CBT = process.ri08IP + 1 + constant;
 			return null;
 		}
-
+		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return null;
 		}
-
+		
 		@Override
 		public final boolean isRelativeAddressInConstant() {
-
+			
 			return true;
 		}
 	},
@@ -883,25 +881,25 @@ public enum OperationsA01 implements OperationA01 {
 	 *
 	 */
 	XFCTGT_P {
-
+		
 		@Override
 		public final ExecStateCode execute(final ExecProcess process, final int constant, final ResultHandler store) {
-
+			
 			assert store instanceof ResultHandlerDirect;
-
+			
 			process.ri0DCT = process.ri08IP + 1 + constant;
 			return null;
 		}
-
+		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return null;
 		}
-
+		
 		@Override
 		public final boolean isRelativeAddressInConstant() {
-
+			
 			return true;
 		}
 	},
@@ -909,26 +907,50 @@ public enum OperationsA01 implements OperationA01 {
 	 *
 	 */
 	XFETGT_P {
-
+		
 		@Override
 		public final ExecStateCode execute(final ExecProcess process, final int constant, final ResultHandler store) {
-
+			
 			assert store instanceof ResultHandlerDirect;
-
+			
 			process.ri0EET = process.ri08IP + 1 + constant;
 			return null;
 		}
-
+		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return null;
 		}
-
+		
 		@Override
 		public final boolean isRelativeAddressInConstant() {
-
+			
 			return true;
+		}
+	},
+	
+	/**
+	 *
+	 */
+	XFCALLA {
+		
+		@Override
+		public final ExecStateCode execute(final ExecProcess ctx, final int constant, final ResultHandler store) {
+			
+			return ctx.vmCall_FCALLA_FSS(constant, store);
+		}
+		
+		@Override
+		public final InstructionResult getResultType() {
+			
+			return InstructionResult.OBJECT;
+		}
+		
+		@Override
+		public final int getStackInputCount(final int constant) {
+			
+			return constant + 1;
 		}
 	},
 
@@ -936,84 +958,40 @@ public enum OperationsA01 implements OperationA01 {
 	 *
 	 */
 	XRCALLA {
-
+		
 		@Override
 		public final ExecStateCode execute(final ExecProcess ctx, final int constant, final ResultHandler store) {
-
-			switch (constant) {
-				case 0 : {
-					final BaseFunction callee = ctx.stackPop().baseCall();
-					final BaseObject instance = ctx.stackPop();
-					if (callee == null) {
-						return ctx.vmRaise("Not a function: class=" + instance.getClass().getName());
-					}
-					return callee.execCallPrepare(ctx, instance, store, false);
-				}
-				case 1 : {
-					final BaseObject argument = ctx.stackPop();
-					final BaseFunction callee = ctx.stackPop().baseCall();
-					final BaseObject instance = ctx.stackPop();
-					if (callee == null) {
-						return ctx.vmRaise("Not a function: class=" + instance.getClass().getName());
-					}
-					return callee.execCallPrepare(ctx, instance, store, false, argument);
-				}
-				case 2 : {
-					final BaseObject argument2 = ctx.stackPop();
-					final BaseObject argument1 = ctx.stackPop();
-					final BaseFunction callee = ctx.stackPop().baseCall();
-					final BaseObject instance = ctx.stackPop();
-					if (callee == null) {
-						return ctx.vmRaise("Not a function: class=" + instance.getClass().getName());
-					}
-					return callee.execCallPrepare(ctx, instance, store, false, argument1, argument2);
-				}
-				default : {
-					final BaseNativeArray array = new BaseNativeArray(constant);
-					final BaseObject[] stack = ctx.stackRaw();
-					final int rASP = ctx.ri0ASP;
-					for (int i = constant; i > 0; --i) {
-						array.putAppend(stack[rASP - i]);
-						stack[rASP - i] = null;
-					}
-					ctx.ri0ASP -= constant;
-					final BaseFunction callee = ctx.stackPop().baseCall();
-					final BaseObject instance = ctx.stackPop();
-					if (callee == null) {
-						return ctx.vmRaise("Not a function: class=" + instance.getClass().getName());
-					}
-					return callee.execCallPrepare(ctx, instance, store, false, array);
-				}
-			}
+			
+			return ctx.vmCall_RCALLA_SSS(constant, store);
 		}
-
+		
 		@Override
 		public final InstructionResult getResultType() {
-
+			
 			return InstructionResult.OBJECT;
 		}
-
+		
 		@Override
 		public final int getStackInputCount(final int constant) {
-
+			
 			return constant + 2;
 		}
 	},
-
+	
 	/**
 	 *
 	 */
 	;
-
+	
 	/** For ae3-vm-info script
 	 *
 	 * @return */
 	public abstract InstructionResult getResultType();
-
+	
 	final Instruction instructionCached(//
 			final int constant,
 			final ResultHandler store) {
-
+		
 		return InstructionA01.instructionCached(this.instruction(constant, store));
 	}
 }

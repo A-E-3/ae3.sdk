@@ -59,25 +59,23 @@ public final class TKV_EOCO extends TokenValue {
 
 		/** valid store */
 		assert store != null;
-		
-		{
-			if (store == ResultHandler.FA_BNN_NXT || store == ResultHandler.FU_BNN_NXT) {
-				final InstructionEditable skip = this.tokenLeft.toConditionalSkipEditable(//
-						assembly,
-						-1,
-						TokenInstruction.ConditionType.NULLISH_YES,
-						store//
-				);
-				// never skips
-				if (skip == null) {
-					this.tokenRight.toAssembly(assembly, null, null, store);
-					return;
-				}
-				final int rightStart = assembly.size();
+
+		if (store == ResultHandler.FA_BNN_NXT || store == ResultHandler.FU_BNN_NXT) {
+			final InstructionEditable skip = this.tokenLeft.toConditionalSkipEditable(//
+					assembly,
+					-1,
+					TokenInstruction.ConditionType.NULLISH_YES,
+					store//
+			);
+			// never skips
+			if (skip == null) {
 				this.tokenRight.toAssembly(assembly, null, null, store);
-				skip.setConstant(assembly.getInstructionCount(rightStart)).setFinished();
 				return;
 			}
+			final int rightStart = assembly.size();
+			this.tokenRight.toAssembly(assembly, null, null, store);
+			skip.setConstant(assembly.getInstructionCount(rightStart)).setFinished();
+			return;
 		}
 
 		if (store instanceof ResultHandlerBasic.ExecutionContinue) {

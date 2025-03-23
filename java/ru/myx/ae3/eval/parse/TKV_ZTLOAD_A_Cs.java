@@ -123,6 +123,18 @@ public final class TKV_ZTLOAD_A_Cs extends TokenValue implements ModifierArgumen
 	}
 	
 	@Override
+	public TokenInstruction toReferenceObject() {
+		
+		return ParseConstants.TKV_THIS;
+	}
+	
+	@Override
+	public TokenInstruction toReferenceProperty() {
+		
+		return ParseConstants.getConstantValue(this.argumentB);
+	}
+	
+	@Override
 	public ModifierArgument toReferenceReadBeforeWrite(final ProgramAssembly assembly,
 			final ModifierArgument argumentA,
 			final ModifierArgument argumentB,

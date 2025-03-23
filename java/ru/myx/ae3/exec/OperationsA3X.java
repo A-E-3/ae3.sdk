@@ -49,7 +49,7 @@ public enum OperationsA3X implements OperationA3X {
 			}
 
 			if (argumentC instanceof final NamedToIndexMapper mapper) {
-				return ctx.vmCallM(callee, argumentA, mapper, store);
+				return ctx.vmCall_Generic_MapArgs(callee, argumentA, mapper, store);
 			}
 			return ctx.vmRaise(
 					"Invalid arguments argument: key=" + argumentB.baseToString() + ", class=" + candidate.getClass().getName() + ", argumentsClass: "
@@ -142,7 +142,7 @@ public enum OperationsA3X implements OperationA3X {
 			}
 
 			if (argumentC instanceof final NamedToIndexMapper mapper) {
-				return ctx.vmCallM(callee, argumentB, mapper, store);
+				return ctx.vmCall_Generic_MapArgs(callee, argumentB, mapper, store);
 			}
 			return ctx.vmRaise("Invalid arguments argument: class=" + argumentA.getClass().getName() + ", argumentsClass: " + argumentC.getClass().getSimpleName());
 		}

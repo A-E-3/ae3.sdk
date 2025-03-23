@@ -70,7 +70,8 @@ public final class TKV_ACCESS_BA_VV_S extends TokenValue {
 	public void toAssembly(final ProgramAssembly assembly, final ModifierArgument argumentA, final ModifierArgument argumentB, final ResultHandlerBasic store) {
 
 		/** zero operands */
-		assert argumentA == null;
+		assert argumentA == null //
+				: "zero";
 		assert argumentB == null;
 
 		/** valid store */

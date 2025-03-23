@@ -21,22 +21,22 @@ final class TKV_ACALLM_CBA_AVM_S extends TokenValue {
 
 	private final ModifierArgument accessObjectModifier;
 
-	private final TokenInstruction argumentB;
+	private final TokenInstruction accessProperty;
 
 	private final TokenInstruction argument;
 
 	private final Instruction carguments;
 
-	TKV_ACALLM_CBA_AVM_S(final ModifierArgument accessObjectModifier, final TokenInstruction argumentB, final TokenInstruction argument, final Instruction carguments) {
+	TKV_ACALLM_CBA_AVM_S(final ModifierArgument accessObjectModifier, final TokenInstruction accessProperty, final TokenInstruction argument, final Instruction carguments) {
 
 		assert carguments != null;
 		assert accessObjectModifier != null;
-		assert argumentB.assertStackValue();
+		assert accessProperty.assertStackValue();
 		assert argument.assertZeroStackOperands();
 		assert argument.getResultCount() == carguments.getOperandCount();
 		assert accessObjectModifier != ModifierArguments.AE21POP && accessObjectModifier != ModifierArguments.AA0RB;
 		this.accessObjectModifier = accessObjectModifier;
-		this.argumentB = argumentB;
+		this.accessProperty = accessProperty;
 		this.argument = argument;
 		this.carguments = carguments;
 	}
@@ -44,7 +44,7 @@ final class TKV_ACALLM_CBA_AVM_S extends TokenValue {
 	@Override
 	public final String getNotation() {
 
-		return "" + this.accessObjectModifier + "." + this.argumentB.getNotation() + "( " + this.argument.getNotation() + " )";
+		return "" + this.accessObjectModifier + "." + this.accessProperty.getNotation() + "( " + this.argument.getNotation() + " )";
 	}
 
 	@Override
@@ -59,10 +59,10 @@ final class TKV_ACALLM_CBA_AVM_S extends TokenValue {
 		assert argumentA == null;
 		assert argumentB == null;
 
-		final ModifierArgument modifierB = this.argumentB.toDirectModifier();
-		final boolean directB = modifierB == ModifierArguments.AA0RB;
-		if (directB) {
-			this.argumentB.toAssembly(assembly, null, null, ResultHandler.FB_BSN_NXT);
+		final ModifierArgument modifierProperty = this.accessProperty.toDirectModifier();
+		final boolean directProperty = modifierProperty == ModifierArguments.AA0RB;
+		if (directProperty) {
+			this.accessProperty.toAssembly(assembly, null, null, ResultHandler.FB_BSN_NXT);
 		}
 
 		this.argument.toAssembly(assembly, null, null, ResultHandler.FB_BSN_NXT);
@@ -71,9 +71,9 @@ final class TKV_ACALLM_CBA_AVM_S extends TokenValue {
 				OperationsA3X.XACALLM//
 						.instruction(
 								this.accessObjectModifier, //
-								directB
+								directProperty
 									? ModifierArguments.AE21POP
-									: modifierB,
+									: modifierProperty,
 								ModifierArguments.AA0RB,
 								0,
 								store));

@@ -165,15 +165,15 @@ public final class TKV_FLOAD_A_Cs_S extends TokenValue implements ModifierArgume
 	@Override
 	public TokenInstruction toReferenceObject() {
 		
-		assert false : "Can't do this!";
-		return null;
+		return ParseConstants.TKV_FRAME;
 	}
 	
 	@Override
 	public TokenInstruction toReferenceProperty() {
 		
+		return ParseConstants.getConstantValue(this.argumentA);
 		/** same FLOAD (cause frame access needs source, not a property name) */
-		return this;
+		// return this;
 	}
 	
 	@Override

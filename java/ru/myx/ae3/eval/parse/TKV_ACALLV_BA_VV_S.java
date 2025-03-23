@@ -19,20 +19,20 @@ final class TKV_ACALLV_BA_VV_S extends TokenValue {
 	
 	private final TokenInstruction accessObject;
 	
-	private final TokenInstruction argumentB;
+	private final TokenInstruction accessProperty;
 	
-	TKV_ACALLV_BA_VV_S(final TokenInstruction accessObject, final TokenInstruction argumentB) {
+	TKV_ACALLV_BA_VV_S(final TokenInstruction accessObject, final TokenInstruction accessProperty) {
 		
 		assert accessObject.isStackValue();
-		assert argumentB.isStackValue();
+		assert accessProperty.isStackValue();
 		this.accessObject = accessObject;
-		this.argumentB = argumentB;
+		this.accessProperty = accessProperty;
 	}
 	
 	@Override
 	public final String getNotation() {
 		
-		return this.accessObject.getNotationValue() + "[" + this.argumentB.getNotation() + "]()";
+		return this.accessObject.getNotationValue() + "[" + this.accessProperty.getNotation() + "]()";
 	}
 	
 	@Override
@@ -48,33 +48,33 @@ final class TKV_ACALLV_BA_VV_S extends TokenValue {
 		assert argumentA == null;
 		assert argumentB == null;
 		
-		final ModifierArgument modifierA = this.accessObject.toDirectModifier();
-		final ModifierArgument modifierB = this.argumentB.toDirectModifier();
+		final ModifierArgument modifierObject = this.accessObject.toDirectModifier();
+		final ModifierArgument modifierProperty = this.accessProperty.toDirectModifier();
 		
-		final boolean directA = modifierA == ModifierArguments.AA0RB;
-		final boolean directB = modifierB == ModifierArguments.AA0RB;
+		final boolean directObject = modifierObject == ModifierArguments.AA0RB;
+		final boolean directProperty = modifierProperty == ModifierArguments.AA0RB;
 		
-		if (directA) {
+		if (directObject) {
 			this.accessObject.toAssembly(
 					assembly,
 					null,
 					null,
-					directB
+					directProperty
 						? ResultHandler.FB_BSN_NXT
 						: ResultHandler.FA_BNN_NXT);
 		}
-		if (directB) {
-			this.argumentB.toAssembly(assembly, null, null, ResultHandler.FA_BNN_NXT);
+		if (directProperty) {
+			this.accessProperty.toAssembly(assembly, null, null, ResultHandler.FA_BNN_NXT);
 		}
 		assembly.addInstruction(
-				(this.argumentB.getResultType() == InstructionResult.STRING
+				(this.accessProperty.getResultType() == InstructionResult.STRING
 					? OperationsS2X.VACALLS_XS
 					: OperationsA2X.XACALLS)//
 							.instruction(
-									directA && directB
+									directObject && directProperty
 										? ModifierArguments.AE21POP
-										: modifierA,
-									modifierB,
+										: modifierObject,
+									modifierProperty,
 									0,
 									store));
 	}
@@ -82,9 +82,9 @@ final class TKV_ACALLV_BA_VV_S extends TokenValue {
 	@Override
 	public final String toCode() {
 		
-		return (this.argumentB.getResultType() == InstructionResult.STRING
+		return (this.accessProperty.getResultType() == InstructionResult.STRING
 			? OperationsS2X.VACALLS_XS
 			: OperationsA2X.XACALLS)//
-				+ "\t0\tVV ->S\t[" + this.accessObject + ", " + this.argumentB + "];";
+				+ "\t0\tVV ->S\t[" + this.accessObject + ", " + this.accessProperty + "];";
 	}
 }
