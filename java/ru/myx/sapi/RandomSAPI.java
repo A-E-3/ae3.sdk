@@ -24,16 +24,16 @@ import ru.myx.ae3.reflect.ReflectionHidden;
  *
  *         Window - Preferences - Java - Code Style - Code Templates */
 public class RandomSAPI {
-
+	
 	/** base62 digits: case-sensitive, all basic letters and digits */
 	@ReflectionHidden
 	public static final String MIXED_62 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
+	
 	/** base78 digits: case-sensitive, all basic letters and digits plus some basic keyboard
 	 * symbols */
 	@ReflectionHidden
 	public static final String MIXED_78 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789~`!@$^*-_[]{}|.,";
-
+	
 	/** base55 digits: case-sensitive easily readable and easily distinguishable */
 	@ReflectionHidden
 	public static final String MIXED_55_EASY = "BCDFGHKLMNPRSTVZbcdfhkmnprstvzJQWXjwxAEUYaeiouy23456789";
@@ -41,11 +41,11 @@ public class RandomSAPI {
 	/** base55 digits: case-sensitive easily readable and easily distinguishable */
 	@ReflectionHidden
 	public static final String MIXED_58_EASY = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
-
+	
 	/** base27 digits: case-insensitive easily readable and easily distinguishable */
 	@ReflectionHidden
 	public static final String MIXED_27_EASY = "bcdfhkmnprtvzjwxaeuy2346789";
-
+	
 	/** @param length
 	 * @return */
 	public static TransferCopier binary(final int length) {
@@ -72,7 +72,7 @@ public class RandomSAPI {
 		}
 		return Transfer.wrapCopier(b);
 	}
-
+	
 	/** @param format
 	 *            D - decimal digit<br>
 	 *            H - hexadecimal digit - upper case<br>
@@ -84,7 +84,7 @@ public class RandomSAPI {
 	 *            E - 55-base digit - mixed case, easy, non-ambiguous<br>
 	 *            \ - next character should be copied<br>
 	 *            all other characters just copied
-	 *
+	 * 			
 	 * @return */
 	public static String formattedString(final String format) {
 		
@@ -190,7 +190,7 @@ public class RandomSAPI {
 		}
 		return result.toString();
 	}
-
+	
 	/** @param list
 	 * @return object */
 	public static Object fromList(final List<Object> list) {
@@ -200,7 +200,7 @@ public class RandomSAPI {
 		}
 		return list.get(Engine.createRandom(list.size()));
 	}
-
+	
 	/** @param list
 	 * @return object */
 	public static Object fromList(final Object[] list) {
@@ -210,19 +210,19 @@ public class RandomSAPI {
 		}
 		return list[Engine.createRandom(list.length)];
 	}
-
+	
 	/** @return */
 	public static Guid guid184() {
-
+		
 		return Guid.createGuid184();
 	}
-
+	
 	/** @return */
 	public static Guid guid384() {
-
+		
 		return Guid.createGuid384();
 	}
-
+	
 	/** @param limit
 	 * @return int */
 	public static int integer(final int limit) {
@@ -232,7 +232,7 @@ public class RandomSAPI {
 		}
 		return Engine.createRandom(limit);
 	}
-
+	
 	/** @param random
 	 * @return */
 	public static String reformat55to27(final String random) {
@@ -248,7 +248,7 @@ public class RandomSAPI {
 		}
 		return result.toString();
 	}
-
+	
 	/** @param list
 	 * @param limit
 	 * @return list */
@@ -260,18 +260,19 @@ public class RandomSAPI {
 		if (limit < 1) {
 			throw new IllegalArgumentException("Limit should be greater than zero, but equals to " + limit + "!");
 		}
-		if (limit >= list.size()) {
-			final List<Object> result = new ArrayList<>();
-			result.addAll(list);
-			Collections.shuffle(result);
-			return result;
-		}
+		
 		final List<Object> result = new ArrayList<>();
 		result.addAll(list);
+
 		Collections.shuffle(result);
+
+		if (limit >= list.size()) {
+			return result;
+		}
+
 		return result.subList(0, limit);
 	}
-
+	
 	/** @param map
 	 * @param limit
 	 * @return map */
@@ -283,18 +284,21 @@ public class RandomSAPI {
 		if (limit < 1) {
 			throw new IllegalArgumentException("Limit should be greater than zero, but equals to " + limit + "!");
 		}
+		
 		final List<String> result = new ArrayList<>();
 		for (final Iterator<String> keys = map.baseKeysOwn(); keys.hasNext();) {
 			result.add(keys.next());
 		}
-		if (limit >= result.size()) {
-			return map;
-		}
+		
 		Collections.shuffle(result);
+		
 		final BaseNativeObject resultMap = new BaseNativeObject(map.basePrototype());
-		for (final String key : result.subList(0, limit)) {
+		for (final String key : limit >= result.size()
+			? result
+			: result.subList(0, limit)) {
 			resultMap.putAppend(key, map.baseGet(key, BaseObject.UNDEFINED));
 		}
+		
 		return resultMap;
 	}
 	
@@ -309,16 +313,22 @@ public class RandomSAPI {
 		if (limit < 1) {
 			throw new IllegalArgumentException("Limit should be greater than zero, but equals to " + limit + "!");
 		}
+		
 		if (limit >= map.size()) {
 			return map;
 		}
+		
 		final List<Map.Entry<String, Object>> result = new ArrayList<>();
 		result.addAll(map.entrySet());
+
+		/** NOTE: no guarantee that this map will honor the order **/
 		Collections.shuffle(result);
+
 		final BaseMap resultMap = BaseObject.createObject();
 		for (final Map.Entry<String, Object> current : result.subList(0, limit)) {
 			resultMap.put(current.getKey(), current.getValue());
 		}
+		
 		return resultMap;
 	}
 }
