@@ -21,6 +21,7 @@ import ru.myx.ae3.base.BaseDate;
 import ru.myx.ae3.base.BaseList;
 import ru.myx.ae3.base.BaseMapEditable;
 import ru.myx.ae3.base.BaseObject;
+import ru.myx.ae3.base.BasePrimitiveString;
 import ru.myx.ae3.base.BaseString;
 import ru.myx.ae3.binary.Transfer;
 import ru.myx.ae3.binary.TransferBuffer;
@@ -42,9 +43,11 @@ import ru.myx.util.Base58;
  *
  *         TODO: real impl with java types to help.Format (or help.Convert), here special
  *         ExecProcess/BaseObject methods for faster scripting (reflection)
- *		
+ *
  *         Window - Preferences - Java - Code Style - Code Templates */
 public class FormatSAPI {
+	
+	private static final BasePrimitiveString STR_DOT = Base.forString(".");
 	
 	private static final StringBuilder csvStringFragmentImpl(final String string, final StringBuilder builder) {
 		
@@ -95,7 +98,7 @@ public class FormatSAPI {
 		return builder;
 	}
 	
-	private static final <T extends Appendable> T xmlElementImpl(final String name, final BaseObject attributes, final T result) throws IOException {
+	private static final <T extends Appendable> T xmlElementImpl(final String name, final BaseObject attributes, final BaseObject nodeValue, final T result) throws IOException {
 		
 		if (!Format.Xml.isValidName(name)) {
 			return result;
@@ -179,7 +182,12 @@ public class FormatSAPI {
 								}
 							}
 						}
-						FormatSAPI.xmlElementImpl(key, element, body);
+						FormatSAPI.xmlElementImpl(//
+								key,
+								element,
+								element.baseGet(FormatSAPI.STR_DOT, null),
+								body//
+						);
 					}
 					continue mapProperties;
 				}
@@ -201,15 +209,28 @@ public class FormatSAPI {
 				}
 			}
 			{
-				FormatSAPI.xmlElementImpl(key, value, body);
+				FormatSAPI.xmlElementImpl(key, value, null, body);
 			}
 		}
-		if (body == null || body.length() == 0) {
-			result.append("/>");
+		
+		if (nodeValue == null || nodeValue.baseValue() == null) {
+			if (body == null || body.length() == 0) {
+				result.append("/>");
+				return result;
+			}
+			result.append('>').append(body).append("</").append(name).append('>');
 			return result;
 		}
-		result.append('>').append(body).append("</").append(name).append('>');
-		return result;
+		
+		{
+			result.append('>');
+			if (body != null && body.length() > 0) {
+				result.append(body);
+			}
+			Format.Xml.xmlNodeValueImpl(nodeValue, result);
+			result.append("</").append(name).append('>');
+			return result;
+		}
 	}
 	
 	/** Formats bytes as base27, more compact and readable than base16/hex
@@ -1556,8 +1577,14 @@ public class FormatSAPI {
 	public static final String xmlElement(final String name, final BaseObject attributes) {
 		
 		assert Format.Xml.isValidName(name) : "invalid element name: " + name;
+		
 		try {
-			return FormatSAPI.xmlElementImpl(name, attributes, new StringBuilder(64)).toString();
+			return FormatSAPI.xmlElementImpl(//
+					name,
+					attributes,
+					attributes.baseGet(FormatSAPI.STR_DOT, null),
+					new StringBuilder(64)//
+			).toString();
 		} catch (final IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -1571,18 +1598,10 @@ public class FormatSAPI {
 	 * @return */
 	public static final String xmlElement(final String name, final BaseObject attributes, final BaseObject nodeValue) {
 		
-		final StringBuilder builder = new StringBuilder(64);
 		assert Format.Xml.isValidName(name) : "invalid element name: " + name;
+		
 		try {
-			builder.append('<').append(name);
-			FormatSAPI.xmlAttributesImpl(attributes, builder);
-			if (nodeValue == null || nodeValue.baseValue() == null) {
-				return builder.append("/>").toString();
-			}
-			builder.append('>');
-			Format.Xml.xmlNodeValueImpl(nodeValue, builder);
-			builder.append("</").append(name).append('>');
-			return builder.toString();
+			return FormatSAPI.xmlElementImpl(name, attributes, nodeValue, new StringBuilder(64)).toString();
 		} catch (final IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -1671,7 +1690,12 @@ public class FormatSAPI {
 							result.append("</").append(name).append('>');
 							continue;
 						}
-						FormatSAPI.xmlElementImpl(name, item, result);
+						FormatSAPI.xmlElementImpl(//
+								name,
+								item,
+								item.baseGet(FormatSAPI.STR_DOT, null),
+								result//
+						);
 					}
 				} catch (final IOException e) {
 					throw new RuntimeException(e);
