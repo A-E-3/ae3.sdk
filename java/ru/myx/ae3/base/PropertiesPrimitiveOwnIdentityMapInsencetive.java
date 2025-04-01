@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 import ru.myx.ae3.Engine;
 import ru.myx.ae3.help.Format;
@@ -97,10 +96,10 @@ import ru.myx.ae3.help.Format;
  * @version 1.65, 03/03/05
  * @since 1.2 */
 
-/** has only enumerable (not all) properties in the linked list
+/** has ALL (not just enumerable) properties in the linked list
  *
  * for case-insencetive property map (like HTTP headers) */
-final class PropertiesPrimitiveOwnIdentityMap //
+class PropertiesPrimitiveOwnIdentityMapInsencetive //
 		implements
 			BaseProperties<BasePrimitiveString>,
 			Serializable //
@@ -111,14 +110,14 @@ final class PropertiesPrimitiveOwnIdentityMap //
 	 * @param <V> */
 	static final class Entry<V> {
 		
-		final BasePrimitiveString key;
+		final String key;
 		
 		Entry<V> next;
 		
 		V value;
 		
 		/** Create new entry. */
-		Entry(final BasePrimitiveString k, final V v, final Entry<V> n) {
+		Entry(final String k, final V v, final Entry<V> n) {
 			
 			this.value = v;
 			this.next = n;
@@ -135,7 +134,7 @@ final class PropertiesPrimitiveOwnIdentityMap //
 				return false;
 			}
 			final Entry<?> e = (Entry<?>) o;
-			final BasePrimitiveString k1 = this.key;
+			final String k1 = this.key;
 			final Object k2 = e.key;
 			if (k1 == k2) {
 				final V v1 = this.value;
@@ -159,7 +158,7 @@ final class PropertiesPrimitiveOwnIdentityMap //
 			return this.key + "=" + this.value;
 		}
 		
-		final BasePrimitiveString getKey() {
+		final String getKey() {
 			
 			return this.key;
 		}
@@ -174,69 +173,6 @@ final class PropertiesPrimitiveOwnIdentityMap //
 			final V oldValue = this.value;
 			this.value = newValue;
 			return oldValue;
-		}
-	}
-	
-	abstract class HashIterator<V> {
-		
-		Entry<?> current; // current entry
-		int index; // current slot
-		Entry<?> next; // next entry to return
-		
-		HashIterator() {
-			
-			final Entry<?>[] t = PropertiesPrimitiveOwnIdentityMap.this.table;
-			this.current = this.next = null;
-			this.index = 0;
-			if (t != null && PropertiesPrimitiveOwnIdentityMap.this.size > 0) {
-				// advance to first entry
-				do {
-					//
-				} while (this.index < t.length && (this.next = t[this.index++]) == null);
-			}
-		}
-		
-		public final boolean hasNext() {
-			
-			return this.next != null;
-		}
-		
-		public final void remove() {
-			
-			final Entry<?> p = this.current;
-			if (p == null) {
-				throw new IllegalStateException();
-			}
-			this.current = null;
-			PropertiesPrimitiveOwnIdentityMap.this.removeEntryForKey(System.identityHashCode(p.key), p.key);
-			// PropertiesPrimitiveOwnIdentityMap.this.delete(p.key);
-		}
-		
-		final Entry<V> nextNode() {
-			
-			Entry<?>[] t;
-			final Entry<?> e = this.next;
-			if (e == null) {
-				throw new NoSuchElementException();
-			}
-			if ((this.next = (this.current = e).next) == null && (t = PropertiesPrimitiveOwnIdentityMap.this.table) != null) {
-				do {
-					//
-				} while (this.index < t.length && (this.next = t[this.index++]) == null);
-			}
-			
-			@SuppressWarnings("unchecked")
-			final Entry<V> result = (Entry<V>) e;
-			return result;
-		}
-	}
-	
-	final class KeyIterator extends HashIterator<BasePrimitiveString> implements Iterator<BasePrimitiveString> {
-		
-		@Override
-		public final BasePrimitiveString next() {
-			
-			return this.nextNode().key;
 		}
 	}
 	
@@ -281,42 +217,41 @@ final class PropertiesPrimitiveOwnIdentityMap //
 	private int threshold;
 	
 	@SuppressWarnings("unchecked")
-	PropertiesPrimitiveOwnIdentityMap() {
+	PropertiesPrimitiveOwnIdentityMapInsencetive() {
 		
-		this.loadFactor = PropertiesPrimitiveOwnIdentityMap.DEFAULT_LOAD_FACTOR;
-		this.threshold = (int) (PropertiesPrimitiveOwnIdentityMap.DEFAULT_INITIAL_CAPACITY * PropertiesPrimitiveOwnIdentityMap.DEFAULT_LOAD_FACTOR);
-		this.table = new Entry[PropertiesPrimitiveOwnIdentityMap.DEFAULT_INITIAL_CAPACITY];
+		this.loadFactor = PropertiesPrimitiveOwnIdentityMapInsencetive.DEFAULT_LOAD_FACTOR;
+		this.threshold = (int) (PropertiesPrimitiveOwnIdentityMapInsencetive.DEFAULT_INITIAL_CAPACITY * PropertiesPrimitiveOwnIdentityMapInsencetive.DEFAULT_LOAD_FACTOR);
+		this.table = new Entry[PropertiesPrimitiveOwnIdentityMapInsencetive.DEFAULT_INITIAL_CAPACITY];
 	}
 	
 	@SuppressWarnings("unchecked")
-	PropertiesPrimitiveOwnIdentityMap(final BasePropertyData<BasePrimitiveString> first) {
+	PropertiesPrimitiveOwnIdentityMapInsencetive(final BasePropertyData<BasePrimitiveString> first) {
 		
-		this.loadFactor = PropertiesPrimitiveOwnIdentityMap.DEFAULT_LOAD_FACTOR;
-		this.threshold = (int) (PropertiesPrimitiveOwnIdentityMap.DEFAULT_INITIAL_CAPACITY * PropertiesPrimitiveOwnIdentityMap.DEFAULT_LOAD_FACTOR);
-		this.table = new Entry[PropertiesPrimitiveOwnIdentityMap.DEFAULT_INITIAL_CAPACITY];
-		
+		this.loadFactor = PropertiesPrimitiveOwnIdentityMapInsencetive.DEFAULT_LOAD_FACTOR;
+		this.threshold = (int) (PropertiesPrimitiveOwnIdentityMapInsencetive.DEFAULT_INITIAL_CAPACITY * PropertiesPrimitiveOwnIdentityMapInsencetive.DEFAULT_LOAD_FACTOR);
+		this.table = new Entry[PropertiesPrimitiveOwnIdentityMapInsencetive.DEFAULT_INITIAL_CAPACITY];
+		this.first = first;
 		for (BasePropertyData<BasePrimitiveString> current = first;;) {
 			this.put(current.name, current);
-			if ((current.attributes & BaseProperty.ATTR_ENUMERABLE) != 0) {
-				if (this.last == null) {
-					this.first = this.last = current;
-				} else {
-					current.prev = this.last;
-					this.last.next = current;
-					this.last = current;
-				}
-			}
-			final BasePropertyData<BasePrimitiveString> next = current.next;
-			if (next == null) {
+			if (current.next == null) {
+				this.last = current;
 				break;
 			}
-			current = next;
+			current = current.next;
 		}
-		if (this.first != null) {
-			this.first.prev = null;
-		}
-		if (this.last != null) {
-			this.last.next = null;
+	}
+	
+	/** just adopt the linked list **/
+	@SuppressWarnings("unchecked")
+	PropertiesPrimitiveOwnIdentityMapInsencetive(final BasePropertyData<BasePrimitiveString> first, final BasePropertyData<BasePrimitiveString> last) {
+		
+		this.loadFactor = PropertiesPrimitiveOwnIdentityMapInsencetive.DEFAULT_LOAD_FACTOR;
+		this.threshold = (int) (PropertiesPrimitiveOwnIdentityMapInsencetive.DEFAULT_INITIAL_CAPACITY * PropertiesPrimitiveOwnIdentityMapInsencetive.DEFAULT_LOAD_FACTOR);
+		this.table = new Entry[PropertiesPrimitiveOwnIdentityMapInsencetive.DEFAULT_INITIAL_CAPACITY];
+		this.first = first;
+		this.last = last;
+		for (final BasePropertyData<BasePrimitiveString> current = first;;) {
+			this.put(current.name, current);
 		}
 	}
 	
@@ -359,20 +294,20 @@ final class PropertiesPrimitiveOwnIdentityMap //
 			(this.first = removed.next).prev = null;
 			return this;
 		}
-		
+
 		if (removed == this.last) {
 			(this.last = removed.prev).next = null;
 			return this;
 		}
-		
+
 		final BasePropertyData<BasePrimitiveString> next = removed.next;
 		final BasePropertyData<BasePrimitiveString> prev = removed.prev;
-		
+
 		if (prev != null) {
 			prev.next = next;
 			removed.prev = null;
 		}
-		
+
 		if (next != null) {
 			next.prev = prev;
 			/** don't clear removed.next here used for enumeration:
@@ -389,74 +324,6 @@ final class PropertiesPrimitiveOwnIdentityMap //
 		return this;
 	}
 	
-	/** @param property
-	 * @param removed
-	 * @return */
-	private BaseProperties<BasePrimitiveString> internReplace(final BasePropertyData<BasePrimitiveString> property, final BasePropertyData<BasePrimitiveString> removed) {
-		
-		if (removed == this.first) {
-			if (removed == this.last) {
-				this.first = this.last = property;
-				return this;
-			}
-			
-			final BasePropertyData<BasePrimitiveString> next = property.next = removed.next;
-			if (next != null) {
-				next.prev = property;
-			}
-			this.first = property;
-			return this;
-		}
-		
-		final BasePropertyData<BasePrimitiveString> prev = property.prev = removed.prev;
-		if (prev != null) {
-			prev.next = property;
-		}
-		
-		if (removed == this.last) {
-			this.last = property;
-			return this;
-		}
-		
-		final BasePropertyData<BasePrimitiveString> next = property.next = removed.next;
-		if (next != null) {
-			next.prev = property;
-		}
-		
-		return this;
-	}
-	
-	/** Removes and returns the entry associated with the specified key in the HashMap. Returns null
-	 * if the HashMap contains no mapping for this key.
-	 *
-	 * for iterators */
-	private final Entry<BasePropertyData<BasePrimitiveString>> removeEntryForKey(final int hash, final BasePrimitiveString key) {
-		
-		final int i = hash & this.table.length - 1;
-		Entry<BasePropertyData<BasePrimitiveString>> prev = this.table[i];
-		Entry<BasePropertyData<BasePrimitiveString>> e = prev;
-		
-		while (e != null) {
-			final Entry<BasePropertyData<BasePrimitiveString>> next = e.next;
-			if (key == e.key) {
-				this.size--;
-				if (prev == e) {
-					this.table[i] = next;
-				} else {
-					prev.next = next;
-				}
-				if ((e.value.attributes & BaseProperty.ATTR_ENUMERABLE) != 0) {
-					this.internDelete(e.value);
-				}
-				return e;
-			}
-			prev = e;
-			e = next;
-		}
-		
-		return null;
-	}
-	
 	/** Rehashes the contents of this map into a new array with a larger capacity. This method is
 	 * called automatically when the number of keys in this map reaches its threshold.
 	 *
@@ -471,7 +338,7 @@ final class PropertiesPrimitiveOwnIdentityMap //
 		
 		final Entry<BasePropertyData<BasePrimitiveString>>[] oldTable = this.table;
 		final int oldCapacity = oldTable.length;
-		if (oldCapacity == PropertiesPrimitiveOwnIdentityMap.MAXIMUM_CAPACITY) {
+		if (oldCapacity == PropertiesPrimitiveOwnIdentityMapInsencetive.MAXIMUM_CAPACITY) {
 			this.threshold = Integer.MAX_VALUE;
 			return;
 		}
@@ -530,57 +397,7 @@ final class PropertiesPrimitiveOwnIdentityMap //
 	@Override
 	public final BaseProperties<BasePrimitiveString> add(final BasePrimitiveString name, final BaseObject value, final short attributes) {
 		
-		assert value != null : "NULL value";
-		assert name != null : "NULL property name";
-		
-		final int i = System.identityHashCode(name) & this.table.length - 1;
-		
-		final boolean propertyEnumerable = (attributes & BaseProperty.ATTR_ENUMERABLE) != 0;
-		for (Entry<BasePropertyData<BasePrimitiveString>> e = this.table[i]; e != null; e = e.next) {
-			if (e.key == name) {
-				final BasePropertyData<BasePrimitiveString> removed = e.value;
-				final boolean removedEnumerable = (removed.attributes & BaseProperty.ATTR_ENUMERABLE) != 0;
-				
-				if (removedEnumerable == propertyEnumerable) {
-					if (removed instanceof final BasePropertyHolderPrimitive holderPrimitive) {
-						holderPrimitive.attributes = attributes;
-						holderPrimitive.value = value;
-						// e.value stays the same
-						return this;
-					}
-				}
-				
-				final BasePropertyData<BasePrimitiveString> property = e.value = new BasePropertyHolderPrimitive(name, value, attributes);
-				
-				if (removedEnumerable) {
-					if (propertyEnumerable) {
-						return this.internReplace(property, removed);
-					}
-					return this.internDelete(removed);
-				}
-				
-				if (propertyEnumerable) {
-					return this.internAppend(property);
-				}
-				
-				return this;
-			}
-		}
-		{
-			final BasePropertyData<BasePrimitiveString> property = new BasePropertyHolderPrimitive(name, value, attributes);
-			
-			final Entry<BasePropertyData<BasePrimitiveString>> e = this.table[i];
-			this.table[i] = new Entry<>(name, property, e);
-			if (this.size++ >= this.threshold) {
-				this.resize(2 * this.table.length);
-			}
-			
-			if (propertyEnumerable) {
-				return this.internAppend(property);
-			}
-			
-			return this;
-		}
+		return this.add(name, new BasePropertyHolderPrimitive(null, value, attributes));
 	}
 	
 	@Override
@@ -594,44 +411,23 @@ final class PropertiesPrimitiveOwnIdentityMap //
 			throw new IllegalArgumentException("Property is already assigned with another name!");
 		}
 		
-		final int i = System.identityHashCode(name) & this.table.length - 1;
+		property.name = name;
+		final BasePropertyData<BasePrimitiveString> removed = this.put(name, property);
+		if (removed == null) {
+			return this.internAppend(property);
+		}
 		
-		final boolean propertyEnumerable = (property.attributes & BaseProperty.ATTR_ENUMERABLE) != 0;
-		for (Entry<BasePropertyData<BasePrimitiveString>> e = this.table[i]; e != null; e = e.next) {
-			if (e.key == name) {
-				final BasePropertyData<BasePrimitiveString> removed = e.value;
-				final boolean removedEnumerable = (removed.attributes & BaseProperty.ATTR_ENUMERABLE) != 0;
-				
-				property.name = name;
-				e.value = property;
-				
-				if (removedEnumerable) {
-					if (propertyEnumerable) {
-						return this.internReplace(property, removed);
-					}
-					return this.internDelete(removed);
-				}
-				
-				if (propertyEnumerable) {
-					return this.internAppend(property);
-				}
-				
-				return this;
-			}
+		final BasePropertyData<BasePrimitiveString> next = removed.next;
+		if (next != null) {
+			next.prev = property;
 		}
-		{
-			final Entry<BasePropertyData<BasePrimitiveString>> e = this.table[i];
-			this.table[i] = new Entry<>(name, property, e);
-			if (this.size++ >= this.threshold) {
-				this.resize(2 * this.table.length);
-			}
-			
-			if (propertyEnumerable) {
-				return this.internAppend(property);
-			}
-			
-			return this;
+		final BasePropertyData<BasePrimitiveString> prev = removed.prev;
+		if (prev != null) {
+			prev.next = property;
 		}
+		property.next = next;
+		property.prev = prev;
+		return this;
 	}
 	
 	@Override
@@ -664,11 +460,11 @@ final class PropertiesPrimitiveOwnIdentityMap //
 	 * @return <tt>true</tt> if this map contains a mapping for the specified key. */
 	public final boolean containsKey(final BasePrimitiveString key) {
 		
-		final int hash = System.identityHashCode(key);
-		final int i = hash & this.table.length - 1;
+		final String keyActual = key.baseToJavaString().toLowerCase();
+		final int i = keyActual.hashCode() & this.table.length - 1;
 		
-		for (Entry<BasePropertyData<BasePrimitiveString>> e = this.table[i]; e != null;) {
-			if (key == e.key) {
+		for(Entry<BasePropertyData<BasePrimitiveString>> e = this.table[i];e != null;) {
+			if (keyActual == e.key || keyActual.equals(e.key)) {
 				return true;
 			}
 			e = e.next;
@@ -705,11 +501,6 @@ final class PropertiesPrimitiveOwnIdentityMap //
 			return this;
 		}
 		
-		if ((removed.attributes & BaseProperty.ATTR_ENUMERABLE) == 0) {
-			/** nothing changed **/
-			return this;
-		}
-		
 		return this.internDelete(removed);
 	}
 	
@@ -723,11 +514,6 @@ final class PropertiesPrimitiveOwnIdentityMap //
 		
 		final BasePropertyData<BasePrimitiveString> removed = this.remove(found.name);
 		if (removed == null) {
-			return this;
-		}
-		
-		if ((removed.attributes & BaseProperty.ATTR_ENUMERABLE) == 0) {
-			/** nothing changed **/
 			return this;
 		}
 		
@@ -766,10 +552,11 @@ final class PropertiesPrimitiveOwnIdentityMap //
 	 *         contains no mapping for this key. */
 	public final BasePropertyData<BasePrimitiveString> get(final BasePrimitiveString key) {
 		
-		final int i = System.identityHashCode(key) & this.table.length - 1;
+		final String keyActual = key.baseToJavaString().toLowerCase();
+		final int i = keyActual.hashCode() & this.table.length - 1;
 		
-		for (Entry<BasePropertyData<BasePrimitiveString>> e = this.table[i]; e != null; e = e.next) {
-			if (e.key == key) {
+		for(Entry<BasePropertyData<BasePrimitiveString>> e = this.table[i]; e != null; e = e.next) {
+			if (keyActual == e.key || keyActual.equals(e.key)) {
 				return e.value;
 			}
 		}
@@ -779,7 +566,15 @@ final class PropertiesPrimitiveOwnIdentityMap //
 	@Override
 	public final boolean hasEnumerableProperties() {
 		
-		return this.first != null;
+		for (BasePropertyData<BasePrimitiveString> first = this.first;;) {
+			/** now ^^^^^^ it is for sure we don't need to pass 'name' to 'isEnumerable' */
+			if ((first.attributes & BaseProperty.ATTR_ENUMERABLE) != 0) {
+				return true;
+			}
+			if (null == (first = first.next)) {
+				return false;
+			}
+		}
 	}
 	
 	/** Returns <tt>true</tt> if this map contains no key-value mappings.
@@ -790,65 +585,57 @@ final class PropertiesPrimitiveOwnIdentityMap //
 		return this.size == 0;
 	}
 	
-	/** COMMENTS:
-	 *
-	 * 1) put only enumerable properties to a linked chain, use this.keySet() for 'all'
-	 *
-	 * 2) use sequence - to put enumerable elements in the front. */
 	@Override
 	public final Iterator<BasePrimitiveString> iteratorAll() {
 		
-		return this.first == null
-			? new KeyIterator()
-			: new IteratorSequencePrimitive(this.iteratorEnumerableAsPrimitive(), new KeyIterator());
+		return new IteratorPropertiesAll<>(this.first);
 	}
 	
 	@Override
 	public final Iterator<BasePrimitiveString> iteratorAllAsPrimitive() {
 		
-		return this.first == null
-			? new KeyIterator()
-			: new IteratorSequencePrimitive(this.iteratorEnumerableAsPrimitive(), new KeyIterator());
+		return new IteratorPropertiesAll<>(this.first);
 	}
 	
 	@Override
 	public final Iterator<String> iteratorAllAsString() {
 		
-		return this.first == null
-			? new IteratorStringForAnything(new KeyIterator())
-			: new IteratorSequenceString(this.iteratorEnumerableAsString(), new IteratorStringForAnything(new KeyIterator()));
+		return new IteratorPropertiesAllToString<>(this.first);
 	}
 	
 	/** all properties in chain */
 	@Override
 	public final Iterator<BasePrimitiveString> iteratorEnumerable() {
 		
-		/** this linked list contains only enumerable properties **/
-		final BasePropertyData<BasePrimitiveString> first = this.first;
-		return first == null
-			? BaseProperties.ITERATOR_EMPTY_PRIMITIVE_STRING
-			: new IteratorPropertiesAll<>(first);
+		for (BasePropertyData<BasePrimitiveString> first = this.first;;) {
+			/** now ^^^^^^ it is for sure we don't need to pass 'name' to 'isEnumerable' */
+			if ((first.attributes & BaseProperty.ATTR_ENUMERABLE) != 0) {
+				return new IteratorPropertiesEnumerablePrimitive(first);
+			}
+			if (null == (first = first.next)) {
+				return BaseProperties.ITERATOR_EMPTY_PRIMITIVE_STRING;
+			}
+		}
 	}
 	
 	@Override
 	public final Iterator<BasePrimitiveString> iteratorEnumerableAsPrimitive() {
 		
-		/** this linked list contains only enumerable properties **/
-		final BasePropertyData<BasePrimitiveString> first = this.first;
-		return first == null
-			? BaseProperties.ITERATOR_EMPTY_PRIMITIVE_STRING
-			: new IteratorPropertiesAll<>(first);
+		return this.iteratorEnumerable();
 	}
 	
 	/** all properties in chain */
 	@Override
 	public final Iterator<String> iteratorEnumerableAsString() {
 		
-		/** this linked list contains only enumerable properties **/
-		final BasePropertyData<BasePrimitiveString> first = this.first;
-		return first == null
-			? BaseObject.ITERATOR_EMPTY
-			: new IteratorPropertiesAllToString<>(first);
+		for (BasePropertyData<BasePrimitiveString> first = this.first;;) {
+			if ((first.attributes & BaseProperty.ATTR_ENUMERABLE) != 0) {
+				return new IteratorPropertiesEnumerablePrimitiveAsString<>(first);
+			}
+			if (null == (first = first.next)) {
+				return BaseObject.ITERATOR_EMPTY;
+			}
+		}
 	}
 	
 	/** Associates the specified value with the specified key in this map. If the map previously
@@ -863,17 +650,23 @@ final class PropertiesPrimitiveOwnIdentityMap //
 	 *         associated <tt>null</tt> with the specified key. */
 	public final BasePropertyData<BasePrimitiveString> put(final BasePrimitiveString key, final BasePropertyData<BasePrimitiveString> value) {
 		
-		final int i = System.identityHashCode(key) & this.table.length - 1;
+		final String keyActual = key.baseToJavaString().toLowerCase();
+		
+		final int i = keyActual.hashCode() & this.table.length - 1;
+		
 		for (Entry<BasePropertyData<BasePrimitiveString>> e = this.table[i]; e != null; e = e.next) {
-			if (e.key == key) {
+			if (keyActual == e.key || keyActual.equals(e.key)) {
 				final BasePropertyData<BasePrimitiveString> oldValue = e.value;
 				e.value = value;
 				return oldValue;
 			}
 		}
-		
+		/** Add a new entry with the specified key, value and hash code to the specified bucket. It
+		 * is the responsibility of this method to resize the table if appropriate.
+		 *
+		 * Subclass overrides this to alter the behavior of put method. */
 		final Entry<BasePropertyData<BasePrimitiveString>> e = this.table[i];
-		this.table[i] = new Entry<>(key, value, e);
+		this.table[i] = new Entry<>(keyActual, value, e);
 		if (this.size++ >= this.threshold) {
 			this.resize(2 * this.table.length);
 		}
@@ -889,13 +682,15 @@ final class PropertiesPrimitiveOwnIdentityMap //
 	 *         associated <tt>null</tt> with the specified key. */
 	public final BasePropertyData<BasePrimitiveString> remove(final BasePrimitiveString key) {
 		
-		final int i = System.identityHashCode(key) & this.table.length - 1;
+		final String keyActual = key.baseToJavaString().toLowerCase();
+		
+		final int i = keyActual.hashCode() & this.table.length - 1;
 		Entry<BasePropertyData<BasePrimitiveString>> prev = this.table[i];
 		Entry<BasePropertyData<BasePrimitiveString>> e = prev;
 		
 		while (e != null) {
 			final Entry<BasePropertyData<BasePrimitiveString>> next = e.next;
-			if (key == e.key) {
+			if (keyActual == e.key || keyActual.equals(e.key)) {
 				this.size--;
 				if (prev == e) {
 					this.table[i] = next;

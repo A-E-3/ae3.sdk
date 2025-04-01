@@ -16,6 +16,7 @@ public class BaseNativeObjectCaseInsencetive extends BaseNativeObject {
 	public BaseNativeObjectCaseInsencetive() {
 		
 		super();
-		this.properties = new PropertiesStringHashMapCaseInsencetive();
+		// this.properties = new PropertiesStringHashMapCaseInsencetive();
+		this.properties = new PropertiesPrimitiveOwnIdentityMapInsencetive();
 	}
 }

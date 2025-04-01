@@ -6,37 +6,168 @@ package ru.myx.ae3.base;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import ru.myx.ae3.Engine;
 import ru.myx.ae3.help.Format;
 
 class PropertiesStringHashMap extends HashMap<String, BasePropertyData<String>> implements BaseProperties<String> {
 
+	/** The default initial capacity - MUST be a power of two. */
+	private static final int DEFAULT_INITIAL_CAPACITY = Engine.MODE_SPEED
+		? 16
+		: 8;
+
+	/** The load factor used when none specified in constructor. */
+	private static final float DEFAULT_LOAD_FACTOR = Engine.MODE_SIZE
+		? 6f
+		: Engine.MODE_SPEED
+			? 2f
+			: 4f;
+
 	private static final long serialVersionUID = 2888363574028818360L;
 
-	private BasePropertyData<String> first;
+	/** properties, only enumerable **/
+	private volatile BasePropertyData<String> first;
 
-	private BasePropertyData<String> last;
+	/** properties, only enumerable **/
+	private volatile BasePropertyData<String> last;
 
 	PropertiesStringHashMap() {
 
-		super(8, 2.0f);
+		super(PropertiesStringHashMap.DEFAULT_INITIAL_CAPACITY, PropertiesStringHashMap.DEFAULT_LOAD_FACTOR);
 	}
 
-	PropertiesStringHashMap(final BasePropertyDataString property1, final String name2, final BasePropertyDataString property2) {
+	/** all properties passed, including non-enumerable **/
+	PropertiesStringHashMap(final BasePropertyData<String> first) {
 
-		super(8, 2.0f);
-		this.add(property1.name, property1);
-		this.add(name2, property2);
+		super(PropertiesStringHashMap.DEFAULT_INITIAL_CAPACITY, PropertiesStringHashMap.DEFAULT_LOAD_FACTOR);
+
+		for (BasePropertyData<String> current = first;;) {
+			this.put(current.name, current);
+			if ((current.attributes & BaseProperty.ATTR_ENUMERABLE) != 0) {
+				if (this.last == null) {
+					this.first = this.last = current;
+				} else {
+					current.prev = this.last;
+					this.last.next = current;
+					this.last = current;
+				}
+			}
+			final BasePropertyData<String> next = current.next;
+			if (next == null) {
+				break;
+			}
+			current = next;
+		}
+		if (this.first != null) {
+			this.first.prev = null;
+		}
+		if (this.last != null) {
+			this.last.next = null;
+		}
 	}
 
-	PropertiesStringHashMap(final int initialCapacity, final float loadFactor) {
+	/** @param property
+	 * @return */
+	private BaseProperties<String> internAppend(final BasePropertyData<String> property) {
+
+		final BasePropertyData<String> last = this.last;
+		if (last == null) {
+			this.first = this.last = property;
+			return this;
+		}
+		last.next = property;
+		(this.last = property).prev = last;
+		return this;
+	}
+
+	private final BaseProperties<String> internDelete(final BasePropertyData<String> removed) {
+
+		if (removed == this.first) {
+			if (removed == this.last) {
+				this.first = this.last = null;
+				return this;
+			}
+
+			(this.first = removed.next).prev = null;
+			return this;
+		}
+
+		if (removed == this.last) {
+			(this.last = removed.prev).next = null;
+			return this;
+		}
 		
-		super(initialCapacity, loadFactor);
+		final BasePropertyData<String> next = removed.next;
+		final BasePropertyData<String> prev = removed.prev;
+
+		if (prev != null) {
+			prev.next = next;
+			removed.prev = null;
+		}
+
+		if (next != null) {
+			next.prev = prev;
+			/** don't clear removed.next here used for enumeration:
+			 * <p>
+			 * Properties of the object being enumerated may be deleted during enumeration. If a
+			 * property that has not yet been visited during enumeration is deleted, then it will
+			 * not be visited. If new properties are added to the object being enumerated during
+			 * enumeration, the newly added properties are not guaranteed to be visited in the
+			 * active enumeration. Deleted: The mechanics of enumerating the properties (step 5 in
+			 * the first algorithm, step 6 in the second) is implementation dependent. The order of
+			 * enumeration is defined by the object. */
+		}
+		
+		return this;
+	}
+
+	/** @param property
+	 * @param removed
+	 * @return */
+	private BaseProperties<String> internReplace(final BasePropertyData<String> property, final BasePropertyData<String> removed) {
+
+		if (removed == this.first) {
+			if (removed == this.last) {
+				this.first = this.last = property;
+				return this;
+			}
+
+			final BasePropertyData<String> next = property.next = removed.next;
+			if (next != null) {
+				next.prev = property;
+			}
+			this.first = property;
+			return this;
+		}
+		
+		final BasePropertyData<String> prev = property.prev = removed.prev;
+		if (prev != null) {
+			prev.next = property;
+		}
+
+		if (removed == this.last) {
+			this.last = property;
+			return this;
+		}
+
+		final BasePropertyData<String> next = property.next = removed.next;
+		if (next != null) {
+			next.prev = property;
+		}
+		
+		return this;
 	}
 
 	@Override
 	public BaseProperties<String> add(final BaseObject instance, final BasePrimitiveString name, final BaseProperty property, final short attributes) {
 
-		return this.add(instance, name.stringValue(), property, attributes);
+		return this.add(
+				name,
+				Base.createPropertyString(
+						instance, //
+						name.stringValue(),
+						property,
+						attributes));
 	}
 
 	@Override
@@ -68,130 +199,70 @@ class PropertiesStringHashMap extends HashMap<String, BasePropertyData<String>> 
 
 		return this.add(name, new BasePropertyHolderString(null, value, attributes));
 	}
-
+	
 	@Override
 	public BaseProperties<String> add(final String name, final BasePropertyData<String> property) {
 
 		assert property != null : "NULL property";
 		assert name != null : "NULL property name";
-		assert property.name == null || property.name.equals(name) : "Property is already assigned!";
 		assert property.next == null : "Property is already assigned!";
-		property.name = name;
-		final BasePropertyData<String> replaced = this.put(name, property);
-		if ((property.attributes & BaseProperty.ATTR_ENUMERABLE) != 0) {
-			if (replaced != null && (replaced.attributes & BaseProperty.ATTR_ENUMERABLE) != 0) {
-				if (replaced == this.first) {
-					if (replaced == this.last) {
-						this.first = this.last = property;
-					} else {
-						replaced.next.prev = property;
-						property.next = replaced.next;
-						this.first = property;
-					}
-				} else //
-				if (replaced == this.last) {
-					replaced.prev.next = property;
-					property.prev = replaced.prev;
-					this.last = property;
-				} else {
-					replaced.next.prev = property;
-					property.next = replaced.next;
-					replaced.prev.next = property;
-					property.prev = replaced.prev;
-				}
-			} else {
-				if (this.last == null) {
-					this.first = this.last = property;
-				} else {
-					this.last.next = property;
-					property.prev = this.last;
-					this.last = property;
-				}
-			}
-		} else {
-			if (replaced != null && (replaced.attributes & BaseProperty.ATTR_ENUMERABLE) != 0) {
-				if (replaced == this.first) {
-					if (replaced == this.last) {
-						this.first = this.last = null;
-					} else {
-						replaced.next.prev = null;
-						this.first = replaced.next;
-					}
-				} else //
-				if (replaced == this.last) {
-					replaced.prev.next = null;
-					this.last = replaced.prev;
-				} else {
-					replaced.prev.next = replaced.next;
-					replaced.next.prev = replaced.prev;
-					replaced.prev = null;/** don't clear removed.next here used for enumeration:
-											 * <p>
-											 * Properties of the object being enumerated may be
-											 * deleted during enumeration. If a property that has
-											 * not yet been visited during enumeration is deleted,
-											 * then it will not be visited. If new properties are
-											 * added to the object being enumerated during
-											 * enumeration, the newly added properties are not
-											 * guaranteed to be visited in the active enumeration.
-											 * Deleted: The mechanics of enumerating the properties
-											 * (step 5 in the first algorithm, step 6 in the second)
-											 * is implementation dependent. The order of enumeration
-											 * is defined by the object. */
-				}
-			}
+
+		if (property.name != null && !property.name.equals(name)) {
+			throw new IllegalArgumentException("Property is already assigned with another name!");
 		}
-		return this;
+
+		property.name = name;
+		final BasePropertyData<String> removed = this.put(name, property);
+
+		/** removed was not enumerable **/
+		if (removed == null || (removed.attributes & BaseProperty.ATTR_ENUMERABLE) == 0) {
+			/** property is enumerable **/
+			if ((property.attributes & BaseProperty.ATTR_ENUMERABLE) != 0) {
+				return this.internAppend(property);
+			}
+			return this;
+		}
+
+		/** property is not enumerable, just removing removed **/
+		if ((property.attributes & BaseProperty.ATTR_ENUMERABLE) == 0) {
+			return this.internDelete(removed);
+		}
+		
+		/** both (property and remove) are enumerable **/
+		return this.internReplace(property, removed);
+	}
+
+	@Override
+	public final void clear() {
+
+		super.clear();
+		this.first = this.last = null;
 	}
 
 	@Override
 	public BaseProperties<String> delete(final BasePrimitiveString name) {
 
-		return this.delete(name.stringValue());
+		final BasePropertyData<String> removed = this.remove(name.stringValue());
+
+		if (removed == null || (removed.attributes & BaseProperty.ATTR_ENUMERABLE) == 0) {
+			/** nothing changed **/
+			return this;
+		}
+
+		return this.internDelete(removed);
 	}
 
 	@Override
 	public BaseProperties<String> delete(final String name) {
 
-		final BasePropertyData<String> replaced = this.remove(name);
-		if (replaced == null || (replaced.attributes & BaseProperty.ATTR_ENUMERABLE) == 0) {
+		final BasePropertyData<String> removed = this.remove(name);
+
+		if (removed == null || (removed.attributes & BaseProperty.ATTR_ENUMERABLE) == 0) {
+			/** nothing changed **/
 			return this;
 		}
-		if (replaced == this.first) {
-			if (replaced == this.last) {
-				this.first = this.last = null;
-			} else {
-				replaced.next.prev = null;
-				this.first = replaced.next;
-			}
-		} else //
-		if (replaced == this.last) {
-			if (replaced.prev != null) {
-				replaced.prev.next = null;
-			}
-			this.last = replaced.prev;
-		} else {
-			if (replaced.prev != null) {
-				replaced.prev.next = replaced.next;
-			}
-			replaced.next.prev = replaced.prev;
-			replaced.prev = null;
-			/** don't clear removed.next here used for enumeration:
-			 * <p>
-			 * Properties of the object being enumerated may be deleted during enumeration. If a
-			 * property that has not yet been visited during enumeration is deleted, then it will
-			 * not be visited. If new properties are added to the object being enumerated during
-			 * enumeration, the newly added properties are not guaranteed to be visited in the
-			 * active enumeration. Deleted: The mechanics of enumerating the properties (step 5 in
-			 * the first algorithm, step 6 in the second) is implementation dependent. The order of
-			 * enumeration is defined by the object. */
-			// replaced.next = null;
-		}
-		if (this.size() == 1) {
-			final BasePropertyData<String> property = this.values().iterator().next();
-			property.next = null;
-			return property;
-		}
-		return this;
+
+		return this.internDelete(removed);
 	}
 
 	@Override
@@ -248,6 +319,7 @@ class PropertiesStringHashMap extends HashMap<String, BasePropertyData<String>> 
 	@Override
 	public Iterator<String> iteratorEnumerable() {
 
+		/** this linked list contains only enumerable properties **/
 		final BasePropertyData<String> first = this.first;
 		return first == null
 			? BaseObject.ITERATOR_EMPTY
@@ -257,6 +329,7 @@ class PropertiesStringHashMap extends HashMap<String, BasePropertyData<String>> 
 	@Override
 	public Iterator<BasePrimitiveString> iteratorEnumerableAsPrimitive() {
 
+		/** this linked list contains only enumerable properties **/
 		final BasePropertyData<String> first = this.first;
 		return first == null
 			? BaseProperties.ITERATOR_EMPTY_PRIMITIVE_STRING
