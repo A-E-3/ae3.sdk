@@ -4,13 +4,13 @@ import ru.myx.ae3.answer.ReplyAnswer;
 import ru.myx.ae3.base.BaseNativeObject;
 import ru.myx.ae3.base.BaseObject;
 import ru.myx.ae3.control.fieldset.ControlFieldset;
-import ru.myx.ae3.i3.Handler;
+import ru.myx.ae3.i3.RequestHandler;
 import ru.myx.ae3.l2.skin.Skin;
 import ru.myx.ae3.reflect.Reflect;
 import ru.myx.ae3.serve.ServeRequest;
 
 /** @author myx */
-public interface Skinner extends Handler, Skin {
+public interface Skinner extends RequestHandler, Skin {
 	
 	/**
 	 *
