@@ -232,26 +232,17 @@ class PropertiesPrimitiveOwnIdentityMapInsencetive //
 		this.table = new Entry[PropertiesPrimitiveOwnIdentityMapInsencetive.DEFAULT_INITIAL_CAPACITY];
 		this.first = first;
 		for (BasePropertyData<BasePrimitiveString> current = first;;) {
+
+			assert current.name != null : "Null property name!";
+
 			this.put(current.name, current);
+			
 			if (current.next == null) {
 				this.last = current;
 				break;
 			}
 			current = current.next;
-		}
-	}
-	
-	/** just adopt the linked list **/
-	@SuppressWarnings("unchecked")
-	PropertiesPrimitiveOwnIdentityMapInsencetive(final BasePropertyData<BasePrimitiveString> first, final BasePropertyData<BasePrimitiveString> last) {
-		
-		this.loadFactor = PropertiesPrimitiveOwnIdentityMapInsencetive.DEFAULT_LOAD_FACTOR;
-		this.threshold = (int) (PropertiesPrimitiveOwnIdentityMapInsencetive.DEFAULT_INITIAL_CAPACITY * PropertiesPrimitiveOwnIdentityMapInsencetive.DEFAULT_LOAD_FACTOR);
-		this.table = new Entry[PropertiesPrimitiveOwnIdentityMapInsencetive.DEFAULT_INITIAL_CAPACITY];
-		this.first = first;
-		this.last = last;
-		for (final BasePropertyData<BasePrimitiveString> current = first;;) {
-			this.put(current.name, current);
+			
 		}
 	}
 	
@@ -463,7 +454,7 @@ class PropertiesPrimitiveOwnIdentityMapInsencetive //
 		final String keyActual = key.baseToJavaString().toLowerCase();
 		final int i = keyActual.hashCode() & this.table.length - 1;
 		
-		for(Entry<BasePropertyData<BasePrimitiveString>> e = this.table[i];e != null;) {
+		for (Entry<BasePropertyData<BasePrimitiveString>> e = this.table[i]; e != null;) {
 			if (keyActual == e.key || keyActual.equals(e.key)) {
 				return true;
 			}
@@ -555,7 +546,7 @@ class PropertiesPrimitiveOwnIdentityMapInsencetive //
 		final String keyActual = key.baseToJavaString().toLowerCase();
 		final int i = keyActual.hashCode() & this.table.length - 1;
 		
-		for(Entry<BasePropertyData<BasePrimitiveString>> e = this.table[i]; e != null; e = e.next) {
+		for (Entry<BasePropertyData<BasePrimitiveString>> e = this.table[i]; e != null; e = e.next) {
 			if (keyActual == e.key || keyActual.equals(e.key)) {
 				return e.value;
 			}
