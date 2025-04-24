@@ -1,5 +1,6 @@
 package ru.myx.ae3.exec;
 
+import ru.myx.ae3.common.Describable;
 import ru.myx.ae3.report.Report;
 
 /** @author myx
@@ -9,26 +10,32 @@ final class ExecValueFormat {
 
 	static final void formatValue(final StringBuilder data, final Object value, final boolean detail) {
 
-		if (value != null) {
-			final String stringValue;
-			{
-				String stringValueCheck;
-				try {
-					stringValueCheck = value.toString();
-				} catch (final Throwable t) {
-					stringValueCheck = "ERROR: " + t.toString();
-				}
-				stringValue = stringValueCheck;
-			}
-			data.append(
-					stringValue == null
-						? "null"
-						: ExecValueFormat.limitString(stringValue));
-			if (detail) {
-				data.append("\n\t\t").append(value.getClass().getName());
-			}
-		} else {
+		if (value == null) {
 			data.append("null");
+			return;
+		}
+
+		if (value instanceof final Describable describable) {
+			data.append(describable.baseDescribe());
+			return;
+		}
+
+		final String stringValue;
+		{
+			String stringValueCheck;
+			try {
+				stringValueCheck = value.toString();
+			} catch (final Throwable t) {
+				stringValueCheck = "ERROR: " + t.toString();
+			}
+			stringValue = stringValueCheck;
+		}
+		data.append(
+				stringValue == null
+					? "null"
+					: ExecValueFormat.limitString(stringValue));
+		if (detail) {
+			data.append("\n\t\t").append(value.getClass().getName());
 		}
 	}
 
