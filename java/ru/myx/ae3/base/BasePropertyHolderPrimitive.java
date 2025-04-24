@@ -24,43 +24,13 @@ final class BasePropertyHolderPrimitive extends BasePropertyDataPrimitive {
 	
 	BaseObject value;
 
-	/** @param value
-	 * @param attributes */
-	public BasePropertyHolderPrimitive(final BaseObject value, final short attributes) {
-		super(attributes);
-		this.value = value;
-	}
-
 	/** @param name
 	 * @param value
 	 * @param attributes */
 	public BasePropertyHolderPrimitive(final BasePrimitiveString name, final BaseObject value, final short attributes) {
+
 		super(name, attributes);
 		this.value = value;
-	}
-
-	/** @param name
-	 * @param value
-	 * @param attributes */
-	public BasePropertyHolderPrimitive(final BasePrimitiveString name, final double value, final short attributes) {
-		super(name, attributes);
-		this.value = Base.forDouble(value);
-	}
-
-	/** @param name
-	 * @param value
-	 * @param attributes */
-	public BasePropertyHolderPrimitive(final BasePrimitiveString name, final long value, final short attributes) {
-		super(name, attributes);
-		this.value = Base.forLong(value);
-	}
-
-	/** @param name
-	 * @param value
-	 * @param attributes */
-	public BasePropertyHolderPrimitive(final BasePrimitiveString name, final String value, final short attributes) {
-		super(name, attributes);
-		this.value = Base.forString(value);
 	}
 
 	@Override
