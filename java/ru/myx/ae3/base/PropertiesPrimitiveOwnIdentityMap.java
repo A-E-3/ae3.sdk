@@ -296,6 +296,9 @@ final class PropertiesPrimitiveOwnIdentityMap //
 		this.table = new Entry[PropertiesPrimitiveOwnIdentityMap.DEFAULT_INITIAL_CAPACITY];
 		
 		for (BasePropertyData<BasePrimitiveString> current = first;;) {
+			
+			assert current.name != null : "Null property name!";
+			
 			this.put(current.name, current);
 			if ((current.attributes & BaseProperty.ATTR_ENUMERABLE) != 0) {
 				if (this.last == null) {
@@ -306,11 +309,13 @@ final class PropertiesPrimitiveOwnIdentityMap //
 					this.last = current;
 				}
 			}
+			
 			final BasePropertyData<BasePrimitiveString> next = current.next;
 			if (next == null) {
 				break;
 			}
 			current = next;
+
 		}
 		if (this.first != null) {
 			this.first.prev = null;
@@ -590,9 +595,7 @@ final class PropertiesPrimitiveOwnIdentityMap //
 		assert name != null : "NULL property name";
 		assert property.next == null : "Property is already assigned!";
 		
-		if (property.name != null && !property.name.equals(name)) {
-			throw new IllegalArgumentException("Property is already assigned with another name!");
-		}
+		property.name = name;
 		
 		final int i = System.identityHashCode(name) & this.table.length - 1;
 		
@@ -602,7 +605,6 @@ final class PropertiesPrimitiveOwnIdentityMap //
 				final BasePropertyData<BasePrimitiveString> removed = e.value;
 				final boolean removedEnumerable = (removed.attributes & BaseProperty.ATTR_ENUMERABLE) != 0;
 				
-				property.name = name;
 				e.value = property;
 				
 				if (removedEnumerable) {

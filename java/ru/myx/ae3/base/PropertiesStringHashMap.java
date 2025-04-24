@@ -44,11 +44,12 @@ class PropertiesStringHashMap extends HashMap<String, BasePropertyData<String>> 
 		for (BasePropertyData<String> current = first;;) {
 			this.put(current.name, current);
 			if ((current.attributes & BaseProperty.ATTR_ENUMERABLE) != 0) {
-				if (this.last == null) {
+				final BasePropertyData<String> last = this.last;
+				if (last == null) {
 					this.first = this.last = current;
 				} else {
-					current.prev = this.last;
-					this.last.next = current;
+					current.prev = last;
+					last.next = current;
 					this.last = current;
 				}
 			}
@@ -206,10 +207,6 @@ class PropertiesStringHashMap extends HashMap<String, BasePropertyData<String>> 
 		assert property != null : "NULL property";
 		assert name != null : "NULL property name";
 		assert property.next == null : "Property is already assigned!";
-
-		if (property.name != null && !property.name.equals(name)) {
-			throw new IllegalArgumentException("Property is already assigned with another name!");
-		}
 
 		property.name = name;
 		final BasePropertyData<String> removed = this.put(name, property);

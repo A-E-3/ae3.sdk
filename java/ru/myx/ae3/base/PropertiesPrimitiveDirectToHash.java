@@ -34,7 +34,10 @@ final class PropertiesPrimitiveDirectToHash implements BaseProperties<BasePrimit
 		assert property1.name != null : "Property should be already assigned!";
 		assert property2 != null : "NULL property";
 		assert property2.name == null : "Property is already assigned!";
+		
+		assert name2 != null : "NULL property name";
 		property2.name = name2;
+
 		this.first = property1;
 		property1.prev = null;
 		property1.next = property2;
@@ -119,6 +122,7 @@ final class PropertiesPrimitiveDirectToHash implements BaseProperties<BasePrimit
 	@Override
 	public BaseProperties<BasePrimitiveString> add(final BaseObject instance, final BasePrimitiveString name, final BaseProperty propertyUnknown, final short attributes) {
 		
+		assert name != null : "NULL property name";
 		assert propertyUnknown != null : "NULL property";
 		
 		final BasePropertyData<BasePrimitiveString> property = Base.createPropertyPrimitive(
@@ -153,6 +157,7 @@ final class PropertiesPrimitiveDirectToHash implements BaseProperties<BasePrimit
 	public final BaseProperties<BasePrimitiveString> add(final BasePrimitiveString name, final BaseObject value, final short attributes) {
 		
 		assert value != null : "NULL value";
+		assert name != null : "NULL property name";
 		
 		final BasePropertyData<BasePrimitiveString> replaced = this.find(name);
 		
@@ -171,6 +176,7 @@ final class PropertiesPrimitiveDirectToHash implements BaseProperties<BasePrimit
 	@Override
 	public final BaseProperties<BasePrimitiveString> add(final BasePrimitiveString name, final BasePropertyData<BasePrimitiveString> property) {
 		
+		assert name != null : "NULL property name";
 		assert property != null : "NULL property";
 		assert property.name == null : "Property is already assigned!";
 		assert property.next == null : "Property is already assigned!";
