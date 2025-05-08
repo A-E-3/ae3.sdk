@@ -3,7 +3,7 @@ package ru.myx.ae3.answer;
 import ru.myx.ae3.base.BaseMessage;
 import ru.myx.ae3.base.BaseObject;
 import ru.myx.ae3.flow.AbstractWrapMessage;
-import ru.myx.ae3.flow.Flow;
+import ru.myx.ae3.flow.FlowOperationException;
 
 /**
  *
@@ -206,13 +206,13 @@ public abstract class AbstractWrapReplyAnswer<T extends AbstractWrapReplyAnswer<
 	}
 
 	@Override
-	public BinaryReplyAnswer<?> toBinary() throws Flow.FlowOperationException {
+	public BinaryReplyAnswer<?> toBinary() throws FlowOperationException {
 		
 		return this.wrapped.toBinary();
 	}
 
 	@Override
-	public CharacterReplyAnswer<?> toCharacter() throws Flow.FlowOperationException {
+	public CharacterReplyAnswer<?> toCharacter() throws FlowOperationException {
 		
 		return this.wrapped.toCharacter();
 	}

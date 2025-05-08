@@ -6,7 +6,7 @@ import java.util.function.Function;
 import ru.myx.ae3.answer.ReplyAnswer;
 import ru.myx.ae3.base.BaseObject;
 import ru.myx.ae3.flow.AbstractWrapMessage;
-import ru.myx.ae3.flow.Flow;
+import ru.myx.ae3.flow.FlowOperationException;
 import ru.myx.ae3.reflect.ReflectionIgnore;
 
 /** @author myx
@@ -429,13 +429,13 @@ public class WrapServeRequest<T extends WrapServeRequest<?, ?>, V extends ServeR
 	}
 	
 	@Override
-	public BinaryServeRequest<?> toBinary() throws Flow.FlowOperationException {
+	public BinaryServeRequest<?> toBinary() throws FlowOperationException {
 
 		return this.wrapped.toBinary();
 	}
 	
 	@Override
-	public CharacterServeRequest<?> toCharacter() throws Flow.FlowOperationException {
+	public CharacterServeRequest<?> toCharacter() throws FlowOperationException {
 
 		return this.wrapped.toCharacter();
 	}

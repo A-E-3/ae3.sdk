@@ -301,13 +301,13 @@ public abstract class AbstractWrapMessage<T extends AbstractWrapMessage<?, ?>, V
 	}
 	
 	@Override
-	public BinaryMessage<?> toBinary() throws Flow.FlowOperationException {
+	public BinaryMessage<?> toBinary() throws FlowOperationException {
 		
 		return this.wrapped.toBinary();
 	}
 	
 	@Override
-	public CharacterMessage<?> toCharacter() throws Flow.FlowOperationException {
+	public CharacterMessage<?> toCharacter() throws FlowOperationException {
 		
 		return this.wrapped.toCharacter();
 	}

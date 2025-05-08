@@ -5,7 +5,7 @@ import java.io.UnsupportedEncodingException;
 import ru.myx.ae3.base.Base;
 import ru.myx.ae3.base.BaseObject;
 import ru.myx.ae3.common.Value;
-import ru.myx.ae3.flow.Flow;
+import ru.myx.ae3.flow.FlowOperationException;
 import ru.myx.ae3.reflect.ReflectionIgnore;
 
 /**
@@ -50,12 +50,12 @@ public abstract class AbstractCharacterServeRequest<T extends AbstractCharacterS
 	}
 
 	@Override
-	public UniversalServeRequest<?> toBinary() throws Flow.FlowOperationException {
+	public UniversalServeRequest<?> toBinary() throws FlowOperationException {
 
 		try {
 			return Request.binaryWrapCharacter(this);
 		} catch (final UnsupportedEncodingException e) {
-			throw new Flow.FlowOperationException("Error converting from character to binary", e);
+			throw new FlowOperationException("Error converting from character to binary", e);
 		}
 	}
 
