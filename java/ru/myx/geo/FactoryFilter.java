@@ -31,13 +31,13 @@ final class FactoryFilter implements ObjectFactory<ServeRequest, ServeRequest> {
 	}
 
 	@Override
-	public final ObjectTarget<ServeRequest> connect(final String variant, final BaseObject attributes, final Class<?> source, final ObjectTarget<ServeRequest> target) {
+	public final ObjectTarget<ServeRequest> wrapTarget(final String variant, final BaseObject attributes, final Class<?> source, final ObjectTarget<ServeRequest> target) {
 		
 		return new TargetNormal(target);
 	}
 
 	@Override
-	public final ObjectSource<ServeRequest> prepare(final String variant, final BaseObject attributes, final ServeRequest query) {
+	public final ObjectSource<ServeRequest> wrapSource(final String variant, final BaseObject attributes, final ServeRequest query) {
 		
 		query.setAttribute("Geo-Mean", IpGeography.getCountryCode(query.getSourceAddress(), "--", "**"));
 		query.setAttribute("Geo-Peer", IpGeography.getCountryCode(query.getSourceAddressExact(), "--", "**"));
