@@ -35,7 +35,7 @@ import ru.myx.sapi.FormatSAPI;
 
 /** @author myx */
 public class Shell extends AbstractShellCommand {
-
+	
 	private static enum CommandState {
 		/**
 		 *
@@ -58,14 +58,14 @@ public class Shell extends AbstractShellCommand {
 		 */
 		QUOTED,
 	}
-
+	
 	private static final Map<String, ShellCommand> COMMANDS;
-
+	
 	static {
 		COMMANDS = new TreeMap<>();
 		Shell.registerCommand(new Shell());
 	}
-
+	
 	/** @param ctx
 	 * @param pathCurrent
 	 * @param argumentList
@@ -73,7 +73,7 @@ public class Shell extends AbstractShellCommand {
 	 * @return false to stop */
 	private static boolean
 			expandPatternComponent(final ExecProcess ctx, final Entry focus, final StringBuilder pathCurrent, final BaseList<String> argumentList, final String string) {
-
+		
 		final String component;
 		final String componentsLeft;
 		{
@@ -218,14 +218,14 @@ public class Shell extends AbstractShellCommand {
 			}
 		}
 	}
-
+	
 	/** FIXME: \* should not be processed! need 3 stages.
 	 *
 	 * @param ctx
 	 * @param argumentList
 	 * @param string */
 	private static void expandPatterns(final ExecProcess ctx, final BaseList<String> argumentList, final String string) {
-
+		
 		/** TODO <code>
 		if(string.length() == 1){
 			if('~' == string.charAt( 0 )){
@@ -238,7 +238,7 @@ public class Shell extends AbstractShellCommand {
 			argumentList.add(string);
 			return;
 		}
-
+		
 		if (string.indexOf('*') == -1) {
 			if (string.charAt(0) == '$') {
 				argumentList.add(Base.getString(ctx, string.substring(1), ""));
@@ -270,13 +270,13 @@ public class Shell extends AbstractShellCommand {
 		}
 		return;
 	}
-
+	
 	/** @param ctx
 	 * @param commandLine
 	 * @param argumentList
 	 * @return */
 	private static ExecStateCode parseCommandLine(final ExecProcess ctx, final String commandLine, final BaseList<String> argumentList) {
-
+		
 		{
 			CommandState state = CommandState.NORM;
 			final StringBuilder buffer = new StringBuilder();
@@ -360,24 +360,24 @@ public class Shell extends AbstractShellCommand {
 		}
 		return null;
 	}
-
+	
 	/** @param argument
 	 * @return */
 	// TODO: use context pwd etc for argument expansion?
 	public static final Set<String> calculateOptions(final String argument) {
-
+		
 		final Set<String> result = new TreeSet<>();
 		for (final char c : argument.toCharArray()) {
 			result.add(String.valueOf(c));
 		}
 		return result;
 	}
-
+	
 	/** @param ctx
 	 * @param args
 	 * @return Anything but REPEAT */
 	public static final ExecStateCode exec(final ExecProcess ctx, final BaseArray args) {
-
+		
 		if (args == null || args.length() == 0) {
 			return ctx.vmSetCallResultFalse();
 		}
@@ -394,12 +394,12 @@ public class Shell extends AbstractShellCommand {
 			}
 		}
 	}
-
+	
 	/** @param ctx
 	 * @param commandLine
 	 * @return */
 	public static final ExecStateCode exec(final ExecProcess ctx, final String commandLine) {
-
+		
 		final BaseList<String> argumentList = BaseObject.createArray(4);
 		final ExecStateCode code = Shell.parseCommandLine(ctx, commandLine, argumentList);
 		if (code != null) {
@@ -410,12 +410,12 @@ public class Shell extends AbstractShellCommand {
 		}
 		return Shell.exec(ctx, argumentList);
 	}
-
+	
 	/** @param ctx
 	 * @param args
 	 * @return */
 	public static final ExecStateCode exec(final ExecProcess ctx, final String[] args) {
-
+		
 		if (args == null || args.length == 0) {
 			return ctx.vmSetCallResultFalse();
 		}
@@ -432,13 +432,13 @@ public class Shell extends AbstractShellCommand {
 			}
 		}
 	}
-
+	
 	/** @param ctx
 	 * @param args
 	 * @return
 	 * @throws Exception */
 	public static final BaseObject execNative(final ExecProcess ctx, final BaseArray args) throws Exception {
-
+		
 		final ExecStateCode code = Shell.exec(ctx, args);
 		if (code == null || code == ExecStateCode.NEXT) {
 			return ctx.vmGetResultDetachable();
@@ -455,13 +455,36 @@ public class Shell extends AbstractShellCommand {
 		}
 		throw new RuntimeException("Illegal state code: " + code);
 	}
-
+	
+	/** @param ctx
+	 * @param args
+	 * @return
+	 * @throws Exception */
+	public static final BaseObject execNative(final ExecProcess ctx, final String[] args) throws Exception {
+		
+		final ExecStateCode code = Shell.exec(ctx, args);
+		if (code == null || code == ExecStateCode.NEXT) {
+			return ctx.vmGetResultDetachable();
+		}
+		if (code == ExecStateCode.ERROR) {
+			final BaseObject result = ctx.vmGetResultDetachable();
+			if (result instanceof final Exception ee) {
+				throw ee;
+			}
+			if (result instanceof final Error ee) {
+				throw ee;
+			}
+			throw Exec.createThrown(result, ctx.contextGetDebug(), null);
+		}
+		throw new RuntimeException("Illegal state code: " + code);
+	}
+	
 	/** @param ctx
 	 * @param commandLine
 	 * @return
 	 * @throws Exception */
 	public static final BaseObject execParse(final ExecProcess ctx, final String commandLine) throws Exception {
-
+		
 		final ExecStateCode code = Shell.exec(ctx, commandLine);
 		if (code == null || code == ExecStateCode.NEXT) {
 			return ctx.vmGetResultDetachable();
@@ -478,14 +501,14 @@ public class Shell extends AbstractShellCommand {
 		}
 		throw new RuntimeException("Illegal state code: " + code);
 	}
-
+	
 	/** @param ctx
 	 * @param console
 	 * @param commandLine
 	 * @return
 	 * @throws Exception */
 	public static final BaseObject executeNativeCommandWithConsole(final ExecProcess ctx, final Console console, final String commandLine) throws Exception {
-
+		
 		final Console prev = ctx.getConsole();
 		try {
 			ctx.setConsole(console);
@@ -494,11 +517,11 @@ public class Shell extends AbstractShellCommand {
 			ctx.setConsole(prev);
 		}
 	}
-
+	
 	/** @param name
 	 * @return */
 	public static final ShellCommand getCommand(final String name) {
-
+		
 		final ShellCommand command = Shell.COMMANDS.get(name);
 		if (command != null) {
 			return command.clone();
@@ -522,58 +545,63 @@ public class Shell extends AbstractShellCommand {
 				return new ShellJsCommand(name, reference);
 			}
 		}
-
+		
 		return null;
 	}
-
+	
 	/** @param command */
 	public static final void registerCommand(final AbstractShellCommand command) {
-
+		
 		Shell.COMMANDS.put(command.getName(), command);
 	}
-
+	
 	static final Map<String, ShellCommand> getCommands() {
-
+		
 		final Entry e = Storage.UNION.relative("settings/shell/", null);
 		if (e == null || !e.isExist()) {
 			return Shell.COMMANDS;
 		}
-
+		
 		final BaseList<Entry> children = e.toContainer().getContentCollection(null).baseValue();
 		if (children == null || children.length() == 0) {
 			return Shell.COMMANDS;
 		}
-
+		
 		final Map<String, ShellCommand> result = Create.tempMap(Shell.COMMANDS);
 		for (final Entry child : children) {
 			final String key = child.getKey();
 			if (key.endsWith(".json")) {
 				final String name = key.substring(0, key.length() - 5);
-				result.put(name, Shell.getCommand(name));
+				final ShellCommand command = Shell.getCommand(name);
+				if (command == null) {
+					Report.warning("ae3-shell", "Command is defined but unavailable: " + name);
+					continue;
+				}
+				result.put(name, command);
 			}
 		}
 		return result;
 	}
-
+	
 	/** default constructor */
 	public Shell() {
-
+		
 		//
 	}
-
+	
 	@Override
 	public Shell clone() {
-
+		
 		return new Shell();
 	}
-
+	
 	@Override
 	public ExecStateCode execCallImpl(final ExecProcess ctx) {
-
+		
 		final EntryVfsRoot saveRoot = ctx.fldVfsRoot;
 		final Entry saveShare = ctx.fldVfsShare;
 		final Entry saveFocus = ctx.fldVfsFocus;
-
+		
 		try {
 			final Console console = ctx.getConsole();
 			ctx.vmScopeDeriveContextFromFV();
@@ -601,9 +629,9 @@ public class Shell extends AbstractShellCommand {
 						ctx.contextCreateMutableBinding("$SUBSHELL", shellLevel, true);
 						return Shell.exec(ctx, arguments.baseArraySlice(argumentIndex, length));
 					}
-
+					
 					final String first = Base.getString(arguments, argumentIndex, "");
-
+					
 					if (first.startsWith("-")) {
 						if (Shell.calculateOptions(first).contains("v")) {
 							verbose = true;
@@ -631,7 +659,7 @@ public class Shell extends AbstractShellCommand {
 				}
 			}
 			main : for (;;) {
-
+				
 				final String commandLine;
 				if (altSource != null) {
 					if (!altSource.hasNext()) {
@@ -656,7 +684,7 @@ public class Shell extends AbstractShellCommand {
 						/** end of input, leave shell */
 						return ExecStateCode.NEXT;
 					}
-
+					
 					commandLine = commandRef.baseValue();
 					if (commandLine == null) {
 						/** end of input, leave shell */
@@ -668,13 +696,13 @@ public class Shell extends AbstractShellCommand {
 						continue main;
 					}
 				}
-
+				
 				try {
 					ctx.contextCreateMutableBinding("$VERBOSE", Base.forBoolean(verbose), true);
 					ctx.contextCreateMutableBinding("$COMMAND", commandLine, true);
 					ctx.contextCreateMutableBinding("$SUBSHELL", shellLevel, true);
 					final BaseList<String> argumentList = BaseObject.createArray(8);
-
+					
 					ExecStateCode code;
 					code : {
 						code = Shell.parseCommandLine(ctx, commandLine, argumentList);
@@ -688,14 +716,14 @@ public class Shell extends AbstractShellCommand {
 						if (x_trace) {
 							console.log("+ " + FormatSAPI.jsObject(argumentList));
 						}
-
+						
 						code = Shell.exec(ctx, argumentList);
 					}
-
+					
 					if (ExecStateCode.RETURN == code) {
 						return ExecStateCode.NEXT;
 					}
-
+					
 					if (ExecStateCode.ERROR == code) {
 						final BaseObject result = ctx.vmGetResultImmediate();
 						if (result != null && result != BaseObject.UNDEFINED) {
@@ -707,23 +735,23 @@ public class Shell extends AbstractShellCommand {
 										: String.valueOf(result));
 							ctx.ra0RB = BaseObject.UNDEFINED;
 						}
-
+						
 						/** repeat */
 						continue main;
 					}
-
+					
 					/** repeat */
 					continue main;
-
+					
 				} catch (final Throwable t) {
-
+					
 					console.sendError("ERROR: " + t.getMessage());
 					ctx.ra0RB = BaseObject.UNDEFINED;
 					Report.exception("SHELL", "While running: " + commandLine, t);
-
+					
 					/** repeat */
 					continue main;
-
+					
 				}
 			}
 		} finally {
@@ -732,16 +760,16 @@ public class Shell extends AbstractShellCommand {
 			ctx.fldVfsRoot = saveRoot;
 		}
 	}
-
+	
 	@Override
 	public String getDescription() {
-
+		
 		return "shell";
 	}
-
+	
 	@Override
 	public String getManual() {
-
+		
 		return "" //
 				+ "Usage: shell [-vc] [scriptFile]\r\n" //
 				+ "       shell -c cmdArg0 [... cmdArgX]\r\n" //
@@ -750,10 +778,10 @@ public class Shell extends AbstractShellCommand {
 				+ "Use -c option to execute the remaining arguments as a command.\r\n" + this.getDescription() //
 		;
 	}
-
+	
 	@Override
 	public String getName() {
-
+		
 		return "shell";
 	}
 }
