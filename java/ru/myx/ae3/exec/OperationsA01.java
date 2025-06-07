@@ -71,13 +71,13 @@ public enum OperationsA01 implements OperationA01 {
 		}
 		
 		@Override
-		public final ExecStateCode execute(final ExecProcess process, final int constant, final ResultHandler store) {
+		public final ExecStateCode execute(final ExecProcess ctx, final int constant, final ResultHandler store) {
 			
 			assert store instanceof ResultHandlerDirect;
 			
 			return constant > 0
-				? process.vmFrameEntryOpCtrl(process.ri08IP + 1 + constant)
-				: process.vmRaise("Incorrect frame size!");
+				? ctx.vmFrameEntryOpCtrl(ctx.ri08IP + 1 + constant)
+				: ctx.vmRaise("Incorrect frame size!");
 		}
 		
 		@Override
@@ -116,13 +116,13 @@ public enum OperationsA01 implements OperationA01 {
 		}
 		
 		@Override
-		public final ExecStateCode execute(final ExecProcess process, final int constant, final ResultHandler store) {
+		public final ExecStateCode execute(final ExecProcess ctx, final int constant, final ResultHandler store) {
 			
 			assert store instanceof ResultHandlerDirect;
 			
 			return constant > 0
-				? process.vmFrameEntryOpFull(process.ri08IP + 1 + constant)
-				: process.vmRaise("Incorrect frame size!");
+				? ctx.vmFrameEntryOpFull(ctx.ri08IP + 1 + constant)
+				: ctx.vmRaise("Incorrect frame size!");
 		}
 		
 		@Override
@@ -161,13 +161,13 @@ public enum OperationsA01 implements OperationA01 {
 		}
 		
 		@Override
-		public final ExecStateCode execute(final ExecProcess process, final int constant, final ResultHandler store) {
+		public final ExecStateCode execute(final ExecProcess ctx, final int constant, final ResultHandler store) {
 			
 			assert store instanceof ResultHandlerDirect;
 			
 			return constant > 0
-				? process.vmFrameEntryOpIterCtrl(process.ri08IP + 1 + constant)
-				: process.vmRaise("Incorrect frame size!");
+				? ctx.vmFrameEntryOpIterCtrl(ctx.ri08IP + 1 + constant)
+				: ctx.vmRaise("Incorrect frame size!");
 		}
 		
 		@Override
@@ -206,13 +206,13 @@ public enum OperationsA01 implements OperationA01 {
 		}
 		
 		@Override
-		public final ExecStateCode execute(final ExecProcess process, final int constant, final ResultHandler store) {
+		public final ExecStateCode execute(final ExecProcess ctx, final int constant, final ResultHandler store) {
 			
 			assert store instanceof ResultHandlerDirect;
 			
 			return constant > 0
-				? process.vmFrameEntryOpIterCtrlNewVars(process.ri08IP + 1 + constant)
-				: process.vmRaise("Incorrect frame size!");
+				? ctx.vmFrameEntryOpIterCtrlNewVars(ctx.ri08IP + 1 + constant)
+				: ctx.vmRaise("Incorrect frame size!");
 		}
 		
 		@Override
@@ -251,13 +251,13 @@ public enum OperationsA01 implements OperationA01 {
 		}
 		
 		@Override
-		public final ExecStateCode execute(final ExecProcess process, final int constant, final ResultHandler store) {
+		public final ExecStateCode execute(final ExecProcess ctx, final int constant, final ResultHandler store) {
 			
 			assert store instanceof ResultHandlerDirect;
 			
 			return constant > 0
-				? process.vmFrameEntryOpCtrlNewVars(process.ri08IP + 1 + constant)
-				: process.vmRaise("Incorrect frame size!");
+				? ctx.vmFrameEntryOpCtrlNewVars(ctx.ri08IP + 1 + constant)
+				: ctx.vmRaise("Incorrect frame size!");
 		}
 		
 		@Override
@@ -296,13 +296,13 @@ public enum OperationsA01 implements OperationA01 {
 		}
 		
 		@Override
-		public final ExecStateCode execute(final ExecProcess process, final int constant, final ResultHandler store) {
+		public final ExecStateCode execute(final ExecProcess ctx, final int constant, final ResultHandler store) {
 			
 			assert store instanceof ResultHandlerDirect;
 			
 			return constant > 0
-				? process.vmFrameEntryOpNone(process.ri08IP + 1 + constant)
-				: process.vmRaise("Incorrect frame size!");
+				? ctx.vmFrameEntryOpNone(ctx.ri08IP + 1 + constant)
+				: ctx.vmRaise("Incorrect frame size!");
 		}
 		
 		@Override
@@ -341,13 +341,13 @@ public enum OperationsA01 implements OperationA01 {
 		}
 		
 		@Override
-		public final ExecStateCode execute(final ExecProcess process, final int constant, final ResultHandler store) {
+		public final ExecStateCode execute(final ExecProcess ctx, final int constant, final ResultHandler store) {
 			
 			assert store instanceof ResultHandlerDirect;
 			
 			return constant > 0
-				? process.vmFrameEntryOpNewVars(process.ri08IP + 1 + constant)
-				: process.vmRaise("Incorrect frame size!");
+				? ctx.vmFrameEntryOpNewVars(ctx.ri08IP + 1 + constant)
+				: ctx.vmRaise("Incorrect frame size!");
 		}
 		
 		@Override
@@ -386,13 +386,13 @@ public enum OperationsA01 implements OperationA01 {
 		}
 		
 		@Override
-		public final ExecStateCode execute(final ExecProcess process, final int constant, final ResultHandler store) {
+		public final ExecStateCode execute(final ExecProcess ctx, final int constant, final ResultHandler store) {
 			
 			assert store instanceof ResultHandlerDirect;
 			
-			return process.ri0BSB == process.ri0ASP
-				? process.vmFrameLeave()
-				: process.vmRaise("Stack disbalance on frame leave!");
+			return ctx.ri0BSB == ctx.ri0ASP
+				? ctx.vmFrameLeave()
+				: ctx.vmRaise("Stack disbalance on frame leave!");
 		}
 		
 		@Override
@@ -429,11 +429,11 @@ public enum OperationsA01 implements OperationA01 {
 		}
 		
 		@Override
-		public final ExecStateCode execute(final ExecProcess process, final int constant, final ResultHandler store) {
+		public final ExecStateCode execute(final ExecProcess ctx, final int constant, final ResultHandler store) {
 			
 			assert store instanceof ResultHandlerDirect;
 			
-			process.ri08IP += constant;
+			ctx.ri08IP += constant;
 			/** return NEXT - skip other VLIW command parts */
 			return null;
 		}
@@ -486,14 +486,14 @@ public enum OperationsA01 implements OperationA01 {
 		}
 		
 		@Override
-		public final ExecStateCode execute(final ExecProcess process, final int constant, final ResultHandler store) {
+		public final ExecStateCode execute(final ExecProcess ctx, final int constant, final ResultHandler store) {
 			
-			if (process.ra1RL == 0) {
-				process.ri08IP += constant;
+			if (ctx.ra1RL == 0) {
+				ctx.ri08IP += constant;
 				/** return NEXT - skip other VLIW command parts */
 				return null;
 			}
-			return store.execReturn(process);
+			return store.execReturn(ctx);
 		}
 		
 		@Override
@@ -551,14 +551,14 @@ public enum OperationsA01 implements OperationA01 {
 		}
 		
 		@Override
-		public final ExecStateCode execute(final ExecProcess process, final int constant, final ResultHandler store) {
+		public final ExecStateCode execute(final ExecProcess ctx, final int constant, final ResultHandler store) {
 			
-			if (process.ra1RL != 0) {
-				process.ri08IP += constant;
+			if (ctx.ra1RL != 0) {
+				ctx.ri08IP += constant;
 				/** return NEXT - skip other VLIW command parts */
 				return null;
 			}
-			return store.execReturn(process);
+			return store.execReturn(ctx);
 		}
 		
 		@Override
@@ -616,14 +616,14 @@ public enum OperationsA01 implements OperationA01 {
 		}
 		
 		@Override
-		public final ExecStateCode execute(final ExecProcess process, final int constant, final ResultHandler store) {
+		public final ExecStateCode execute(final ExecProcess ctx, final int constant, final ResultHandler store) {
 			
-			if (process.ra0RB.baseToBoolean() == BaseObject.FALSE) {
-				process.ri08IP += constant;
+			if (ctx.ra0RB.baseToBoolean() == BaseObject.FALSE) {
+				ctx.ri08IP += constant;
 				/** return NEXT - skip other VLIW command parts */
 				return null;
 			}
-			return store.execReturn(process);
+			return store.execReturn(ctx);
 		}
 		
 		@Override
@@ -681,14 +681,33 @@ public enum OperationsA01 implements OperationA01 {
 		}
 		
 		@Override
-		public final ExecStateCode execute(final ExecProcess process, final int constant, final ResultHandler store) {
+		public final ExecStateCode execute(final ExecProcess ctx, final int constant, final ResultHandler store) {
 			
-			if (process.ra0RB.baseValue() == null) {
-				process.ri08IP += constant;
-				/** return NEXT - skip other VLIW command parts */
+			final BaseObject candidateValue = ctx.ra0RB;
+			final Object replacementValue = candidateValue.baseValue();
+			/* strict ?? false */
+			if (replacementValue == null) {
+				ctx.ri08IP += constant;
+				/** return NULL - no VLIW command parts to skip! */
 				return null;
 			}
-			return store.execReturn(process);
+			/* strict ?? true */
+			if (replacementValue == candidateValue) {
+				return store.execReturn(ctx);
+			}
+			/* implicit reference (References and Promises) */
+			if (replacementValue instanceof final BaseObject baseValue) {
+				/* reference ?? false */
+				if (baseValue.baseValue() == null) {
+					ctx.ri08IP += constant;
+					/** return NULL - no VLIW command parts to skip! */
+					return null;
+				}
+				/* reference ?? true */
+				return store.execReturn(ctx, baseValue);
+			}
+			/* failover ?? true */
+			return store.execReturn(ctx);
 		}
 		
 		@Override
@@ -746,14 +765,14 @@ public enum OperationsA01 implements OperationA01 {
 		}
 		
 		@Override
-		public final ExecStateCode execute(final ExecProcess process, final int constant, final ResultHandler store) {
+		public final ExecStateCode execute(final ExecProcess ctx, final int constant, final ResultHandler store) {
 			
-			if (process.ra0RB.baseToBoolean() == BaseObject.TRUE) {
-				process.ri08IP += constant;
+			if (ctx.ra0RB.baseToBoolean() == BaseObject.TRUE) {
+				ctx.ri08IP += constant;
 				/** return NEXT - skip other VLIW command parts */
 				return null;
 			}
-			return store.execReturn(process);
+			return store.execReturn(ctx);
 		}
 		
 		@Override
@@ -811,14 +830,14 @@ public enum OperationsA01 implements OperationA01 {
 		}
 		
 		@Override
-		public final ExecStateCode execute(final ExecProcess process, final int constant, final ResultHandler store) {
+		public final ExecStateCode execute(final ExecProcess ctx, final int constant, final ResultHandler store) {
 			
-			if (process.ra0RB.baseValue() != null) {
-				process.ri08IP += constant;
+			if (ctx.ra0RB.baseValue() != null) {
+				ctx.ri08IP += constant;
 				/** return NEXT - skip other VLIW command parts */
 				return null;
 			}
-			return store.execReturn(process);
+			return store.execReturn(ctx);
 		}
 		
 		@Override
@@ -859,9 +878,9 @@ public enum OperationsA01 implements OperationA01 {
 	XFBTGT_P {
 		
 		@Override
-		public final ExecStateCode execute(final ExecProcess process, final int constant, final ResultHandler store) {
+		public final ExecStateCode execute(final ExecProcess ctx, final int constant, final ResultHandler store) {
 			
-			process.ri0CBT = process.ri08IP + 1 + constant;
+			ctx.ri0CBT = ctx.ri08IP + 1 + constant;
 			return null;
 		}
 		
@@ -883,11 +902,11 @@ public enum OperationsA01 implements OperationA01 {
 	XFCTGT_P {
 		
 		@Override
-		public final ExecStateCode execute(final ExecProcess process, final int constant, final ResultHandler store) {
+		public final ExecStateCode execute(final ExecProcess ctx, final int constant, final ResultHandler store) {
 			
 			assert store instanceof ResultHandlerDirect;
 			
-			process.ri0DCT = process.ri08IP + 1 + constant;
+			ctx.ri0DCT = ctx.ri08IP + 1 + constant;
 			return null;
 		}
 		
@@ -909,11 +928,11 @@ public enum OperationsA01 implements OperationA01 {
 	XFETGT_P {
 		
 		@Override
-		public final ExecStateCode execute(final ExecProcess process, final int constant, final ResultHandler store) {
+		public final ExecStateCode execute(final ExecProcess ctx, final int constant, final ResultHandler store) {
 			
 			assert store instanceof ResultHandlerDirect;
 			
-			process.ri0EET = process.ri08IP + 1 + constant;
+			ctx.ri0EET = ctx.ri08IP + 1 + constant;
 			return null;
 		}
 		

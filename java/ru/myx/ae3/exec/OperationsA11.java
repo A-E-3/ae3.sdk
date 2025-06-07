@@ -191,12 +191,31 @@ public enum OperationsA11 implements OperationA11 {
 		@Override
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final int constant, final ResultHandler store) {
 
-			if (argumentA.baseValue() == null) {
+			final Object replacementValue = argumentA.baseValue();
+			/* strict ?? false */
+			if (replacementValue == null) {
 				ctx.ra0RB = BaseObject.UNDEFINED;
 				ctx.ri08IP += constant;
 				/** return NEXT - skip other VLIW command parts */
 				return NEXT;
 			}
+			/* strict ?? true */
+			if (replacementValue == argumentA) {
+				return store.execReturn(ctx, argumentA);
+			}
+			/* implicit reference (References and Promises) */
+			if (replacementValue instanceof final BaseObject baseValue) {
+				/* reference ?? false */
+				if (baseValue.baseValue() == null) {
+					ctx.ra0RB = BaseObject.UNDEFINED;
+					ctx.ri08IP += constant;
+					/** return NEXT - skip other VLIW command parts */
+					return NEXT;
+				}
+				/* reference ?? true */
+				return store.execReturn(ctx, baseValue);
+			}
+			/* failover ?? true */
 			return store.execReturn(ctx, argumentA);
 		}
 
@@ -277,17 +296,35 @@ public enum OperationsA11 implements OperationA11 {
 			final BaseObject[] stack = ctx.fldStack;
 			final BaseObject accessObject = stack[rASP - 1];
 
-			final BaseObject candidate = accessObject.baseGet(argumentB, BaseObject.UNDEFINED);
-			
-			if (candidate.baseValue() == null) {
+			final BaseObject candidateValue = accessObject.baseGet(argumentB, BaseObject.UNDEFINED);
+			final Object replacementValue = candidateValue.baseValue();
+			/* strict ?? false */
+			if (replacementValue == null) {
 				stack[--ctx.ri0ASP] = null;
 				ctx.ra0RB = BaseObject.UNDEFINED;
 				ctx.ri08IP += constant;
 				/** return NEXT - skip other VLIW command parts */
 				return NEXT;
 			}
-
-			return store.execReturn(ctx, candidate);
+			/* strict ?? true */
+			if (replacementValue == candidateValue) {
+				return store.execReturn(ctx, candidateValue);
+			}
+			/* implicit reference (References and Promises) */
+			if (replacementValue instanceof final BaseObject baseValue) {
+				/* reference ?? false */
+				if (baseValue.baseValue() == null) {
+					stack[--ctx.ri0ASP] = null;
+					ctx.ra0RB = BaseObject.UNDEFINED;
+					ctx.ri08IP += constant;
+					/** return NEXT - skip other VLIW command parts */
+					return NEXT;
+				}
+				/* reference ?? true */
+				return store.execReturn(ctx, baseValue);
+			}
+			/* failover ?? true */
+			return store.execReturn(ctx, candidateValue);
 		}
 
 		@Override

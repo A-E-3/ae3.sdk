@@ -3,6 +3,7 @@
  */
 package ru.myx.ae3.exec;
 
+import ru.myx.ae3.base.BaseObject;
 import ru.myx.vm_vliw32_2010.InstructionIA1I;
 import ru.myx.vm_vliw32_2010.OperationA11;
 import ru.myx.vm_vliw32_2010.VIFmtA11;
@@ -24,11 +25,33 @@ final class IA11_XNSKIP0A_A_C_FA_NN_NXT extends InstructionIA1I {
 	}
 
 	@Override
-	public final ExecStateCode execCall(final ExecProcess process) throws Exception {
+	public final ExecStateCode execCall(final ExecProcess ctx) throws Exception {
 		
-		if ((process.ra0RB = this.modifierA.argumentRead(process)).baseValue() == null) {
-			process.ri08IP += this.constant;
+		final BaseObject candidateValue = ctx.ra0RB = this.modifierA.argumentRead(ctx);
+		final Object replacementValue = candidateValue.baseValue();
+		/* strict ?? false */
+		if (replacementValue == null) {
+			ctx.ri08IP += this.constant;
+			return null;
 		}
+		/* strict ?? true */
+		if (replacementValue == candidateValue) {
+			return null;
+		}
+		/* implicit reference (References and Promises) */
+		if (replacementValue instanceof final BaseObject baseValue) {
+			/* reference ?? false */
+			if (baseValue.baseValue() == null) {
+				ctx.ri08IP += this.constant;
+				/** return NULL - no VLIW command parts to skip! */
+				// return ExecStateCode.NEXT;
+				return null;
+			}
+			/* reference ?? true */
+			ctx.ra0RB = baseValue;
+			return null;
+		}
+		/* failover ?? true */
 		return null;
 	}
 

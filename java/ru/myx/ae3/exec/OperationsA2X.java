@@ -853,15 +853,32 @@ public enum OperationsA2X implements OperationA2X {
 		@Override
 		public final ExecStateCode execute(final ExecProcess ctx, final BaseObject argumentA, final BaseObject argumentB, final int constant, final ResultHandler store) {
 
-			final BaseObject candidate = argumentA.baseGet(argumentB, BaseObject.UNDEFINED);
-
-			if (candidate.baseValue() == null) {
+			final BaseObject candidateValue = argumentA.baseGet(argumentB, BaseObject.UNDEFINED);
+			final Object replacementValue = candidateValue.baseValue();
+			/* strict ?? false */
+			if (replacementValue == null) {
 				return store.execReturnUndefined(ctx);
 			}
-			
+			/* strict ?? true */
+			if (replacementValue == candidateValue) {
+				ctx.stackPush(argumentA);
+				ctx.stackPush(ctx.ra0RB = candidateValue);
+				return null;
+			}
+			/* implicit reference (References and Promises) */
+			if (replacementValue instanceof final BaseObject baseValue) {
+				/* reference ?? false */
+				if (baseValue.baseValue() == null) {
+					return store.execReturnUndefined(ctx);
+				}
+				/* reference ?? true */
+				ctx.stackPush(argumentA);
+				ctx.stackPush(ctx.ra0RB = baseValue);
+				return null;
+			}
+			/* failover ?? true */
 			ctx.stackPush(argumentA);
-			ctx.stackPush(ctx.ra0RB = candidate);
-
+			ctx.stackPush(ctx.ra0RB = candidateValue);
 			return null;
 		}
 
