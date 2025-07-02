@@ -25,6 +25,6 @@ final class ListString extends ArrayList<String> {
 	@Override
 	public final String toString() {
 
-		return Text.join(this, "\n");
+		return String.join("\n", (Iterable<? extends CharSequence>) this);
 	}
 }

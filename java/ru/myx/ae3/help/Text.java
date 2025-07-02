@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -222,6 +221,30 @@ public final class Text {
 				this.length = sourceLength;
 			}
 
+			/** Skips ahead from startPos and returns the index of the next delimiter character
+			 * encountered, or maxPosition if no such delimiter is found.
+			 *
+			 * @param startPos
+			 * @return int */
+			private final int scanToken(final int startPos) {
+
+				int position = startPos;
+				while (position < this.length) {
+					final char c = this.str.charAt(position);
+					if (c == '&' || c == ';') {
+						break;
+					}
+					position++;
+				}
+				if (startPos == position) {
+					final char c = this.str.charAt(position);
+					if (c == '&' || c == ';') {
+						position++;
+					}
+				}
+				return position;
+			}
+
 			/** Tests if there are more tokens available from this tokenizer's string. If this
 			 * method returns <tt>true</tt>, then a subsequent call to <tt>nextToken</tt> with no
 			 * argument will successfully return a token.
@@ -246,30 +269,6 @@ public final class Text {
 				final int start = this.index;
 				this.index = this.scanToken(this.index);
 				return this.str.substring(start, this.index);
-			}
-
-			/** Skips ahead from startPos and returns the index of the next delimiter character
-			 * encountered, or maxPosition if no such delimiter is found.
-			 *
-			 * @param startPos
-			 * @return int */
-			private final int scanToken(final int startPos) {
-
-				int position = startPos;
-				while (position < this.length) {
-					final char c = this.str.charAt(position);
-					if (c == '&' || c == ';') {
-						break;
-					}
-					position++;
-				}
-				if (startPos == position) {
-					final char c = this.str.charAt(position);
-					if (c == '&' || c == ';') {
-						position++;
-					}
-				}
-				return position;
 			}
 		}
 
@@ -601,10 +600,12 @@ public final class Text {
 		return result.toString();
 	}
 
-	/** @param strs
+	/** Please, use standard String.join(delimiter, Iterable<? extends CharSequence) if matches.
+	 *
+	 * @param strs
 	 * @param token
 	 * @return string */
-	public static final String join(final Collection<?> strs, final String token) {
+	public static final String join(final Iterable<?> strs, final String token) {
 
 		final StringBuilder result = new StringBuilder(128);
 		for (final Object object : strs) {
@@ -616,30 +617,11 @@ public final class Text {
 		return result.toString();
 	}
 
-	/** Skips every null element!
-	 *
-	 * @param array
-	 * @param token
-	 * @return string */
-	public static final String join(final Object[] array, final char token) {
-
-		final StringBuilder result = new StringBuilder(128);
-		for (final Object element : array) {
-			if (element != null) {
-				if (result.length() > 0) {
-					result.append(token);
-				}
-				result.append(element);
-			}
-		}
-		return result.toString();
-	}
-
 	/** @param objects
 	 * @param token
 	 * @return string */
 	public static final String join(final Object[] objects, final String token) {
-
+		
 		if (objects == null) {
 			return "";
 		}
