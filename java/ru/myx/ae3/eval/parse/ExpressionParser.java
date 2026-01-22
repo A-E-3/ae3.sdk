@@ -341,7 +341,7 @@ public final class ExpressionParser {
 	private static final void addNumberBin(final List<TokenInstruction> precompiled, final String token, final char type) {
 
 		if (token.length() == 0) {
-			throw new RuntimeException("Illegal binary constant: 0x" + token);
+			throw new RuntimeException("Illegal binary constant, empty");
 		}
 		try {
 			final long number = Long.parseLong(token, 2);
@@ -370,6 +370,9 @@ public final class ExpressionParser {
 
 	private static final void addNumberFloat(final List<TokenInstruction> precompiled, final String token, final char type) {
 
+		if (token.length() == 0) {
+			throw new RuntimeException("Illegal float constant, empty");
+		}
 		try {
 			final int size = precompiled.size();
 			if (size > 0 && precompiled.get(size - 1) == ParseConstants.TKO_MSUB_BA_S0) {
@@ -395,7 +398,7 @@ public final class ExpressionParser {
 	private static final void addNumberHex(final List<TokenInstruction> precompiled, final String token, final char type) {
 
 		if (token.length() == 0) {
-			throw new RuntimeException("Illegal hexadecimal constant: 0x" + token);
+			throw new RuntimeException("Illegal hexadecimal constant, empty");
 		}
 		try {
 			final long number = Long.parseLong(token, 16);
@@ -425,7 +428,7 @@ public final class ExpressionParser {
 	private static final void addNumberOct(final List<TokenInstruction> precompiled, final String token, final char type) {
 
 		if (token.length() == 0) {
-			throw new RuntimeException("Illegal octal constant: 0x" + token);
+			throw new RuntimeException("Illegal octal constant, empty");
 		}
 		try {
 			final long number = Long.parseLong(token, 8);
