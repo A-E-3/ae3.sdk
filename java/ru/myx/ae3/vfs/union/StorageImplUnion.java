@@ -81,9 +81,8 @@ public class StorageImplUnion
 	
 	@Override
 	public TransactionUnion createTransaction() throws Exception {
-		
-		// TODO Auto-generated method stub
-		return null;
+
+		return new TransactionUnion(this);
 	}
 	
 	@Override
