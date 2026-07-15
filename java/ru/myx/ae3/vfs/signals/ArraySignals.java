@@ -3,9 +3,9 @@ package ru.myx.ae3.vfs.signals;
 import java.util.ArrayList;
 
 import ru.myx.ae3.common.Value;
-import ru.myx.ae3.vfs.ars.ArsArray;
+import ru.myx.ae3.vfs.ars.ArsRefArray;
 
-final class ArraySignals extends ArrayList<ReferenceSignals> implements ArsArray<ReferenceSignals>, Value<ArraySignals> {
+final class ArraySignals extends ArrayList<ReferenceSignals> implements ArsRefArray<ReferenceSignals>, Value<ArraySignals> {
 	/**
 	 * 
 	 */

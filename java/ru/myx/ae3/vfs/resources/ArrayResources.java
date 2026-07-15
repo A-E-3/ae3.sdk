@@ -3,9 +3,9 @@ package ru.myx.ae3.vfs.resources;
 import java.util.ArrayList;
 
 import ru.myx.ae3.common.Value;
-import ru.myx.ae3.vfs.ars.ArsArray;
+import ru.myx.ae3.vfs.ars.ArsRefArray;
 
-final class ArrayResources extends ArrayList<ReferenceResources> implements ArsArray<ReferenceResources>,
+final class ArrayResources extends ArrayList<ReferenceResources> implements ArsRefArray<ReferenceResources>,
 		Value<ArrayResources> {
 	/**
 	 * 

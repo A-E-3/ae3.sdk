@@ -10,7 +10,7 @@ import ru.myx.ae3.vfs.TreeLinkType;
  * @param <R>
  * @param <A>
  */
-public abstract class AbstractArsStorage<O extends ArsRecord, R extends ArsReference<O>, A extends ArsArray<R>> implements
+public abstract class AbstractArsStorage<O extends ArsRecord, R extends ArsReference<O>, A extends ArsRefArray<R>> implements
 		ArsStorage<O, R, A> {
 	
 	@SuppressWarnings("unchecked")

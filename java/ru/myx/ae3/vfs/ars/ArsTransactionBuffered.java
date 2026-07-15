@@ -14,7 +14,7 @@ import ru.myx.ae3.vfs.TreeReadType;
  * @param <A>
  * 
  */
-public class ArsTransactionBuffered<O extends ArsRecord, R extends ArsReference<O>, A extends ArsArray<R>> implements
+public class ArsTransactionBuffered<O extends ArsRecord, R extends ArsReference<O>, A extends ArsRefArray<R>> implements
 		ArsTransaction<O, R, A> {
 	
 	private ArsInterface<O, R, A>	iface;

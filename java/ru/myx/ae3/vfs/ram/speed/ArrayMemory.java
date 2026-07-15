@@ -3,9 +3,9 @@ package ru.myx.ae3.vfs.ram.speed;
 import java.util.ArrayList;
 
 import ru.myx.ae3.common.Value;
-import ru.myx.ae3.vfs.ars.ArsArray;
+import ru.myx.ae3.vfs.ars.ArsRefArray;
 
-final class ArrayMemory extends ArrayList<ReferenceMemory> implements ArsArray<ReferenceMemory>, Value<ArrayMemory> {
+final class ArrayMemory extends ArrayList<ReferenceMemory> implements ArsRefArray<ReferenceMemory>, Value<ArrayMemory> {
 	
 	/**
 	 * 

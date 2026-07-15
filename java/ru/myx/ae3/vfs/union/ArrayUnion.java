@@ -3,9 +3,9 @@ package ru.myx.ae3.vfs.union;
 import java.util.ArrayList;
 
 import ru.myx.ae3.common.Value;
-import ru.myx.ae3.vfs.ars.ArsArray;
+import ru.myx.ae3.vfs.ars.ArsRefArray;
 
-final class ArrayUnion extends ArrayList<RecordReferenceUnion> implements ArsArray<RecordReferenceUnion>,
+final class ArrayUnion extends ArrayList<RecordReferenceUnion> implements ArsRefArray<RecordReferenceUnion>,
 		Value<ArrayUnion> {
 	/**
 	 * 
