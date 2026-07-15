@@ -10,7 +10,7 @@ import ru.myx.ae3.vfs.TreeLinkType;
  * @param <O>
  * @param <R>
  * @param <A> */
-public abstract class AbstractArsStorageReadOnly<O extends ArsRecord, R extends ArsReference<O>, A extends ArsArray<R>> //
+public abstract class AbstractArsStorageReadOnly<O extends ArsRecord, R extends ArsReference<O>, A extends ArsRefArray<R>> //
 		extends //
 			AbstractArsStorage<O, R, A>
 		implements //

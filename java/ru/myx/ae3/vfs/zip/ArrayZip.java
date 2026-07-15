@@ -3,9 +3,9 @@ package ru.myx.ae3.vfs.zip;
 import java.util.ArrayList;
 
 import ru.myx.ae3.common.Value;
-import ru.myx.ae3.vfs.ars.ArsArray;
+import ru.myx.ae3.vfs.ars.ArsRefArray;
 
-final class ArrayZip extends ArrayList<ReferenceZip> implements ArsArray<ReferenceZip>, Value<ArrayZip> {
+final class ArrayZip extends ArrayList<ReferenceZip> implements ArsRefArray<ReferenceZip>, Value<ArrayZip> {
 	/**
 	 * 
 	 */

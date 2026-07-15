@@ -3,9 +3,9 @@ package ru.myx.ae3.vfs.filesystem;
 import java.util.ArrayList;
 
 import ru.myx.ae3.common.Value;
-import ru.myx.ae3.vfs.ars.ArsArray;
+import ru.myx.ae3.vfs.ars.ArsRefArray;
 
-abstract class ArrayFilesystem extends ArrayList<ReferenceFilesystem> implements ArsArray<ReferenceFilesystem>,
+abstract class ArrayFilesystem extends ArrayList<ReferenceFilesystem> implements ArsRefArray<ReferenceFilesystem>,
 		Value<ArrayFilesystem> {
 	/**
 	 * 

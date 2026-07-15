@@ -3,9 +3,9 @@ package ru.myx.ae3.vfs.status;
 import java.util.ArrayList;
 
 import ru.myx.ae3.common.Value;
-import ru.myx.ae3.vfs.ars.ArsArray;
+import ru.myx.ae3.vfs.ars.ArsRefArray;
 
-final class ArrayStatus extends ArrayList<ReferenceStatus> implements ArsArray<ReferenceStatus>, Value<ArrayStatus> {
+final class ArrayStatus extends ArrayList<ReferenceStatus> implements ArsRefArray<ReferenceStatus>, Value<ArrayStatus> {
 	/**
 	 * 
 	 */

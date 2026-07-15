@@ -2,7 +2,7 @@ package ru.myx.ae3.vfs;
 
 import ru.myx.ae3.base.BaseObject;
 import ru.myx.ae3.know.Guid;
-import ru.myx.ae3.vfs.ars.ArsArray;
+import ru.myx.ae3.vfs.ars.ArsRefArray;
 import ru.myx.ae3.vfs.ars.ArsRecord;
 import ru.myx.ae3.vfs.ars.ArsReference;
 import ru.myx.ae3.vfs.ars.ArsTransaction;
@@ -17,7 +17,7 @@ import ru.myx.util.FifoQueueLinked;
  * @param <A>
  * 
  */
-public class VfsTransactionArsBridge<O extends ArsRecord, R extends ArsReference<O>, A extends ArsArray<R>> extends
+public class VfsTransactionArsBridge<O extends ArsRecord, R extends ArsReference<O>, A extends ArsRefArray<R>> extends
 		VfsTransactionAbstract<VfsInterface> {
 	
 	private ArsTransaction<O, R, A>	txn;

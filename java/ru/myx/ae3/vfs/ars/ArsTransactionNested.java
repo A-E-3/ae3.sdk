@@ -13,7 +13,7 @@ import ru.myx.ae3.vfs.TreeReadType;
  * @param <R>
  * @param <A>
  */
-public class ArsTransactionNested<O extends ArsRecord, R extends ArsReference<O>, A extends ArsArray<R>> implements
+public class ArsTransactionNested<O extends ArsRecord, R extends ArsReference<O>, A extends ArsRefArray<R>> implements
 		ArsTransaction<O, R, A> {
 	
 	private ArsTransaction<O, R, A>	parent;
