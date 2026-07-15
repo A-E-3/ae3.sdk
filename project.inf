@@ -2,6 +2,7 @@ Name: ae3.sdk
 Info: AE3 SDK Package
 Requires: \
 	ae3.api \
+	clean-java.crypto \
 
 Provides: \
 	ae3.sdk \
