@@ -12,6 +12,7 @@ import ru.myx.ae3.base.BaseProperty;
 import ru.myx.ae3.binary.TransferCopier;
 import ru.myx.ae3.i3.TargetInterface;
 import ru.myx.ae3.l2.geo.GeometryLayout;
+import ru.myx.ae3.l2.skin.Skin;
 import ru.myx.ae3.report.Report;
 
 /** @author myx */
@@ -185,6 +186,11 @@ public class NativeTargetContext extends TargetContextAbstract<NativeTargetConte
 		 *
 		 */
 		CLONE,
+		/** Same as {@link #CLONE}, except when a skin is assigned and actually has a
+		 * {@link LayoutDefinition} for the incoming layout's name - then it defers to the real
+		 * skin-driven walk instead of capturing the object as-is.
+		 **/
+		CLONE_SKINNED,
 		/**
 		 *
 		 */
@@ -397,6 +403,18 @@ public class NativeTargetContext extends TargetContextAbstract<NativeTargetConte
 	public BaseObject onNest(final NativeTargetContext target, final BaseObject layout) {
 
 		if (this.targetMode == TargetMode.CLONE) {
+			this.result = layout;
+			return null;
+		}
+		if (this.targetMode == TargetMode.CLONE_SKINNED) {
+			final String name = Base.getString(layout, "layout", "").trim();
+			if (!"xml".equals(name) && !"final".equals(name)) {
+				for (Skin skin = this.currentSkin; skin != null; skin = skin.getSkinParent()) {
+					if (skin.getLayoutDefinition(name) != null) {
+						return super.onNest(target, layout);
+					}
+				}
+			}
 			this.result = layout;
 			return null;
 		}
