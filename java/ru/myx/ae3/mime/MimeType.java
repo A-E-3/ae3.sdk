@@ -42,7 +42,12 @@ public class MimeType {
 	 * Content type application/x-unknown-content
 	 */
 	public static final String					SMT_APPLICATION_UNKNOWN		= "application/x-unknown-content";
-	
+
+	/**
+	 * Content type application/xhtml+xml
+	 */
+	public static final String					SMT_APPLICATION_XHTML_XML	= "application/xhtml+xml";
+
 	/**
 	 * Content type multipart/mixed
 	 */
