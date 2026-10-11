@@ -49,6 +49,14 @@ enum ParserState {
      */
 	STR2,
 	/**
+	 * backtick template literal, copied verbatim into the code buffer for the expression parser
+	 */
+	STR3,
+	/**
+	 * escape inside a backtick template literal, copied verbatim
+	 */
+	STR3_ESCAPE,
+	/**
      * 
      */
 	STR_ESCAPE,

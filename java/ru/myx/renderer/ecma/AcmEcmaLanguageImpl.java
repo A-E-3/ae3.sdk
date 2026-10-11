@@ -334,6 +334,16 @@ public class AcmEcmaLanguageImpl implements LanguageImpl {
 						column = 0;
 						continue;
 					}
+					if (state == ParserState.STR3 || state == ParserState.STR3_ESCAPE) {
+						/** backtick templates may span lines; keep the newline verbatim */
+						buffer.append(c);
+						if (state == ParserState.STR3_ESCAPE) {
+							state = ParserState.STR3;
+						}
+						++line;
+						column = 0;
+						continue;
+					}
 					if (state == ParserState.CODE || state == ParserState.IDENTIFIER) {
 						if (statementCurrent.isNewLineSemicolon() && buffer.length() == 0) {
 							if (statementStack.isEmpty()) {
@@ -542,6 +552,19 @@ public class AcmEcmaLanguageImpl implements LanguageImpl {
 						state = ParserState.STR2;
 						continue;
 					}
+					if (c == '`') {
+						if (tokenStartPosition == 0 && statementCurrent.isIdentifierRequired()) {
+							throw new IllegalStateException(
+									"Identifier expected: file=" + identity + ", line=" + line + ", column=" + column + ", buffer=" + buffer + ", code:\r\n"
+											+ AcmEcmaLanguageImpl.formatCodeHighlight(code, line, column));
+						}
+						/** copy the whole backtick template verbatim for the expression parser */
+						buffer.append('`');
+						state2 = state1;
+						state1 = state;
+						state = ParserState.STR3;
+						continue;
+					}
 					if (c == '/') {
 						state2 = state1;
 						state1 = state;
@@ -745,6 +768,14 @@ public class AcmEcmaLanguageImpl implements LanguageImpl {
 						state = ParserState.STR2;
 						continue;
 					}
+					if (c == '`') {
+						/** copy the whole backtick template verbatim for the expression parser */
+						buffer.append('`');
+						state2 = state1;
+						state1 = state;
+						state = ParserState.STR3;
+						continue;
+					}
 					if (c == '/') {
 						state2 = state1;
 						state1 = state;
@@ -939,6 +970,29 @@ public class AcmEcmaLanguageImpl implements LanguageImpl {
 					 */
 					continue local;
 				}
+				if (state == ParserState.STR3) {
+					if (c == '`') {
+						buffer.append('`');
+						state = state1;
+						state1 = state2;
+						/**
+						 * jump to the main loop
+						 */
+						continue main;
+					}
+					if (c == '\\') {
+						buffer.append('\\');
+						state = ParserState.STR3_ESCAPE;
+						continue local;
+					}
+					buffer.append(c);
+					continue local;
+				}
+				if (state == ParserState.STR3_ESCAPE) {
+					buffer.append(c);
+					state = ParserState.STR3;
+					continue local;
+				}
 				if (state == ParserState.STR1) {
 					if (c == '\'') {
 						final String constant = string.toString();
@@ -1063,7 +1117,7 @@ public class AcmEcmaLanguageImpl implements LanguageImpl {
 					"Unterminated unicode symbol in string constant: file=" + identity + ", line=" + line + ", column=" + column + ", code:\r\n"
 							+ AcmEcmaLanguageImpl.formatCodeHighlight(code, line, column));
 		}
-		if (state == ParserState.STR1 || state == ParserState.STR2 || state == ParserState.STR_ESCAPE) {
+		if (state == ParserState.STR1 || state == ParserState.STR2 || state == ParserState.STR_ESCAPE || state == ParserState.STR3 || state == ParserState.STR3_ESCAPE) {
 			throw new IllegalStateException(
 					"Unterminated string constant: file=" + identity + ", line=" + line + ", column=" + column + ", code:\r\n"
 							+ AcmEcmaLanguageImpl.formatCodeHighlight(code, line, column));

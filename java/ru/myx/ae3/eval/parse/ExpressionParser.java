@@ -108,6 +108,14 @@ public final class ExpressionParser {
 
 	private static final int ST_NUMBER_BIN = 32;
 
+	private static final int ST_TEMPLATE = 33;
+
+	private static final int ST_3STRING_FUNCTION_ROOT = 34;
+
+	private static final int ST_3STRING_FUNCTION_ACCS = 35;
+
+	private static final int ST_3STRING_FUNCTION_NEW = 36;
+
 	private static final int ST_WHITESPACE = 0;
 
 	private static final TokenValue MA_CONSTRUCTOR = ParseConstants.getConstantValue(Base.forString("constructor"));
@@ -1601,6 +1609,32 @@ public final class ExpressionParser {
 		return (ExpressionParser.CHARS[c] & 0x04) != 0;
 	}
 
+	/** Skips a quoted region starting at the opening delimiter (single quote, double quote or
+	 * backtick) and returns the index of the matching unescaped closing delimiter, or {@code length}
+	 * when the region is not terminated. Used to step over strings while scanning a template
+	 * substitution for its matching '}'.
+	 *
+	 * @param expression
+	 * @param start
+	 *            index of the opening delimiter
+	 * @param length
+	 * @return index of the closing delimiter, or {@code length} */
+	private static final int skipQuoted(final char[] expression, final int start, final int length) {
+
+		final char quote = expression[start];
+		for (int i = start + 1; i < length; ++i) {
+			final char c = expression[i];
+			if (c == '\\') {
+				++i;
+				continue;
+			}
+			if (c == quote) {
+				return i;
+			}
+		}
+		return length;
+	}
+
 	private static final boolean isIdentifierStart(final char c) {
 
 		return (ExpressionParser.CHARS[c] & 0x02) != 0;
@@ -1637,6 +1671,10 @@ public final class ExpressionParser {
 							}
 							case '"' : {
 								state = ExpressionParser.ST_2STRING;
+								continue main;
+							}
+							case '`' : {
+								state = ExpressionParser.ST_TEMPLATE;
 								continue main;
 							}
 							case '.' : {
@@ -2743,6 +2781,14 @@ public final class ExpressionParser {
 								state = ExpressionParser.ST_2STRING;
 								continue main;
 							}
+							case '`' : {
+								if (current.length() > 0) {
+									ExpressionParser.addOperator(assembly, precompiled, current.toString());
+									current.setLength(0);
+								}
+								state = ExpressionParser.ST_TEMPLATE;
+								continue main;
+							}
 							case '@' : {
 								if (current.length() > 0) {
 									ExpressionParser.addOperator(assembly, precompiled, current.toString());
@@ -2831,6 +2877,11 @@ public final class ExpressionParser {
 							state = ExpressionParser.ST_2STRING_FUNCTION_NEW;
 							break;
 						}
+						if (c == '`') {
+							current.append('`');
+							state = ExpressionParser.ST_3STRING_FUNCTION_NEW;
+							break;
+						}
 						if (c == '(') {
 							current.append('(');
 							levelBrace++;
@@ -2874,6 +2925,11 @@ public final class ExpressionParser {
 						if (c == '"') {
 							current.append('"');
 							state = ExpressionParser.ST_2STRING_FUNCTION_ROOT;
+							break;
+						}
+						if (c == '`') {
+							current.append('`');
+							state = ExpressionParser.ST_3STRING_FUNCTION_ROOT;
 							break;
 						}
 						if (c == '(') {
@@ -2939,6 +2995,11 @@ public final class ExpressionParser {
 							state = ExpressionParser.ST_2STRING_FUNCTION_ACCS;
 							break;
 						}
+						if (c == '`') {
+							current.append('`');
+							state = ExpressionParser.ST_3STRING_FUNCTION_ACCS;
+							break;
+						}
 						if (c == '(') {
 							current.append('(');
 							levelBrace++;
@@ -2984,6 +3045,156 @@ public final class ExpressionParser {
 							}
 							current.append(')');
 							continue;
+						}
+						current.append(c);
+					}
+					continue main;
+				}
+				case ST_3STRING_FUNCTION_ROOT :
+				case ST_3STRING_FUNCTION_ACCS :
+				case ST_3STRING_FUNCTION_NEW : {
+					for (; i < length; ++i) {
+						final char c = expression[i];
+						switch (c) {
+							case '`' : {
+								current.append('`');
+								state = state == ExpressionParser.ST_3STRING_FUNCTION_NEW
+									? ExpressionParser.ST_FUNCTION_NEW
+									: state == ExpressionParser.ST_3STRING_FUNCTION_ACCS
+										? ExpressionParser.ST_FUNCTION_ACCS
+										: ExpressionParser.ST_FUNCTION_ROOT;
+								continue main;
+							}
+							case '\\' : {
+								current.append('\\');
+								final char next = expression[++i];
+								current.append(
+										next == '\r'
+											? expression[++i]
+											: next);
+								continue;
+							}
+							default :
+								current.append(c);
+								continue;
+						}
+					}
+					continue main;
+				}
+				case ST_TEMPLATE : {
+					/** Backtick template literal. Collects literal parts and `${ }` substitutions into
+					 * an ordered parts list, then emits one string-concat expression (seeded string so
+					 * the whole chain is string-typed). Reuses existing folding and string-add tokens. */
+					final List<TokenInstruction> parts = new ArrayList<>(8);
+					template : for (; i < length; ++i) {
+						final char c = expression[i];
+						if (c == '`') {
+							if (current.length() > 0) {
+								parts.add(new TKV_LCONSTS(Base.forString(current.toString())));
+								current.setLength(0);
+							} else if (parts.isEmpty()) {
+								parts.add(ParseConstants.TKV_STRING_EMPTY);
+							}
+							final int partCount = parts.size();
+							if (partCount == 1) {
+								precompiled.add(parts.get(0));
+							} else {
+								final List<TokenInstruction> seq = new ArrayList<>(partCount * 2 - 1);
+								for (int p = 0; p < partCount; ++p) {
+									if (p > 0) {
+										seq.add(ParseConstants.TKO_MADD_BA_SS);
+									}
+									seq.add(parts.get(p));
+								}
+								precompiled.add(assembly.compileExpression(seq, BalanceType.EXPRESSION));
+							}
+							state = ExpressionParser.ST_WHITESPACE;
+							continue main;
+						}
+						if (c == '\\') {
+							++i;
+							if (length <= i) {
+								break template;
+							}
+							final char escaped = expression[i];
+							switch (escaped) {
+								case 'n' :
+									current.append('\n');
+									break;
+								case 'r' :
+									current.append('\r');
+									break;
+								case 't' :
+									current.append('\t');
+									break;
+								case 'b' :
+									current.append('\b');
+									break;
+								case 'f' :
+									current.append('\f');
+									break;
+								case 'x' :
+									if (length > i + 2) {
+										current.append((char) Integer.parseInt(expressionString.substring(i + 1, i + 3), 16));
+										i += 2;
+										break;
+									}
+									precompiled.clear();
+									precompiled.add(new TKV_ERROR_A_C_E("Invalid \\x (at " + i + "): " + expressionString));
+									return precompiled;
+								case 'u' :
+									if (length > i + 4) {
+										current.append((char) Integer.parseInt(expressionString.substring(i + 1, i + 5), 16));
+										i += 4;
+										break;
+									}
+									precompiled.clear();
+									precompiled.add(new TKV_ERROR_A_C_E("Invalid \\u (at " + i + "): " + expressionString));
+									return precompiled;
+								default :
+									current.append(escaped);
+							}
+							continue template;
+						}
+						if (c == '$' && i + 1 < length && expression[i + 1] == '{') {
+							if (current.length() > 0) {
+								parts.add(new TKV_LCONSTS(Base.forString(current.toString())));
+								current.setLength(0);
+							} else if (parts.isEmpty()) {
+								parts.add(ParseConstants.TKV_STRING_EMPTY);
+							}
+							i += 2;
+							final int exprStart = i;
+							int depth = 1;
+							scan : for (; i < length; ++i) {
+								final char cc = expression[i];
+								switch (cc) {
+									case '{' :
+										depth++;
+										continue scan;
+									case '}' :
+										if (--depth == 0) {
+											break scan;
+										}
+										continue scan;
+									case '\'' :
+									case '"' :
+									case '`' :
+										i = ExpressionParser.skipQuoted(expression, i, length);
+										continue scan;
+									default :
+										continue scan;
+								}
+							}
+							if (depth != 0) {
+								precompiled.clear();
+								precompiled.add(new TKV_ERROR_A_C_E("Unterminated template substitution: " + expressionString));
+								return precompiled;
+							}
+							final String exprText = new String(expression, exprStart, i - exprStart).trim();
+							final List<TokenInstruction> sub = ExpressionParser.prepare(assembly, exprText);
+							parts.add(assembly.compileExpression(sub, BalanceType.EXPRESSION));
+							continue template;
 						}
 						current.append(c);
 					}
@@ -3498,7 +3709,11 @@ public final class ExpressionParser {
 			case ST_1STRING_FUNCTION_ACCS :
 			case ST_2STRING_FUNCTION_ACCS :
 			case ST_1STRING_FUNCTION_DECL :
-			case ST_2STRING_FUNCTION_DECL : {
+			case ST_2STRING_FUNCTION_DECL :
+			case ST_TEMPLATE :
+			case ST_3STRING_FUNCTION_NEW :
+			case ST_3STRING_FUNCTION_ROOT :
+			case ST_3STRING_FUNCTION_ACCS : {
 				precompiled.clear();
 				precompiled.add(new TKV_ERROR_A_C_E("Unterminated string constant: " + expressionString));
 				return precompiled;
