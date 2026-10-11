@@ -82,11 +82,11 @@ final class TKV_MADDS_BA_VV_S extends TokenValue {
 					null,
 					null,
 					directB
-						? ResultHandler.FB_BSN_NXT
-						: ResultHandler.FA_BNN_NXT);
+						? ResultHandler.FS_BSN_NXT
+						: ResultHandler.FS_BNN_NXT);
 		}
 		if (directB) {
-			this.argumentB.toAssembly(assembly, null, null, ResultHandler.FA_BNN_NXT);
+			this.argumentB.toAssembly(assembly, null, null, ResultHandler.FS_BNN_NXT);
 		}
 		assembly.addInstruction(
 				(this.visibility == 2
