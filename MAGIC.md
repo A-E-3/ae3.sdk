@@ -1,0 +1,12 @@
+# MAGIC.md — ae3.sdk
+
+Team-owned. Durable findings/gotchas for this repo, not investigation narration.
+
+## For keeper-ae3
+
+- **A malformed Basic credential is refused inside `ru.myx.auth.AuthUtils.squeezeCredentialsFromRequestHeaders`.** `ru.myx.util.Base64.decode` throws `RuntimeException("Decoder error: Invalid base64 encoding.")` when the payload length is not a multiple of four, so the decode sits in a try/catch there and throws `Reply.exception(Reply.stringUnauthorized("AUTH:BASIC", query, "Invalid credentials"))`. The answer is a 401 carrying `WWW-Authenticate: Basic realm="sign in"` and a plain `Invalid credentials` body, never a 500 with a dump (MAGIC-11, the MAGIC-8 trigger).
+- **`AbstractReplyException` is the platform's handled-refusal carrier.** It is an `ExecNonMaskedException`, so the VM and the JS layer pass it through unnested, and `WebTargetActor.apply` sends its `getReply()` as the answer. An input-reading site refuses by throwing one; no new exception kind is needed.
+- **`Context.checkAuthorization` (acm-base-api) swallows a 401 or 403 reply exception** and then throws its own sign-in challenge, so an ACM-side caller sees the standard 401 either way.
+- **A source edit reaches the local rig only after its class is recompiled** into the project's own `bin/` tree, which the rig puts on its classpath: `javac -cp <every ae3.*/clean-* bin> -d /Volumes/workspace/myx/ae3.sdk/bin <file>`.
+- **The regression test is the `auth` subsystem test**: `/Users/myx/Workspaces/ws-myx.ae3-devel/source/ae3/ae3.test/java/ru/myx/ae3/test/auth/TestAuth.java`, registered as `/Users/myx/Workspaces/ws-myx.ae3-devel/source/ae3/ae3.test/ae3-packages/ae3.test/settings/tests/auth.json` and called from `/Users/myx/Workspaces/ws-myx.ae3-devel/source/ae3/ae3.test/java/ru/myx/ae3/test/TestAe3.java`. Run it with `java -ea`, every project's `bin/` and the axiom jars on the classpath.
+- **The credential parser is reachable over HTTP only where a share calls it.** `Ae3WebService` overrides `onHandle`, so `ae3.local` never runs its authentication provider and answers 200 to a malformed header. The live caller is `Context.checkAuthorization`, which the local rig does not load. A probe share calling `ru.myx.auth.AuthUtils.squeezeCredentials` gives the signal: 401 with the sign-in challenge and a 19-byte body on this code, 500 with a 21,648-byte dump on the unguarded version. JS reaches the parser through `require("java.class/ru.myx.auth.AuthUtils")`, as `/Volumes/workspace/myx/acm-cvs/sys-current/resources/lib/ae3.util/Auth.js` does.
