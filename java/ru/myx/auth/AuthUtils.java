@@ -2,6 +2,7 @@ package ru.myx.auth;
 
 import java.nio.charset.StandardCharsets;
 
+import ru.myx.ae3.answer.Reply;
 import ru.myx.ae3.base.Base;
 import ru.myx.ae3.base.BaseNativeObject;
 import ru.myx.ae3.base.BaseObject;
@@ -97,7 +98,13 @@ public class AuthUtils {
 		}
 		final String auth;
 		{
-			final byte[] bytes = Base64.decode(authorization.substring(6), true);
+			final byte[] bytes;
+			try {
+				bytes = Base64.decode(authorization.substring(6), true);
+			} catch (final RuntimeException e) {
+				/** the decoder rejects client input only: refuse, with the sign-in challenge */
+				throw Reply.exception(Reply.stringUnauthorized("AUTH:BASIC", query, "Invalid credentials"));
+			}
 			if (bytes == null || bytes.length == 0) {
 				return null;
 			}
