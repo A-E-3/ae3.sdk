@@ -10,7 +10,21 @@ import ru.myx.ae3.know.WhirlpoolDigest;
 import ru.myx.ae3.serve.ServeRequest;
 import ru.myx.util.Base64;
 
-/** @author myx */
+/**
+ * The one place the AE3 password-hash string is made and checked.
+ * The string is a version digit, a semicolon, then the base64 of a 64-byte Whirlpool digest folded
+ * into 32 bytes. The digest is taken over the login, a hyphen, then the password.
+ * <p>
+ * It sits in <code>ru.myx.auth</code>, outside the <code>ru.myx.ae3</code> namespace. The JavaScript
+ * auth stack reaches it by that class name, through
+ * <code>require("java.class/ru.myx.auth.AuthUtils")</code>.
+ * <p>
+ * The two directions disagree about the case of the login. <code>checkPasswordHash</code>
+ * lower-cases it before digesting, and <code>hashPassword</code> does not, so a hash made from a
+ * login holding an upper-case letter does not verify here.
+ *
+ * @author myx
+ */
 public class AuthUtils {
 
 	/** @param hash

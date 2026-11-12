@@ -17,7 +17,19 @@ import ru.myx.ae3.skinner.Skinner;
 import ru.myx.ae3.vfs.Entry;
 import ru.myx.ae3.vfs.Storage;
 
-/** @author myx */
+/**
+ * The one place the <code>/!/</code> URL space is defined, and the one place it is inverted back.
+ * <p>
+ * All five subclasses inherit <code>onQuery</code> from here rather than overriding it, so the four
+ * prefixes are settled once: <code>skin/</code> is delegated to a deployed system skinner through
+ * <code>SkinScanner</code>, <code>class/</code> is served off the class loader, and
+ * <code>public/</code> and <code>base/</code> are served off the two storage entries the constructor
+ * was given. Each subclass adds only its own protocol elsewhere.
+ * <code>resolveEntry(Entry)</code> maps an entry of either tree back to the same <code>/!/</code> URL,
+ * so a resource keeps its name whichever subclass built the reply.
+ *
+ * @author myx
+ */
 public abstract class TargetInterfaceAbstract extends BaseHostEmpty implements TargetInterface {
 	
 	private final Entry root;
