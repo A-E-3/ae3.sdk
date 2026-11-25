@@ -1357,6 +1357,19 @@ public final class Xml {
 						target.appendChild(element);
 					}
 				}
+				for (final Iterator<String> iterator = array.baseKeysOwn(); iterator.hasNext();) {
+					final String key = iterator.next();
+					if (key.length() < 10 && key.chars().allMatch(Character::isDigit) && Integer.parseInt(key) < count) {
+						/** an element, already written above under the 'items' name */
+						continue;
+					}
+					final Element element = Dom.createElement(doc, key);
+					final Node child = Xml.toNode(doc, element, namePrefix == null
+						? ""
+						: namePrefix + name + '/', key, array.baseGet(key, BaseObject.UNDEFINED), readable, handler, attachment, maxFieldLength, lookup);
+					assert child == element;
+					target.appendChild(element);
+				}
 				return target;
 			}
 		}

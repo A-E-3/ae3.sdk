@@ -89,3 +89,126 @@ Team-owned. Durable findings/gotchas for this repo, not investigation narration.
 - Each `project.inf` requires `ae3.sys.l2.tgt.html`, a project that exists in no tree: neither `/Volumes/workspace/myx` nor `/Users/myx/Workspaces/ws-myx.ae3-devel/source/ae3` holds that directory, and the surviving node is `/Volumes/workspace/myx/ae3.sys.pkg.l2.tgt.html`, 36 Java files. `ae3.sys.l2.tgt.html` is the pre-`pkg` name, so the stale `Requires:` is a second trace of the rename.
 - Nothing builds or lists them. `/Volumes/workspace/myx/ae3-devel-tools/MAKE-AE3-DISTRO.xml` names none of the three, against 1 occurrence of `ae3.sys.pkg.l2.tgt.xml`. `/Users/myx/Workspaces/ws-myx.ae3-devel/source/ae3/util.repository-ae3/sh-data/repository/remotes-list-ae3.txt` carries 0 `ae3.sys.l2` entries of its 42. A grep for the three names over the whole place, outside `.metadata/` and their own folders, returns 0 files. `/Volumes/workspace/myx/.metadata/.plugins/org.eclipse.core.resources/.projects/` holds 126 project folders and none of the three.
 - So the prefix `ae3.sys.l2.tgt.*` is dead and `ae3.sys.pkg.l2.tgt.*` is live. The place holds 3 projects under the first and 11 under the second. Ten of the 11 carry a `java/` tree with compiled `bin/` classes; `ae3.sys.pkg.l2.tgt.servlet` carries 5 files under `src/` and an empty `bin/`. Read the prefix as history, never as taxonomy.
+
+## The request parameter setters: two create the map, two dereference it
+
+Two of the four parameter setters dereference a null map on a fresh request, and two create it.
+
+- The field `parameters` starts null: `java/ru/myx/ae3/serve/AbstractServeRequestMutable.java:38`.
+- `addParameter` (`:120-124`) and `setParameters` (`:452-453`) both test for null and create the map.
+- `setParameter` (`:435-445`) and the `baseDefine(String, BaseObject, short)` override (`:161-170`) call
+  `this.parameters.baseIsPrimitive()` with no null test.
+- So the first `setParameter` on a fresh request throws `NullPointerException: Cannot invoke
+  "ru.myx.ae3.base.BaseObject.baseIsPrimitive()" because "this.parameters" is null`.
+
+Measured 2026-11-12 16:27 +0200 on JDK 25.0.2, with a scratch probe: `setParameter` on a fresh
+`SimpleServeRequest` threw exactly that exception, and the same probe built with `addParameter` answered as
+expected. `ServeRequest.setParameter` is on the interface (`ae3.api/java/ru/myx/ae3/serve/ServeRequest.java:257`)
+with six `default` overloads at `:267`, `:280`, `:295` and `:308`, all funnelling through it, so every
+typed overload carries the same fault. Writing a request's parameters from Java therefore goes through
+`addParameter` unless the map is already populated.
+
+## The XML writer drops every named property of an array
+
+`Xml.toXmlString` throws away the named own properties of a `BaseArray` and writes only its elements, so
+`{"number":3.14,"string":"+Infinity"}` reads back as `[]`.
+
+`/Volumes/workspace/myx/ae3.sdk/java/ru/myx/ae3/xml/Xml.java:1344-1358` is the whole array branch. It sets
+`class="list"` at `:1347`, writes one child per element inside `if (count > 0)` at `:1349-1357`, and returns
+at `:1358`. No loop over the array's own keys exists in the branch, and nothing before it writes them either.
+A zero-length array therefore writes `<data class="list"/>` and an array with elements writes those elements
+alone.
+
+**The writer, measured on JDK 25.0.2, four fixtures, one run, readable output:**
+
+- an empty `BaseNativeArray` writes `<data class="list"/>`.
+- an array with `number` and `string` properties and no elements writes `<data class="list"/>`, with neither property.
+- an array with one `alpha` property and no elements writes `<data class="list"/>`, with no property.
+- an array with one `alpha` property and one element writes `<data class="list" items="item"><item …/></data>`, with the element and no `alpha`.
+
+So the loss is not a zero-length special case: the writer drops named properties on every array it meets.
+The control in the same run is a `BaseNativeObject` with one property, which writes `<data><alpha>one</alpha></data>`.
+
+**The reader is not the lossy half, measured on the same machine in a second run.** The same three hand-written
+elements were read with `Xml.toBase`:
+
+- `<data class="list"/>` reads back as `[]`.
+- `<data class="list"><number …/><string>+Infinity</string></data>` reads back as `{"number":3.141592653589793,"string":"+Infinity"}`.
+- the same with `class="string" type="inner"` on the `<string>` reads back identically.
+
+So a writer that emitted the named properties as child elements would round-trip them, and the fault is one
+branch of one method. The reader's handling is at `:881-888` (ignores `class="list"`), `:894-897` (takes the
+`items` name) and `:912-922` (defines each other child).
+
+`ae3.test`'s own XML suite fails on this row and on no other: `TestXml.java:238-245` builds exactly
+`{"number": PI, "string": "+Infinity"}` on a `BaseNativeArray`, and `DomXml.checkMapping`
+(`DomXml.java:41`) throws on the round trip. The suite reaches the `BaseNativeObject` rows above it without
+a fault, so the array row is the first one it cannot pass.
+
+## The array writer now keeps a named property, and its own suite stops on a later row
+
+The array branch of `Xml.toNode` writes an array's named own properties as child elements, so the shape the reader already reads whole now round-trips.
+
+`/Volumes/workspace/myx/ae3.sdk/java/ru/myx/ae3/xml/Xml.java:1360-1372` adds one loop after the element loop, inside the same `array != null` block:
+
+```java
+for (final Iterator<String> iterator = array.baseKeysOwn(); iterator.hasNext();) {
+	final String key = iterator.next();
+	if (key.length() < 10 && key.chars().allMatch(Character::isDigit) && Integer.parseInt(key) < count) {
+		/** an element, already written above under the 'items' name */
+		continue;
+	}
+	final Element element = Dom.createElement(doc, key);
+	final Node child = Xml.toNode(doc, element, namePrefix == null
+		? ""
+		: namePrefix + name + '/', key, array.baseGet(key, BaseObject.UNDEFINED), readable, handler, attachment, maxFieldLength, lookup);
+	assert child == element;
+	target.appendChild(element);
+}
+```
+
+The index test is a range, not a shape. `baseKeysOwn` on a non-empty `BaseNativeArray` lists the element indices as `"0"`, `"1"` and so on beside the named keys (`BaseNativeArray.java:478-491`), so a digit-only test alone would write a property called `"7"` as an element's twin. A key below the element count is an index; a key at or above it is a name.
+The loop sits after the `count > 0` block and outside it, so an array with no elements and two properties is written too, which is the row the old code lost.
+
+**Measured on JDK 25.0.2, both arms compiled from source, the same four fixtures the section above lists.**
+
+- pre-fix: `<data class="list"/>` for the empty array, for two properties and no elements, and for one property and no elements; the array with one `alpha` property and one element writes the element alone.
+- fixed: `<data class="list"><number class="number" type="double">3.141592653589793</number><string class="string" type="inner">+Infinity</string></data>`, and the one-property shapes likewise.
+- the `BaseNativeObject` control writes `<data class="map"><alpha class="string" type="inner">one</alpha></data>` on both arms.
+- round trip, pre-fix: `number=undefined, string=undefined`. Fixed: `number=3.141592653589793, string=+Infinity`, with the element count still 1.
+
+**`ae3.test`'s own XML suite, `ru.myx.ae3.test.xml.TestXml` with `-ea`:**
+
+- pre-fix, exit 1: `Mapping fromXml(toXml()) error - should be equal`, for the array row, `result=[]`.
+- fixed: the array rows pass, and the suite then stops on a different row, `ClassCastException` inside `Validate.mapsEqual` at `ComparatorJava.java:159`.
+
+That later row is not this fault and not this fix. The row is a `BaseNativeObject` holding `Flow.character(...)`, and the same probe of that one object throws the same `ClassCastException` on the pre-fix writer too, so the suite's own next obstacle exists with and without the change.
+So the array rows are green and the suite still exits non-zero; the row it stops on is a separate defect in the message comparison, outside this section's scope.
+
+## The three `Engine.createProcess` callers answer `TRUE` whatever the launch did
+
+
+Measured 2026-11-20 05:45 to 05:52 +0200 in a verify round, by reading the three files. Nothing here was run.
+
+- `java/ru/myx/ae3/serve/file/ServeRequestExecuteFileOnReply.java:37-44` calls
+  `Engine.createProcess(this.file.getName(), null, this.file.getParentFile())` at `:42` and discards the
+  returned `Process`. It returns `Boolean.TRUE` unless `super.apply(reply)` already answered something else.
+- `java/ru/myx/ae3/serve/folder/ServeRequestReplyToTestFolder.java:32-41` does the same at `:39`.
+- `java/ru/myx/ae3/l2/folder/TestFolderServeRequest.java:33-39` never calls `super.apply(reply)` at all. It
+  carries `// TODO Auto-generated method stub`, calls `Engine.createProcess(this.file.getName(),
+  BaseObject.UNDEFINED, this.folder)` at `:37`, and returns `Boolean.TRUE`.
+
+So `Engine.createProcess` returning `null`, which it does after every launch strategy fails at
+`/Volumes/workspace/myx/ae3.api/java/ru/myx/ae3/Engine.java:351` to `:352`, reaches no caller as a refusal.
+`createProcess` itself writes the reason to `System.err` at `:351`.
+
+`ServeRequestReplyToTempFolder.apply` is the `super` the first two call. It is the one place that can already
+answer something other than `Boolean.TRUE`, and it does not know the launch's outcome.
+
+Any guard on `createProcess` therefore needs these three files changed as well, or the refusal is silent at the
+caller. That is why `task-20261120T0130Z-createprocess-launch-guard` names all three, and why a change to
+`Engine` alone does not close it.
+
+Text search for refusal wording, with a control that fires: `grep -icE 'refus|guard|launch'` gives 0, 0 and 0
+on the three files, where `ae3.api/java/ru/myx/ae3/answer/Reply.java` gives 2. Each file still holds exactly one
+`createProcess` call.
